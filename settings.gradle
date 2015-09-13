@@ -1,1 +1,1 @@
-include ':app', ':StarMap', ':mytest'
+include ':app', ':StarMap', ':mytest', ':switchview'
