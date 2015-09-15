@@ -1,11 +1,16 @@
 package com.zhd.testdemo.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 
 
@@ -27,6 +32,21 @@ public class MainActivity extends ActionBarActivity implements OnClickListener{
         btn_starmap= (Button) findViewById(R.id.btn_starmap);
         btn_project.setOnClickListener(this);
         btn_starmap.setOnClickListener(this);
+        setWindowValue();
+    }
+
+    private void setWindowValue() {
+        WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        Display display = manager.getDefaultDisplay();
+        Point p = new Point();
+        display.getSize(p);
+        //获得宽和高,就是整个屏幕的宽和高
+        int width = p.x;
+        int height = p.y;
+        SharedPreferences.Editor editor=getSharedPreferences("VALUE",MODE_PRIVATE).edit();
+        editor.putInt("WIDTH",width);
+        editor.putInt("HEIGHT",height);
+        editor.commit();
     }
 
     private void createDirectory() {

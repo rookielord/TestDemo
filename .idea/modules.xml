@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/StarMap/StarMap.iml" filepath="$PROJECT_DIR$/StarMap/StarMap.iml" />
       <module fileurl="file://$PROJECT_DIR$/TestDemo.iml" filepath="$PROJECT_DIR$/TestDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/mytest/mytest.iml" filepath="$PROJECT_DIR$/mytest/mytest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/switchview/switchview.iml" filepath="$PROJECT_DIR$/switchview/switchview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hi-test/hi-test.iml" filepath="$PROJECT_DIR$/hi-test/hi-test.iml" />
     </modules>
   </component>
 </project>
