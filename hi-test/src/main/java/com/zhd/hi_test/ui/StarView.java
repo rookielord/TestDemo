@@ -128,7 +128,7 @@ public class StarView extends View {
                     break;
                 case 1:
                     //parseColor("#FFC6C077")
-                    mPaint.setColor(Color.YELLOW);
+                    mPaint.setColor(Color.parseColor("#FFCDBE3F"));
                     break;
                 case 2:
                     //parseColor("FF32D034")
@@ -142,7 +142,7 @@ public class StarView extends View {
             mPaint.setColor(Color.WHITE);
             mPaint.setTextSize(msRadius);
             mPaint.setTypeface(Typeface.DEFAULT_BOLD);
-            canvas.drawText(String.valueOf(point.getmNum()), x - 5, y - 5, mPaint);
+            canvas.drawText(String.valueOf(point.getmNum()), x-5 , y+5 , mPaint);
         }
     }
 
@@ -160,6 +160,7 @@ public class StarView extends View {
             mPaint.setStyle(Paint.Style.STROKE);
             canvas.drawCircle(mRadius, mRadius, r, mPaint);
             if (i == 0) {
+                mPaint.setTextSize(20);
                 mPaint.setColor(Color.parseColor("#FF0044"));
                 canvas.drawText("N", mRadius, mRadius - r + 10, mPaint);
             }
@@ -177,12 +178,12 @@ public class StarView extends View {
         double divide = 2 * Math.PI / divideNum;//每个角的弧度值
         int divideAngel=360/divideNum;
         //计算坐标点的值，通过极坐标求得
-        //根据坐标角获得x,y的值，但需要考虑到不同象限的加减值，然后每个后面都会添加一个坐标中心点
+        //根据坐标角获得x,y的值，但需要考虑到不同象限的加减值,经过考虑只有y轴为相反值
         double x = 0;
         double y = 0;
         for (int i = 0; i < divideNum; i++) {
-            x = mRadius * Math.cos(divide * i)+mRadius;
-            y = mRadius * Math.sin(divide * i)+mRadius;
+            x = mRadius+mRadius * Math.cos(divide * i);
+            y = mRadius-mRadius * Math.sin(divide * i);
             ptr[4*i]=mRadius;
             ptr[4*i+1]=mRadius;
             ptr[4*i+2]=(float)x;
@@ -192,17 +193,16 @@ public class StarView extends View {
             mPaint.setTextSize(20);
             if (i>=0&&i<=3){
                 x-=15;
-                y-=5;
+                y+=10;
             }
             else if(i>=4&&i<=6) {
-                y-=5;
+                y+=5;
             }
             else if(i>=7&&i<=9){
-                y+=15;
+                y-=5;
             }
             else {
                 x-=30;
-                y+=25;
             }
             canvas.drawText(String.valueOf(divideAngel*i),(float)x,(float)y,mPaint);
         }
@@ -267,7 +267,7 @@ public class StarView extends View {
         //获得最短的长度
         int length = mWidth < mHeight ? mWidth : mHeight;
         mRadius = length / 2 - 10;
-        msRadius = (float) 0.05d * mRadius;
+        msRadius = (float) 0.06d * mRadius;
     }
 
     /**

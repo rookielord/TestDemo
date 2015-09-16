@@ -23,7 +23,7 @@ import java.io.File;
 public class MainActivity extends ActionBarActivity implements OnClickListener {
 
     private String mPath;
-    private Button mPro,mStarmap,mFragment;
+    private Button mPro,mStarmap,mFragment,mBluetooth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,9 +31,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
         mPro= (Button) findViewById(R.id.btn_project);
         mStarmap= (Button) findViewById(R.id.btn_starmap);
         mFragment= (Button) findViewById(R.id.btn_fragment);
+        mBluetooth= (Button) findViewById(R.id.btn_bluetooth);
         mPro.setOnClickListener(this);
         mStarmap.setOnClickListener(this);
         mFragment.setOnClickListener(this);
+        mBluetooth.setOnClickListener(this);
         createDirectory();
         getWindowValue();
     }
@@ -88,6 +90,10 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
             case R.id.btn_fragment:
                 Intent intent3=new Intent("com.zhd.fragment.START");
                 startActivity(intent3);
+                break;
+            case R.id.btn_bluetooth:
+                Intent intent4=new Intent(this,BlueToothActivity.class);
+                startActivity(intent4);
                 break;
         }
     }

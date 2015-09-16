@@ -6,4 +6,8 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--蓝牙设备配置-->
+    <string name="pairedlist">已配对的设备</string>
+    <string name="newlist">找到的设备</string>
+    <string name="search">搜索</string>
 </resources>
