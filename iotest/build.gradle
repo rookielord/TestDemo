@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.zhd.hi_test"
+        applicationId "com.zhd.iotest"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1

@@ -10,9 +10,11 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.ui.CustomDialog;
 
 import java.util.Set;
 
@@ -27,11 +30,12 @@ import java.util.Set;
  * Created by 2015032501 on 2015/9/16.
  * 这里显示所有的匹配和未匹配的蓝牙设备，如果点击该设备则会把所有的MAC码返回到上一个Activity
  * 这里的蓝牙已经在上一个页面被打开了，所以不再考虑蓝牙没有打开的情况
+ * 用一个scrolview来包含两个listview
  */
 public class DeviceListActivity extends Activity {
     //device上面的控件
-    Button btn_search,btn_start;
-    ListView lv_pairedlist, lv_newlist;
+    Button btn_search;
+    ListView lv_pairedlist,lv_newlist;
     //存放数据的两个Adapter
     ArrayAdapter<String> mPairedAdapter, mNewsAdapter;
     //蓝牙适配器
@@ -50,21 +54,19 @@ public class DeviceListActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_list);
-        //放在这里打开蓝牙
-         OpenBluetooth();
-        //获得已配对的蓝牙进行显示
-        getPairedAdaper();
         //找到控件
         btn_search = (Button) findViewById(R.id.btn_search);
         lv_pairedlist = (ListView) findViewById(R.id.lv_pairedlist);
         lv_newlist = (ListView) findViewById(R.id.lv_newlist);
-        //默认设置结果为cancel，防止意外返回没有数据
-        setResult(RESULT_CANCELED);
         //获得蓝牙适配器
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        //默认设置结果为cancel，防止意外返回没有数据
+        setResult(RESULT_CANCELED);
         //实例化两个Adapter
         mPairedAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
         mNewsAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+        //获得已配对的蓝牙进行显示
+        getPairedAdaper();
         //注册广播接受者，监听设备添加
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -100,24 +102,6 @@ public class DeviceListActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    /**
-     * 处理蓝牙是否打开
-     */
-
-
-
-    private void OpenBluetooth() {
-        if (!mAdapter.isEnabled()) {
-            //设置开启请求
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivityForResult(intent, REQUES_CODE);
-        } else {
-            Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
-            btn_search.setEnabled(true);
-        }
-    }
-
     private void getPairedAdaper() {
         Set<BluetoothDevice> devices = mAdapter.getBondedDevices();
         //这里需要保证devices大于0
@@ -126,6 +110,8 @@ public class DeviceListActivity extends Activity {
             for (BluetoothDevice device : devices) {
                 mPairedAdapter.add(device.getName() + ";" + device.getAddress());
             }
+            //在接下来添加没有适配过的仪器
+            mPairedAdapter.add("位配对过的仪器");
         } else {
             mPairedAdapter.add("当前没有配对的数据");
         }
@@ -173,6 +159,18 @@ public class DeviceListActivity extends Activity {
             intent.putExtra(ADRESS, adress);
             setResult(RESULT_OK, intent);
             finish();
+        }
+    };
+
+    /**
+     * 长点击后可以删除该适配
+     */
+    OnItemLongClickListener mitemLongClickListener=new OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            CustomDialog customDialog=new CustomDialog();
+            customDialog.show(getFragmentManager(),"BluetoothDialog");
+            return false;
         }
     };
 

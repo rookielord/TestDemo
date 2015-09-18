@@ -28,4 +28,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="蓝牙"/>
+    <Button
+        android:id="@+id/btn_filein"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="读文件"/>
+    <Button
+        android:id="@+id/btn_fileout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="写文件"/>
+    <TextView
+        android:id="@+id/tv_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获得的全局变量"/>
 </LinearLayout>

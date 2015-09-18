@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-<TextView
-    android:id="@+id/tv_pairedlist_title"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:visibility="gone"
-    android:text="@string/pairedlist"/>
-    <ListView
-        android:id="@+id/lv_pairedlist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"></ListView>
-    <TextView
-        android:id="@+id/tv_newlist_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="@string/newlist"/>
-    <ListView
-        android:id="@+id/lv_newlist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        ></ListView>
-    <Button
-        android:id="@+id/btn_search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/search"/>
-</LinearLayout>
+    android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_pairedlist_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pairedlist"
+                android:visibility="gone" />
+
+            <ListView
+                android:id="@+id/lv_pairedlist"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></ListView>
+
+            <TextView
+                android:id="@+id/tv_newlist_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/newlist"
+                android:visibility="gone" />
+
+            <ListView
+                android:id="@+id/lv_newlist"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></ListView>
+
+            <Button
+                android:id="@+id/btn_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/search" />
+        </LinearLayout>
+</RelativeLayout>

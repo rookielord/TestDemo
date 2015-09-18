@@ -138,11 +138,13 @@ public class StarView extends View {
             mPaint.setStyle(Paint.Style.FILL);
             float x = (float) point.getmX();
             float y = (float) point.getmY();
+            mPaint.setHinting(Paint.HINTING_ON);
             canvas.drawCircle(x, y, (int) msRadius, mPaint);
             mPaint.setColor(Color.WHITE);
             mPaint.setTextSize(msRadius);
+            mPaint.setTextAlign(Paint.Align.CENTER);
             mPaint.setTypeface(Typeface.DEFAULT_BOLD);
-            canvas.drawText(String.valueOf(point.getmNum()), x-5 , y+5 , mPaint);
+            canvas.drawText(String.valueOf(point.getmNum()), x , y , mPaint);
         }
     }
 

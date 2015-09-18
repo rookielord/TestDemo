@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.ui.StarView;
 
@@ -34,7 +35,7 @@ public class GPSTestActivity extends Activity implements OnClickListener {
     private int minTime = 5000;
     private int minDistance = 5;
     //控件对象
-    TextView tv_gps, tv_satlitte;
+    TextView tv_gps, tv_data;
     Button btn_loc;
     StarView my_view;
     //所使用的位置提供器
@@ -48,12 +49,15 @@ public class GPSTestActivity extends Activity implements OnClickListener {
         tv_gps = (TextView) findViewById(R.id.tv_gps);
         btn_loc = (Button) findViewById(R.id.btn_loc_close);
         my_view = (StarView) findViewById(R.id.my_view);
+        tv_data= (TextView) findViewById(R.id.tv_data);
+        Data d= (Data) getApplication();
         //设置按钮监听
         btn_loc.setOnClickListener(this);
         //GPS初始设定
         GPSinit();
         mManager.addGpsStatusListener(mListener);
         mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+        tv_data.setText(d.getName());
     }
     //1.获取位置服务(暂时不考虑位置信息)
     //2.设置卫星监听(没有调用到)
@@ -153,6 +157,7 @@ public class GPSTestActivity extends Activity implements OnClickListener {
             mManager.removeUpdates(mLocListener);
             mManager.removeGpsStatusListener(mListener);
         }
+        super.onPause();
     }
 
     private void GPSinit() {
