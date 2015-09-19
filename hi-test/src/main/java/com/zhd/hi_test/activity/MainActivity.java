@@ -56,8 +56,6 @@ public class MainActivity extends Activity implements OnClickListener {
         btn_fileout.setOnClickListener(this);
         createDirectory();
         getWindowValue();
-        Data d= (Data) getApplication();
-        tv_file.setText(d.getName());
     }
 
     //在储存卡上创建文件夹

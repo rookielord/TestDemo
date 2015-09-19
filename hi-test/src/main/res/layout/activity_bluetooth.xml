@@ -3,39 +3,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
     <Button
         android:id="@+id/btn_open"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="打开蓝牙"/>
+        android:text="打开蓝牙" />
+
     <Button
         android:id="@+id/btn_scan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="开始搜索"/>
+        android:text="开始搜索" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-       <Button
-           android:id="@+id/btn_clear"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="清空数据"/>
+
+        <Button
+            android:id="@+id/btn_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清空数据" />
+
         <Button
             android:id="@+id/btn_getinfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="获取信息"
-            android:layout_gravity="top"/>
+            android:layout_gravity="top" />
     </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/tv_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="改变全局"/>
+            android:text="改变全局" />
     </ScrollView>
 </LinearLayout>

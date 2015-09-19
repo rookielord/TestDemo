@@ -1,7 +1,6 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.ProjectAdapter;
 import com.zhd.hi_test.callback.IDialogCallback;
@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Created by 2015032501 on 2015/9/7.
  */
-public class ProjectActivity extends Activity {
+public class ProjectListActivity extends Activity {
     private ListView mlv;
     private String mPath;
     private List<Project> mProjects;
@@ -48,8 +48,8 @@ public class ProjectActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project);
-        Intent intent = getIntent();
-        mPath = intent.getStringExtra("path");
+        Data d= (Data) getApplication();
+        mPath=d.getmPath();
         mlv = (ListView) findViewById(R.id.lv);
         tv_proinfo= (TextView) findViewById(R.id.tv_proinfo);
         //获得Project目录下所有的Project文件对象
@@ -70,7 +70,7 @@ public class ProjectActivity extends Activity {
 
         } else
         {
-            Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
+            Toast.makeText(ProjectListActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -164,7 +164,7 @@ public class ProjectActivity extends Activity {
                     if (isRight) {
                         mConfigs[0] = pro_name;//获得项目名称
                     } else {
-                        Toast.makeText(ProjectActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProjectListActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     EditText et2 = (EditText) view.findViewById(R.id.et_pro_back);
@@ -175,15 +175,15 @@ public class ProjectActivity extends Activity {
                     //创建文件夹，写入config.txt配置文件,如果写在外面会先执行这个,在点击item的时候就会执行
                     //而我必须在点击确定后才能执行这段代码，所以在外面执行全为空
                     //获得添加的项目对象
-                    boolean res = Method.createDirectory(mPath, mConfigs, getApplicationContext());
+                    boolean res = Method.createProject(mPath, mConfigs, getApplicationContext());
                     if (res) {
-                        Toast.makeText(ProjectActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProjectListActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
                         //刷新
                         refresh();
                         mProject=null;
                     }
                     else
-                        Toast.makeText(ProjectActivity.this,"创建失败",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProjectListActivity.this,"创建失败",Toast.LENGTH_SHORT).show();
                 }
             });
                 break;
@@ -196,13 +196,13 @@ public class ProjectActivity extends Activity {
                     File file = new File(mPath+"/"+mProject.getmName());
                     Method.deleteDirectory(file);
                     //提示
-                    Toast.makeText(ProjectActivity.this,"删除成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectListActivity.this,"删除成功",Toast.LENGTH_SHORT).show();
                     //这里刷新只会重读ProjectAdapter，但Adapter中projects对象的数量没有变化，可以在这里对
                     //删除Adapter里面的mProjects数据
                     refresh();
                     mProject=null;
                 }else {
-                    Toast.makeText(ProjectActivity.this,"请选择项目",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectListActivity.this,"请选择项目",Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

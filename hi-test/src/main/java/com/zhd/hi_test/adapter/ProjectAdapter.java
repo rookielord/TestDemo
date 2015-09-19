@@ -28,9 +28,10 @@ public class ProjectAdapter extends BaseAdapter {
         this.mP = mP;
     }
 
+    //闯过来所有Project对象
     private List<Project> mProjects;
     private Context mContext;
-    private static String TAG = "Adapter";
+    private static String TAG = "ProjectAdapter";
     //用来存放所有的Radio状态
     Map<String, Boolean> states = new HashMap<String, Boolean>();
 
@@ -43,13 +44,6 @@ public class ProjectAdapter extends BaseAdapter {
     class ViewHolder {
         TextView pro_name, pro_back, pro_time;
         RadioButton radio;
-    }
-    //在ProjectActivity中进行删除的话，重新加载Adapter需要删除mProjects中的内容进行删除,添加同理
-    public void deleteItem(int position){
-        mProjects.remove(position);
-    }
-    public void addItem(Project project){
-        mProjects.add(project);
     }
 
     @Override
@@ -75,6 +69,7 @@ public class ProjectAdapter extends BaseAdapter {
         final int index=position;
         //获得布局填充器
         LayoutInflater inflater = LayoutInflater.from(mContext);
+        //就是缓存view被销毁
         if (convertView == null) {
             //使用内容填充器填充对象
             convertView = inflater.inflate(R.layout.item_pro, null);
@@ -90,7 +85,7 @@ public class ProjectAdapter extends BaseAdapter {
             //如果缓存对象没有被消灭就获取
             holder = (ViewHolder) convertView.getTag();
         }
-        //设置Holder里面的内容
+        //设置Holder里面的内容,因为没有被销毁，所以控件内容都还在
         holder.pro_name.setText(p.getmName());
         holder.pro_back.setText(p.getmBackup());
         holder.pro_time.setText(p.getmTime());

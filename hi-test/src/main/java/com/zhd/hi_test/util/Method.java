@@ -1,6 +1,11 @@
 package com.zhd.hi_test.util;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Point;
+import android.os.Environment;
+import android.view.Display;
+import android.view.WindowManager;
 
 
 import com.zhd.hi_test.db.Curd;
@@ -41,7 +46,7 @@ public class Method {
         return format.format(date);
     }
 
-    public static boolean createDirectory(String path, String[] configs,Context context) {
+    public static boolean createProject(String path, String[] configs, Context context) {
         File pro_file = new File(path + "/" + configs[0]);
         if (!pro_file.exists()) {
             pro_file.mkdir();
@@ -52,11 +57,11 @@ public class Method {
                 //写入文件流
                 out = new BufferedOutputStream(new FileOutputStream(config_file));
                 //写入内容
-                String tableName=createTableName();
-                String msg = configs[0] + ";" + configs[1] + ";" + configs[2]+";"+tableName;
+                String tableName = createTableName();
+                String msg = configs[0] + ";" + configs[1] + ";" + configs[2] + ";" + tableName;
                 out.write(msg.getBytes());
                 //并创建对应的数据库表
-                Curd curd=new Curd(tableName,context);
+                Curd curd = new Curd(tableName, context);
                 curd.createTable(tableName);
                 //写入
                 out.flush();
@@ -78,11 +83,11 @@ public class Method {
         }
     }
 
-    public static String createTableName(){
-        String mTableName="project";
-        Date date=new Date(System.currentTimeMillis());
-        SimpleDateFormat format=new SimpleDateFormat("yyyymmddHHmmss");
-        mTableName+=format.format(date);
+    public static String createTableName() {
+        String mTableName = "project";
+        Date date = new Date(System.currentTimeMillis());
+        SimpleDateFormat format = new SimpleDateFormat("yyyymmddHHmmss");
+        mTableName += format.format(date);
         return mTableName;
     }
 
@@ -99,6 +104,43 @@ public class Method {
         } else {
             del_directory.delete();
         }
+    }
+
+    //在储存卡上创建文件夹
+    public static String createDirectory(Context context) {
+        String mPath = null;
+        File ext_path = Environment.getExternalStorageDirectory();
+        File file = new File(ext_path, "ZHD_TEST");
+        //第一次安装，或判断是否存在
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        //创建Project目录
+        File pro_file = new File(file.getPath() + "/Project");
+        if (!pro_file.exists()) {
+            //第一次创建后就不会再第二次创建了
+            pro_file.mkdir();
+        }
+        //最终获取其路径,并将其赋值给全局变量
+        mPath = pro_file.getPath();
+        SharedPreferences.Editor sp = context.getSharedPreferences("VALUE", context.MODE_PRIVATE).edit();
+        sp.putString("path", mPath);
+        sp.commit();
+        return mPath;
+    }
+
+    //获取数据参数
+    public static void getWindowValue(Context context) {
+        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = manager.getDefaultDisplay();
+        Point p = new Point();
+        display.getSize(p);
+        //获得宽和高,就是整个屏幕的宽和高
+        int width = p.x;
+        int height = p.y;
+        SharedPreferences sp = context.getSharedPreferences("VALUE", context.MODE_PRIVATE);
+        sp.edit().putInt("WIDTH", width).commit();
+        sp.edit().putInt("HEIGHT", height).commit();
     }
 
 }

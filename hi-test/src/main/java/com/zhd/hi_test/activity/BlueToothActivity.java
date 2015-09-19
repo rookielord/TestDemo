@@ -67,7 +67,6 @@ public class BlueToothActivity extends Activity implements OnClickListener {
         btn_send.setOnClickListener(this);
         btn_clear.setOnClickListener(this);
         Data d= (Data) getApplication();
-        d.setName("我改变了哈哈哈");
         mIsOpenBluetooth = mAdapter.isEnabled();
         if (mIsOpenBluetooth)
             btn_open.setText("关闭蓝牙");

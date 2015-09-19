@@ -5,25 +5,27 @@ import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
-import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.adapter.MyPagerAdapter;
+import com.zhd.hi_test.util.Method;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.v4.view.ViewPager.*;
 
 /**
  * Created by 2015032501 on 2015/9/18.
@@ -32,23 +34,30 @@ public class ViewPaperActivity extends Activity {
 
 
     Context context = null;//当前context,用于跳转
-    LocalActivityManager manager = null;
+    LocalActivityManager manager = null;//用于管理当前显示的Activity
+    //控件
     ViewPager pager = null;
     TabHost tabHost = null;
-    TextView t1,t2,t3;
+    TextView t1, t2, t3, t4;
 
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
     private int bmpW;// 动画图片宽度
     private ImageView cursor;// 动画图片
+    private List<TextView> tv_list;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_viewpaper);
+        setContentView(R.layout.activity_viewpager);
+
+        //获取屏幕的参数和项目文件夹路径,并传给全局变量
+        Method.getWindowValue(this);
+        Data d = (Data) getApplication();
+        d.setmPath(Method.createDirectory(this));
 
         context = ViewPaperActivity.this;
-        manager = new LocalActivityManager(this , true);
+        manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
 
         InitImageView();
@@ -56,6 +65,7 @@ public class ViewPaperActivity extends Activity {
         initPagerViewer();
 
     }
+
     /**
      * 初始化标题,标题添加监听
      */
@@ -63,30 +73,46 @@ public class ViewPaperActivity extends Activity {
         t1 = (TextView) findViewById(R.id.text1);
         t2 = (TextView) findViewById(R.id.text2);
         t3 = (TextView) findViewById(R.id.text3);
-
+        t4 = (TextView) findViewById(R.id.text4);
+        tv_list = new ArrayList<>();
+        tv_list.add(t1);
+        tv_list.add(t2);
+        tv_list.add(t3);
+        tv_list.add(t4);
         t1.setOnClickListener(new MyOnClickListener(0));
         t2.setOnClickListener(new MyOnClickListener(1));
         t3.setOnClickListener(new MyOnClickListener(2));
-
+        t4.setOnClickListener(new MyOnClickListener(4));
     }
+
     /**
      * 初始化PageViewer
-     * 用跳转意图来获取View
+     * 用跳转意图来获取View,然后向这里的Intent传入PageID,方便GridView进行填充其内容；
      */
     private void initPagerViewer() {
         pager = (ViewPager) findViewById(R.id.viewpage);
         final ArrayList<View> list = new ArrayList<View>();
-        Intent intent = new Intent(context, GPSTestActivity.class);
+        Intent intent = new Intent(context, GridActivity.class);
+        intent.putExtra("PageNum", 1);
         list.add(getView("A", intent));
-        Intent intent2 = new Intent(context, MainActivity.class);
+
+        Intent intent2 = new Intent(context, GridActivity.class);
+        intent2.putExtra("PageNum", 2);
         list.add(getView("B", intent2));
-        Intent intent3 = new Intent(context, MainActivity.class);
+
+        Intent intent3 = new Intent(context, GridActivity.class);
+        intent3.putExtra("PageNum", 3);
         list.add(getView("C", intent3));
+
+        Intent intent4 = new Intent(context, GridActivity.class);
+        intent4.putExtra("PageNum", 4);
+        list.add(getView("D", intent4));
 
         pager.setAdapter(new MyPagerAdapter(list));
         pager.setCurrentItem(0);
         pager.setOnPageChangeListener(new MyOnPageChangeListener());
     }
+
     /**
      * 初始化动画
      * 1.找到图片控件2.找到图片资源3.
@@ -98,15 +124,15 @@ public class ViewPaperActivity extends Activity {
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         int screenW = dm.widthPixels;// 获取分辨率宽度
-        offset = (screenW / 3 - bmpW) / 2;// 计算偏移量
+        offset = (screenW / 4 - bmpW) / 2;// 计算偏移量,
         Matrix matrix = new Matrix();
         matrix.postTranslate(offset, 0);
         cursor.setImageMatrix(matrix);// 设置动画初始位置
     }
 
-
     /**
      * 通过activity获取视图
+     *
      * @param id
      * @param intent
      * @return
@@ -116,68 +142,27 @@ public class ViewPaperActivity extends Activity {
     }
 
     /**
-     * Pager适配器
-     */
-    public class MyPagerAdapter extends PagerAdapter {
-        List<View> list =  new ArrayList<View>();
-        public MyPagerAdapter(ArrayList<View> list) {
-            this.list = list;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position,
-                                Object object) {
-            ViewPager pViewPager = ((ViewPager) container);
-            pViewPager.removeView(list.get(position));
-        }
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-
-        @Override
-        public int getCount() {
-            return list.size();
-        }
-        @Override
-        public Object instantiateItem(View arg0, int arg1) {
-            ViewPager pViewPager = ((ViewPager) arg0);
-            pViewPager.addView(list.get(arg1));
-            return list.get(arg1);
-        }
-
-        @Override
-        public void restoreState(Parcelable arg0, ClassLoader arg1) {
-
-        }
-
-        @Override
-        public Parcelable saveState() {
-            return null;
-        }
-
-        @Override
-        public void startUpdate(View arg0) {
-        }
-    }
-    /**
      * 页卡切换监听
      */
-    public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
+    public class MyOnPageChangeListener implements OnPageChangeListener {
 
         int one = offset * 2 + bmpW;// 页卡1 -> 页卡2 偏移量
         int two = one * 2;// 页卡1 -> 页卡3 偏移量
+        int three = one * 3;//页面1->页面4偏移量
 
         @Override
         public void onPageSelected(int arg0) {
+            setTextBackgroundColor();
             Animation animation = null;
+
             switch (arg0) {
-                case 0:
-                    if (currIndex == 1) {
+                case 0://选择了第一页
+                    if (currIndex == 1) {//跳转到第二页
                         animation = new TranslateAnimation(one, 0, 0, 0);
-                    } else if (currIndex == 2) {
+                    } else if (currIndex == 2) {//跳转第三页
                         animation = new TranslateAnimation(two, 0, 0, 0);
+                    } else if (currIndex == 3) {
+                        animation = new TranslateAnimation(three, 0, 0, 0);
                     }
                     break;
                 case 1:
@@ -185,6 +170,8 @@ public class ViewPaperActivity extends Activity {
                         animation = new TranslateAnimation(offset, one, 0, 0);
                     } else if (currIndex == 2) {
                         animation = new TranslateAnimation(two, one, 0, 0);
+                    } else if (currIndex == 3) {
+                        animation = new TranslateAnimation(three, one, 0, 0);
                     }
                     break;
                 case 2:
@@ -192,10 +179,23 @@ public class ViewPaperActivity extends Activity {
                         animation = new TranslateAnimation(offset, two, 0, 0);
                     } else if (currIndex == 1) {
                         animation = new TranslateAnimation(one, two, 0, 0);
+                    } else if (currIndex == 3) {
+                        animation = new TranslateAnimation(three, two, 0, 0);
+                    }
+                    break;
+                case 3:
+                    if (currIndex == 0) {
+                        animation = new TranslateAnimation(offset, three, 0, 0);
+                    } else if (currIndex == 1) {
+                        animation = new TranslateAnimation(one, three, 0, 0);
+                    } else if (currIndex == 2) {
+                        animation = new TranslateAnimation(two, three, 0, 0);
                     }
                     break;
             }
+            //设置当前页面选中编号，在选中编号中进行
             currIndex = arg0;
+            tv_list.get(arg0).setBackgroundColor(Color.BLUE);
             animation.setFillAfter(true);// True:图片停在动画结束位置
             animation.setDuration(300);
             cursor.startAnimation(animation);
@@ -203,7 +203,6 @@ public class ViewPaperActivity extends Activity {
 
         @Override
         public void onPageScrollStateChanged(int arg0) {
-
         }
 
         @Override
@@ -211,10 +210,11 @@ public class ViewPaperActivity extends Activity {
 
         }
     }
+
     /**
      * 头标点击监听
      */
-    public class MyOnClickListener implements View.OnClickListener {
+    public class MyOnClickListener implements OnClickListener {
         private int index = 0;
 
         public MyOnClickListener(int i) {
@@ -223,7 +223,14 @@ public class ViewPaperActivity extends Activity {
 
         @Override
         public void onClick(View v) {
+            setTextBackgroundColor();
+            v.setBackgroundColor(Color.BLUE);
             pager.setCurrentItem(index);
         }
-    };
+    }
+    private void setTextBackgroundColor() {
+        for (TextView tv : tv_list) {
+            tv.setBackgroundColor(Color.parseColor("#ffa6a8f8"));
+        }
+    }
 }
