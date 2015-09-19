@@ -72,7 +72,7 @@ public class ProjectAdapter extends BaseAdapter {
         //就是缓存view被销毁
         if (convertView == null) {
             //使用内容填充器填充对象
-            convertView = inflater.inflate(R.layout.item_pro, null);
+            convertView = inflater.inflate(R.layout.pro_item, null);
             //创建holder对象
             holder = new ViewHolder();
             //将layout上面的控件给holder中的控件属性

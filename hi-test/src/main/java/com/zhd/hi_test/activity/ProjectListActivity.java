@@ -1,10 +1,14 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -48,10 +52,10 @@ public class ProjectListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project);
-        Data d= (Data) getApplication();
-        mPath=d.getmPath();
+        Data d = (Data) getApplication();
+        mPath = d.getmPath();
         mlv = (ListView) findViewById(R.id.lv);
-        tv_proinfo= (TextView) findViewById(R.id.tv_proinfo);
+        tv_proinfo = (TextView) findViewById(R.id.tv_proinfo);
         //获得Project目录下所有的Project文件对象
         mHasProject = HasProject(mPath);
         if (mHasProject) {
@@ -68,15 +72,17 @@ public class ProjectListActivity extends Activity {
             //第三步通过适配器，将项目显示到ListView上
             mlv.setAdapter(pa);
 
-        } else
-        {
+        } else {
             Toast.makeText(ProjectListActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
         }
     }
 
     private void showProjectInfo(Project project) {
-        String msg="项目的名称："+project.getmName()+"\t\n" +
-                "项目的对应表格" +project.getmTableName()+"\t\n";
+        String msg =
+                "项目的名称:\t" + project.getmName() + "\t\n" +
+                        "项目的对应表格:\t" + project.getmTableName() + "\t\n" +
+                        "项目的创建时间:\t" + project.getmTime() + "\t\n" +
+                        "行最近使用时间:\t" +project.getmLastTime();
         tv_proinfo.setText(msg);
     }
 
@@ -118,7 +124,7 @@ public class ProjectListActivity extends Activity {
                 //读取完后进行分割
                 String[] messges = sb.toString().split(";");
                 //创建project对象
-                Project p = new Project(messges[0], messges[1], messges[2], messges[3], pro_file);
+                Project p = new Project(messges[0], messges[1], messges[2], messges[3], pro_file, messges[4]);
                 projectList.add(p);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -148,61 +154,60 @@ public class ProjectListActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.item_create:
-            //这里实现创建项目,使用dialog来创建
-            CustomDialog dialog = new CustomDialog();
-            //把dialog放进服务中进行显示
-            dialog.show(getFragmentManager(), "CreateDialog");
-            //获取弹出框里面的信息
-            dialog.setmCallback(new IDialogCallback() {
-                @Override
-                public void getInfo(View view) {
-                    EditText et1 = (EditText) view.findViewById(R.id.et_pro_name);
-                    String pro_name = et1.getText().toString();
-                    boolean isRight = Method.checkMsg(pro_name);
-                    if (isRight) {
-                        mConfigs[0] = pro_name;//获得项目名称
-                    } else {
-                        Toast.makeText(ProjectListActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
-                        return;
+                //这里实现创建项目,使用dialog来创建
+                CustomDialog dialog = new CustomDialog();
+                //把dialog放进服务中进行显示
+                dialog.show(getFragmentManager(), "CreateDialog");
+                //获取弹出框里面的信息
+                dialog.setmCallback(new IDialogCallback() {
+                    @Override
+                    public void getInfo(View view) {
+                        EditText et1 = (EditText) view.findViewById(R.id.et_pro_name);
+                        String pro_name = et1.getText().toString();
+                        boolean isRight = Method.checkMsg(pro_name);
+                        if (isRight) {
+                            mConfigs[0] = pro_name;//获得项目名称
+                        } else {
+                            Toast.makeText(ProjectListActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        EditText et2 = (EditText) view.findViewById(R.id.et_pro_back);
+                        String pro_back = et2.getText().toString();
+                        mConfigs[1] = pro_back;//项目备注
+                        String add_time = Method.getCurrentTime();
+                        mConfigs[2] = add_time;//添加时间
+                        //创建文件夹，写入config.txt配置文件,如果写在外面会先执行这个,在点击item的时候就会执行
+                        //而我必须在点击确定后才能执行这段代码，所以在外面执行全为空
+                        //获得添加的项目对象
+                        boolean res = Method.createProject(mPath, mConfigs, getApplicationContext());
+                        if (res) {
+                            Toast.makeText(ProjectListActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
+                            //刷新
+                            refresh();
+                            mProject = null;
+                        } else
+                            Toast.makeText(ProjectListActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
                     }
-                    EditText et2 = (EditText) view.findViewById(R.id.et_pro_back);
-                    String pro_back = et2.getText().toString();
-                    mConfigs[1] = pro_back;//项目备注
-                    String add_time = Method.getCurrentTime();
-                    mConfigs[2] = add_time;//添加时间
-                    //创建文件夹，写入config.txt配置文件,如果写在外面会先执行这个,在点击item的时候就会执行
-                    //而我必须在点击确定后才能执行这段代码，所以在外面执行全为空
-                    //获得添加的项目对象
-                    boolean res = Method.createProject(mPath, mConfigs, getApplicationContext());
-                    if (res) {
-                        Toast.makeText(ProjectListActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
-                        //刷新
-                        refresh();
-                        mProject=null;
-                    }
-                    else
-                        Toast.makeText(ProjectListActivity.this,"创建失败",Toast.LENGTH_SHORT).show();
-                }
-            });
+                });
                 break;
             case R.id.item_delte:
-                if (mProject!=null) {
+                if (mProject != null) {
                     //删除表
-                    Curd curd=new Curd(mProject.getmTableName(),getApplicationContext());
+                    Curd curd = new Curd(mProject.getmTableName(), getApplicationContext());
                     curd.dropTable(mProject.getmTableName());
                     //删除项目文件
-                    File file = new File(mPath+"/"+mProject.getmName());
+                    File file = new File(mPath + "/" + mProject.getmName());
                     Method.deleteDirectory(file);
                     //提示
-                    Toast.makeText(ProjectListActivity.this,"删除成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectListActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
                     //这里刷新只会重读ProjectAdapter，但Adapter中projects对象的数量没有变化，可以在这里对
                     //删除Adapter里面的mProjects数据
                     refresh();
-                    mProject=null;
-                }else {
-                    Toast.makeText(ProjectListActivity.this,"请选择项目",Toast.LENGTH_SHORT).show();
+                    mProject = null;
+                } else {
+                    Toast.makeText(ProjectListActivity.this, "请选择项目", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -210,8 +215,24 @@ public class ProjectListActivity extends Activity {
     }
 
     //重新刷新整个Activity来获取文件列表
-    public void refresh(){
+    public void refresh() {
         onCreate(null);
+    }
+
+    /**
+     * 长按来弹出菜单删除
+     */
+    public void onLongClick(){
+        mlv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                new AlertDialog.Builder(ProjectListActivity.this)
+                        .setTitle("对item进行操作")
+                        .setItems()
+                view.setBackgroundColor(Color.GREEN);
+                return true;
+            }
+        });
     }
 
 }

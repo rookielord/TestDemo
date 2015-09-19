@@ -17,13 +17,15 @@ public class Project {
     private String mBackup;
     private File mConfig;
     private String mTableName;
+    private String mLastTime;
 
-    public Project(String mName, String mTime, String mBackup, String mTableName, File mConfig) {
+    public Project(String mName, String mTime, String mBackup, String mTableName, File mConfig, String mLastTime) {
         this.mName = mName;
         this.mTime = mTime;
         this.mBackup = mBackup;
         this.mConfig = mConfig;
         this.mTableName = mTableName;
+        this.mLastTime = mLastTime;
     }
 
     public String getmName() {
@@ -64,5 +66,13 @@ public class Project {
 
     public void setmConfig(File mConfig) {
         this.mConfig = mConfig;
+    }
+
+    public String getmLastTime() {
+        return mLastTime;
+    }
+
+    public void setmLastTime(String mLastTime) {
+        this.mLastTime = mLastTime;
     }
 }
