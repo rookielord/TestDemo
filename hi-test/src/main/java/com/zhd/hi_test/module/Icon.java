@@ -4,8 +4,8 @@ import android.content.Intent;
 
 /**
  * Created by 2015032501 on 2015/9/19.
- * 这是存放图标资源和名称以及他们对应的id的对象
- *
+ * 所有GridView中每个View的信息。其中包含
+ * 名称，图片，id，跳转意图
  */
 public class Icon {
     private String icon_name;

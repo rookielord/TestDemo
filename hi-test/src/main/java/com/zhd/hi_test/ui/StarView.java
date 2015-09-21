@@ -5,14 +5,18 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.location.GpsSatellite;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 
 
 import com.zhd.hi_test.module.StarPoint;
+import com.zhd.hi_test.util.Method;
 
 import java.security.interfaces.ECKey;
 import java.util.ArrayList;
@@ -38,8 +42,10 @@ public class StarView extends View {
     private int mHeight;
     //画卫星图像的大小
     private static float msRadius;
-    //测试代码
-
+    private int[] values;
+    //画卫星图的中心位置
+    private int mX;
+    private int mY;
 
     /**
      * 这里是实现将卫星对象转化成我要在图像上显示的卫星对象
@@ -60,8 +66,8 @@ public class StarView extends View {
                 //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
                 double radian = degreeToRadian(360 - azimuth + 90);
                 //这个就是转换坐标,就以第一象限作为参考
-                double x = mRadius + Math.cos(radian) * r2;//x方向上的增量
-                double y = mRadius - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
+                double x = mX + Math.cos(radian) * r2;//x方向上的增量
+                double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
                 //获得x,y方向上的变化后的值
                 //获得卫星的信噪比，并分级绘制
                 int snr = (int) satellite.getSnr();
@@ -69,7 +75,6 @@ public class StarView extends View {
                 //卫星编号
                 int num = satellite.getPrn();
                 StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, num, level);
-                //mPoints.put(num,p);
                 mPoints.add(p);
             }
         }
@@ -109,7 +114,7 @@ public class StarView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.d(TAG, "绘图" + mPoints.size());
+        getWindowValue();
         //1.绘制整个背景
         drawStarbackground(canvas);
         //2.绘制星星
@@ -144,7 +149,7 @@ public class StarView extends View {
             mPaint.setTextSize(msRadius);
             mPaint.setTextAlign(Paint.Align.CENTER);
             mPaint.setTypeface(Typeface.DEFAULT_BOLD);
-            canvas.drawText(String.valueOf(point.getmNum()), x , y , mPaint);
+            canvas.drawText(String.valueOf(point.getmNum()), x, y, mPaint);
         }
     }
 
@@ -153,24 +158,23 @@ public class StarView extends View {
         mPaint.setColor(Color.BLACK);
         mPaint.setAntiAlias(true);
         //这里绘制星空的圆形
-        canvas.drawCircle(mRadius, mRadius, mRadius, mPaint);
+        canvas.drawCircle(mX, mY, mRadius, mPaint);
         //画圆圈和分割线
         int r = 0;//画圆的半径，根据高度角来获得对应的边长
         for (int i = 0; i <= 3; i++) {
             r = (int) (mRadius * Math.cos(degreeToRadian(i * 30)));//高度角分别是0,30,60,90值分别是r,1/2r……
             mPaint.setColor(Color.WHITE);
             mPaint.setStyle(Paint.Style.STROKE);
-            canvas.drawCircle(mRadius, mRadius, r, mPaint);
+            canvas.drawCircle(mX, mY, r, mPaint);
             if (i == 0) {
                 mPaint.setTextSize(20);
                 mPaint.setColor(Color.parseColor("#FF0044"));
-                canvas.drawText("N", mRadius, mRadius - r + 10, mPaint);
+                canvas.drawText("N", mX, mY - r + 10, mPaint);
             }
-            canvas.drawText(String.valueOf(30 * i), mRadius, mRadius - r, mPaint);
+            canvas.drawText(String.valueOf(30 * i), mX, mY - r, mPaint);
         }
         //画线,根据极坐标画线
         drawdivideLines(canvas, 12);
-
     }
 
     private void drawdivideLines(Canvas canvas, int divideNum) {
@@ -178,35 +182,23 @@ public class StarView extends View {
         //将360度等分化为个数，然后分别求得各个点的x,y坐标
         float[] ptr = new float[divideNum * 4];//每条线都有4个点
         double divide = 2 * Math.PI / divideNum;//每个角的弧度值
-        int divideAngel=360/divideNum;
+        int divideAngel = 360 / divideNum;
         //计算坐标点的值，通过极坐标求得
         //根据坐标角获得x,y的值，但需要考虑到不同象限的加减值,经过考虑只有y轴为相反值
         double x = 0;
         double y = 0;
         for (int i = 0; i < divideNum; i++) {
-            x = mRadius+mRadius * Math.cos(divide * i);
-            y = mRadius-mRadius * Math.sin(divide * i);
-            ptr[4*i]=mRadius;
-            ptr[4*i+1]=mRadius;
-            ptr[4*i+2]=(float)x;
-            ptr[4*i+3]=(float)y;
+            x = mX + mRadius * Math.cos(divide * i);
+            y = mY - mRadius * Math.sin(divide * i);
+            ptr[4 * i] = mX;
+            ptr[4 * i + 1] = mY;
+            ptr[4 * i + 2] = (float) x;
+            ptr[4 * i + 3] = (float) y;
             //这里画字
             mPaint.setColor(Color.WHITE);
             mPaint.setTextSize(20);
-            if (i>=0&&i<=3){
-                x-=15;
-                y+=10;
-            }
-            else if(i>=4&&i<=6) {
-                y+=5;
-            }
-            else if(i>=7&&i<=9){
-                y-=5;
-            }
-            else {
-                x-=30;
-            }
-            canvas.drawText(String.valueOf(divideAngel*i),(float)x,(float)y,mPaint);
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText(String.valueOf(divideAngel * i), (float) x, (float) y, mPaint);
         }
         mPaint.setColor(Color.WHITE);
         canvas.drawLines(ptr, mPaint);
@@ -218,16 +210,16 @@ public class StarView extends View {
      * 1获取屏幕的宽和高，定义自定义控件的大小
      * 2自定义控件的宽和高，如果不设置的话只能在xml文档中写死，最好是在这里设置
      * 宽度是fill_parent,不用管,但高度却需要设置成warp_content
+     * 画的中心是通过屏幕获取，然后半径是通过控件的宽度获取
      *
      * @param widthMeasureSpec  自定义控件的宽度
      * @param heightMeasureSpec 自定义控件的高度
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        getWindowValue();
-        int height = measureHeight(heightMeasureSpec);
-        int width = measureWidth(widthMeasureSpec);
-        setMeasuredDimension(width, height);
+        mHeight = measureHeight(heightMeasureSpec);
+        mWidth = measureWidth(widthMeasureSpec);
+        setMeasuredDimension(mWidth, mHeight);
     }
 
     private int measureHeight(int heightMeasureSpec) {
@@ -238,7 +230,7 @@ public class StarView extends View {
         } else if (HspeMode == MeasureSpec.AT_MOST) {//根据获取的屏幕宽高来设置其大小
             return mRadius * 2;
         } else {
-            return 0;
+            return HspeSize;
         }
     }
 
@@ -250,25 +242,23 @@ public class StarView extends View {
         } else if (WspeMode == MeasureSpec.AT_MOST) {
             return mRadius * 2;
         } else {
-            return 0;
+            return WspeSize;
         }
     }
 
     /**
      * 从sp获得宽和高，并且根据宽和高设置画圆的半径
+     * 本想用sp来获得，但是考虑到屏幕转化，需要重新获取宽高, 最好获取控件的宽和高
+     * 获得宽和高控件的宽和高和整个屏幕的宽和高获得屏幕的宽和高
+     * 理解有误，如果只有一个控件，则用屏幕的宽和高来代表图片是没有问题的，但是如果有多个控件就不可以了.
+     * 总的来说，就以控件为中心来进行画图，不用考虑屏幕的宽和高。因为控件自适应匹配屏幕，只要以控件canvas的宽和高
+     * 来画图就可以了,相对于控件来进行画图就可以了
      */
     private void getWindowValue() {
-        SharedPreferences sp = getContext().getSharedPreferences("VALUE", Context.MODE_PRIVATE);
-        mWidth = sp.getInt("WIDTH", 0);
-        mHeight = sp.getInt("HEIGHT", 0);
-        Log.d("VALUE", mWidth + ";" + mHeight);
-        if (mWidth == 0 || mHeight == 0) {
-            Log.e("GPS", "屏幕参数出错");
-            return;
-        }
-        //获得最短的长度
-        int length = mWidth < mHeight ? mWidth : mHeight;
-        mRadius = length / 2 - 10;
+        int length = (mWidth < mHeight) ? mWidth : mHeight;
+        mRadius = length / 2 - 30;
+        mX=mWidth/2;
+        mY=mHeight/2;
         msRadius = (float) 0.06d * mRadius;
     }
 

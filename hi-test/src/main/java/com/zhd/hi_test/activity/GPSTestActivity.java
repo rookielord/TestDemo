@@ -28,18 +28,18 @@ import java.util.List;
 /**
  * Created by 2015032501 on 2015/9/10.
  */
-public class GPSTestActivity extends Activity implements OnClickListener {
+public class GPSTestActivity extends Activity {
 
     private static final String TAG = "GPS";
     private LocationManager mManager;
     private int minTime = 5000;
     private int minDistance = 5;
     //控件对象
-    TextView tv_gps, tv_data;
-    Button btn_loc;
+    TextView tv_gps;
     StarView my_view;
     //所使用的位置提供器
     private String mProvider;
+    private StringBuilder sb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +47,8 @@ public class GPSTestActivity extends Activity implements OnClickListener {
         setContentView(R.layout.activity_gpstest);
         //找控件
         tv_gps = (TextView) findViewById(R.id.tv_gps);
-        btn_loc = (Button) findViewById(R.id.btn_loc_close);
         my_view = (StarView) findViewById(R.id.my_view);
-        tv_data= (TextView) findViewById(R.id.tv_data);
         //设置按钮监听
-        btn_loc.setOnClickListener(this);
         //GPS初始设定
         GPSinit();
         mManager.addGpsStatusListener(mListener);
@@ -67,8 +64,9 @@ public class GPSTestActivity extends Activity implements OnClickListener {
             double longtitude = location.getLongitude();
             double altitude = location.getAltitude();
             double latitude = location.getLatitude();
-            //Log.d(TAG,latitude+";"+longtitude+";"+altitude);
-
+            sb = new StringBuilder();
+            sb.append("当前的经度是:" + longtitude + "\r\n" + "当前的纬度是:" + latitude + "\r\n" +
+                    "当前的高度是:" + altitude);
         }
 
         @Override
@@ -97,7 +95,6 @@ public class GPSTestActivity extends Activity implements OnClickListener {
             switch (event) {
                 //第一次定位
                 case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    tv_gps.setText("卫星锁定了");
                     Log.d(TAG, "卫星第一次锁定");
                     break;
                 //卫星状态改变,当定位信息启动一次，那么它就会调用一次
@@ -111,7 +108,7 @@ public class GPSTestActivity extends Activity implements OnClickListener {
                     Iterator<GpsSatellite> it = satellites.iterator();
                     //获得最大的卫星数量，对接收的数量进行限制
                     int maxSatellite = status.getMaxSatellites();
-                    Log.d(TAG,"获得的最大卫星数"+maxSatellite);
+                    Log.d(TAG, "获得的最大卫星数" + maxSatellite);
                     int SatelliteNum = 0;
                     //这里创建需要进行传递的对象
                     List<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();
@@ -120,6 +117,8 @@ public class GPSTestActivity extends Activity implements OnClickListener {
                         satelliteList.add(s);
                         SatelliteNum++;
                     }
+                    if (sb!=null)
+                    tv_gps.setText(sb.toString()+"当前卫星数量:" + satelliteList.size());
                     my_view.SetSatetllite(satelliteList);
                     my_view.invalidate();
                     break;
@@ -133,20 +132,6 @@ public class GPSTestActivity extends Activity implements OnClickListener {
             }
         }
     };
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_loc_close://移除卫星监听和位置监听，位置和卫星算是一起的
-                if (mManager != null) {
-                    mManager.removeUpdates(mLocListener);
-                    mManager.removeGpsStatusListener(mListener);
-                }
-                break;
-        }
-    }
-
-    //注销监听
 
 
     @Override

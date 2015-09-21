@@ -33,10 +33,10 @@ public class Curd {
                 "N varchar(32) ," +
                 "E varchar(32) ," +
                 "Z varchar(32) ," +
-                "time varchar(32)"+
-                "NRMS varchar(32)"+
-                "ERMS varchar(32)"+
-                "ZRMS varchar(32)"+
+                "time varchar(32),"+
+                "NRMS varchar(32),"+
+                "ERMS varchar(32),"+
+                "ZRMS varchar(32),"+
                 "DES text);";
         mDb.execSQL(create_table);
     }

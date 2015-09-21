@@ -74,6 +74,7 @@ public class ViewPaperActivity extends Activity {
         t2 = (TextView) findViewById(R.id.text2);
         t3 = (TextView) findViewById(R.id.text3);
         t4 = (TextView) findViewById(R.id.text4);
+        t1.setBackgroundColor(Color.BLUE);
         tv_list = new ArrayList<>();
         tv_list.add(t1);
         tv_list.add(t2);

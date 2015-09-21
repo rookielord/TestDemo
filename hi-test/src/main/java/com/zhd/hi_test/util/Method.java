@@ -46,6 +46,13 @@ public class Method {
         return format.format(date);
     }
 
+    /**
+     *
+     * @param path
+     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
+     * @param context
+     * @return
+     */
     public static boolean createProject(String path, String[] configs, Context context) {
         File pro_file = new File(path + "/" + configs[0]);
         if (!pro_file.exists()) {
@@ -58,7 +65,7 @@ public class Method {
                 out = new BufferedOutputStream(new FileOutputStream(config_file));
                 //写入内容
                 String tableName = createTableName();
-                String msg = configs[0] + ";" + configs[1] + ";" + configs[2] + ";" + tableName;
+                String msg = configs[0] + ";" + configs[1] + ";" + configs[2] + ";" + configs[3] + ";" + tableName;
                 out.write(msg.getBytes());
                 //并创建对应的数据库表
                 Curd curd = new Curd(tableName, context);
@@ -91,6 +98,7 @@ public class Method {
         return mTableName;
     }
 
+    //删除项目
     public static void deleteDirectory(File del_directory) {
         if (del_directory.isDirectory()) {
             File[] files = del_directory.listFiles();
@@ -130,7 +138,7 @@ public class Method {
     }
 
     //获取数据参数
-    public static void getWindowValue(Context context) {
+    public static int[] getWindowValue(Context context) {
         WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
         Point p = new Point();
@@ -138,9 +146,9 @@ public class Method {
         //获得宽和高,就是整个屏幕的宽和高
         int width = p.x;
         int height = p.y;
-        SharedPreferences sp = context.getSharedPreferences("VALUE", context.MODE_PRIVATE);
-        sp.edit().putInt("WIDTH", width).commit();
-        sp.edit().putInt("HEIGHT", height).commit();
+        int[] values={width,height};
+        return values;
+
     }
 
 }

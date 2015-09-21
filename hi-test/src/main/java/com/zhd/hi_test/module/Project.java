@@ -19,7 +19,7 @@ public class Project {
     private String mTableName;
     private String mLastTime;
 
-    public Project(String mName, String mTime, String mBackup, String mTableName, File mConfig, String mLastTime) {
+    public Project(String mName, String mBackup, String mTime, String mLastTime, String mTableName, File mConfig) {
         this.mName = mName;
         this.mTime = mTime;
         this.mBackup = mBackup;

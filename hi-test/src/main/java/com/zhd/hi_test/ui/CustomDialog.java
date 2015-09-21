@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -25,6 +26,7 @@ public class CustomDialog extends DialogFragment {
     public void setmCallback(IDialogCallback mCallback) {
         this.mCallback = mCallback;
     }
+
     //创建返回一个自定义弹出框
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -34,21 +36,18 @@ public class CustomDialog extends DialogFragment {
         //LayoutInflater inflater=LayoutInflater.from(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         //将AlertDialog用布局填充器进行设置和填充(这里获取view对象，用来获取上面的信息)
-        builder.setView(mView=inflater.inflate(R.layout.dialog_sign, null))
+        mView = inflater.inflate(R.layout.dialog_sign, null);
+        builder.setView(mView)
                 //设置确定按钮
                 .setPositiveButton("创建", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //获取信息，在ProjectActivity中进行回调
-                        mCallback.getInfo(mView);
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mCallback.getInfo(mView);
+                                CustomDialog.this.dismiss();
+                            }
+                        }
+                )
+                .setNegativeButton("取消", null);
         return builder.create();
     }
 }

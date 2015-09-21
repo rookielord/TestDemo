@@ -111,7 +111,6 @@ public class DeviceListActivity extends Activity {
                 mPairedAdapter.add(device.getName() + ";" + device.getAddress());
             }
             //在接下来添加没有适配过的仪器
-            mPairedAdapter.add("位配对过的仪器");
         } else {
             mPairedAdapter.add("当前没有配对的数据");
         }
