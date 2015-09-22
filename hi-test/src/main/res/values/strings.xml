@@ -10,4 +10,6 @@
     <string name="pairedlist">已配对的设备</string>
     <string name="newlist">找到的设备</string>
     <string name="search">搜索</string>
+    <string name="device_title">请选择对应的设备</string>
+    <string name="way_title">请选择连接方式</string>
 </resources>

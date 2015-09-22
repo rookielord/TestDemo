@@ -7,4 +7,5 @@ import android.app.Activity;
  * 进行点位数据的查询和显示，并且可以对数据进行增删改查
  */
 public class ManageActivity extends Activity {
+
 }

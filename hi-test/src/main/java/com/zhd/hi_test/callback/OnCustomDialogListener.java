@@ -5,6 +5,6 @@ import android.view.View;
 /**
  * Created by 2015032501 on 2015/9/8.
  */
-public interface IDialogCallback {
+public interface OnCustomDialogListener {
     void getInfo(View view);
 }

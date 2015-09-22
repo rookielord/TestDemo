@@ -23,8 +23,10 @@ import java.util.regex.Pattern;
 /**
  * Created by 2015032501 on 2015/9/8.
  * 用来存放一些静态方法来做一些小功能，例如获得时间或者输入内容检查……
+ *
  */
 public class Method {
+
 
     public static boolean checkMsg(String msg) {
         boolean check1, check2;

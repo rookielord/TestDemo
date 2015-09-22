@@ -26,7 +26,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ViewPaperActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -49,6 +49,12 @@
         <activity android:name=".activity.GridActivity">
             <intent-filter>
                 <action android:name="com.zhd.grid.START" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.SurveyActivity">
+            <intent-filter>
+                <action android:name="com.zhd.survey.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -25,7 +25,6 @@ public class GridActivity extends Activity {
 
     //这里创建所有的图标资源，然后通过传入的PageID来决定传入使用哪些进行进行填充
     private static ArrayList<Icon> AllSource = new ArrayList<Icon>();
-
     static {
         AllSource.add(new Icon("项目管理", R.drawable.ic_root_file_proj, 0, new Intent("com.zhd.project.START")));
         AllSource.add(new Icon("星图展示", R.drawable.ic_root_file_param, 1, new Intent("com.zhd.starmap.START")));
@@ -34,7 +33,6 @@ public class GridActivity extends Activity {
         AllSource.add(new Icon("数据采集", R.drawable.ic_root_survey_point, 4, null));
     }
 
-    int image = R.drawable.ic_file_documents;
     private GridView gridView;
     int PageID;
     GridAdapter myAdapter = null;
@@ -87,5 +85,6 @@ public class GridActivity extends Activity {
         });
 
     }
+
 
 }

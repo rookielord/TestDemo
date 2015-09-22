@@ -35,20 +35,21 @@ public class GPSTestActivity extends Activity {
     private int minTime = 5000;
     private int minDistance = 5;
     //控件对象
-    TextView tv_gps;
     StarView my_view;
+    TextView tv_satellite,tv_locB,tv_locL,tv_locH;
     //所使用的位置提供器
     private String mProvider;
-    private StringBuilder sb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gpstest);
         //找控件
-        tv_gps = (TextView) findViewById(R.id.tv_gps);
         my_view = (StarView) findViewById(R.id.my_view);
-        //设置按钮监听
+        tv_satellite= (TextView) findViewById(R.id.tv_satellite);
+        tv_locB= (TextView) findViewById(R.id.tv_LocB);
+        tv_locL= (TextView) findViewById(R.id.tv_LocL);
+        tv_locH= (TextView) findViewById(R.id.tv_locH);
         //GPS初始设定
         GPSinit();
         mManager.addGpsStatusListener(mListener);
@@ -64,9 +65,9 @@ public class GPSTestActivity extends Activity {
             double longtitude = location.getLongitude();
             double altitude = location.getAltitude();
             double latitude = location.getLatitude();
-            sb = new StringBuilder();
-            sb.append("当前的经度是:" + longtitude + "\r\n" + "当前的纬度是:" + latitude + "\r\n" +
-                    "当前的高度是:" + altitude);
+            tv_locB.setText(String.valueOf(latitude));
+            tv_locL.setText(String.valueOf(longtitude));
+            tv_locH.setText(String.valueOf(altitude));
         }
 
         @Override
@@ -86,7 +87,7 @@ public class GPSTestActivity extends Activity {
     };
 
     /**
-     * 这是GPS卫星监听的型
+     * 这是GPS卫星监听
      */
     private GpsStatus.Listener mListener = new GpsStatus.Listener() {
         @Override
@@ -117,8 +118,7 @@ public class GPSTestActivity extends Activity {
                         satelliteList.add(s);
                         SatelliteNum++;
                     }
-                    if (sb!=null)
-                    tv_gps.setText(sb.toString()+"当前卫星数量:" + satelliteList.size());
+                    tv_satellite.setText(String.valueOf(satelliteList.size()));
                     my_view.SetSatetllite(satelliteList);
                     my_view.invalidate();
                     break;

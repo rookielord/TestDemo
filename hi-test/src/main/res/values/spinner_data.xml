@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="devices">
+        <item>中海达</item>
+        <item>安卓设备</item>
+    </string-array>
+    <string-array name="zhd_way">
+        <item>蓝牙</item>
+    </string-array>
+    <string-array name="phone_way">
+        <item>内置GPS</item>
+    </string-array>
+</resources>

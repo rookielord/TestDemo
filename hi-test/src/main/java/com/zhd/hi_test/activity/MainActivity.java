@@ -16,6 +16,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
@@ -30,7 +31,7 @@ import static android.support.v4.view.ViewPager.*;
 /**
  * Created by 2015032501 on 2015/9/18.
  */
-public class ViewPaperActivity extends Activity {
+public class MainActivity extends Activity {
 
 
     Context context = null;//当前context,用于跳转
@@ -39,6 +40,8 @@ public class ViewPaperActivity extends Activity {
     ViewPager pager = null;
     TabHost tabHost = null;
     TextView t1, t2, t3, t4;
+    private long mFirsttime=0;
+    private static final int INTERVAL=2000;
 
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
@@ -56,7 +59,7 @@ public class ViewPaperActivity extends Activity {
         Data d = (Data) getApplication();
         d.setmPath(Method.createDirectory(this));
 
-        context = ViewPaperActivity.this;
+        context = MainActivity.this;
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
 
@@ -232,6 +235,19 @@ public class ViewPaperActivity extends Activity {
     private void setTextBackgroundColor() {
         for (TextView tv : tv_list) {
             tv.setBackgroundColor(Color.parseColor("#ffa6a8f8"));
+        }
+    }
+    /**
+     * 点两次退出，计算两次的点击的时间
+     */
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis()-mFirsttime>INTERVAL)
+        {
+            mFirsttime=System.currentTimeMillis();
+            Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
+        }else {
+            finish();
         }
     }
 }

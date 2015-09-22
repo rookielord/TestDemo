@@ -10,11 +10,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -22,9 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.ui.CustomDialog;
 
 import java.util.Set;
+
+import static android.view.View.*;
 
 /**
  * Created by 2015032501 on 2015/9/16.
@@ -34,7 +33,7 @@ import java.util.Set;
  */
 public class DeviceListActivity extends Activity {
     //device上面的控件
-    Button btn_search;
+    Button btn_search,btn_close;
     ListView lv_pairedlist,lv_newlist;
     //存放数据的两个Adapter
     ArrayAdapter<String> mPairedAdapter, mNewsAdapter;
@@ -56,6 +55,7 @@ public class DeviceListActivity extends Activity {
         setContentView(R.layout.device_list);
         //找到控件
         btn_search = (Button) findViewById(R.id.btn_search);
+        btn_close= (Button) findViewById(R.id.btn_close);
         lv_pairedlist = (ListView) findViewById(R.id.lv_pairedlist);
         lv_newlist = (ListView) findViewById(R.id.lv_newlist);
         //获得蓝牙适配器
@@ -76,17 +76,25 @@ public class DeviceListActivity extends Activity {
         lv_pairedlist.setAdapter(mPairedAdapter);
         lv_newlist.setOnItemClickListener(mItemlistener);
         lv_pairedlist.setOnItemClickListener(mItemlistener);
-        //这里需要设置蓝牙可用被设置可以被搜索
-
         //开始搜索蓝牙设备
-        btn_search.setOnClickListener(new View.OnClickListener() {
+        btn_search.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 startDiscovery();
                 //搜索完毕后按钮消失
-                v.setVisibility(View.GONE);
+                v.setVisibility(GONE);
+                btn_close.setVisibility(VISIBLE);
             }
         });
+        //停止搜索
+        btn_close.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mAdapter.isDiscovering())
+                    mAdapter.cancelDiscovery();
+            }
+        });
+
     }
 
     @Override
@@ -106,7 +114,7 @@ public class DeviceListActivity extends Activity {
         Set<BluetoothDevice> devices = mAdapter.getBondedDevices();
         //这里需要保证devices大于0
         if (devices.size() > 0) {
-            findViewById(R.id.tv_pairedlist_title).setVisibility(View.VISIBLE);
+            findViewById(R.id.tv_pairedlist_title).setVisibility(VISIBLE);
             for (BluetoothDevice device : devices) {
                 mPairedAdapter.add(device.getName() + ";" + device.getAddress());
             }
@@ -124,7 +132,7 @@ public class DeviceListActivity extends Activity {
         setProgressBarIndeterminateVisibility(true);
         setTitle("正在搜索中……");
         //将新蓝牙设备的listview找到并设为可见
-        findViewById(R.id.tv_newlist_title).setVisibility(View.VISIBLE);
+        findViewById(R.id.tv_newlist_title).setVisibility(VISIBLE);
         if (mAdapter.isDiscovering())
             mAdapter.cancelDiscovery();
         //开始搜索
@@ -153,7 +161,6 @@ public class DeviceListActivity extends Activity {
             mAdapter.cancelDiscovery();
             String info = ((TextView) view).getText().toString();
             String adress = info.substring(info.length() - 17);//固定的长度
-            Log.d(TAG, adress);
             Intent intent = new Intent();//创建一个空intent来存放数据
             intent.putExtra(ADRESS, adress);
             setResult(RESULT_OK, intent);
@@ -164,14 +171,6 @@ public class DeviceListActivity extends Activity {
     /**
      * 长点击后可以删除该适配
      */
-    OnItemLongClickListener mitemLongClickListener=new OnItemLongClickListener() {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            CustomDialog customDialog=new CustomDialog();
-            customDialog.show(getFragmentManager(),"BluetoothDialog");
-            return false;
-        }
-    };
 
     //广播接收者接收广播
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
