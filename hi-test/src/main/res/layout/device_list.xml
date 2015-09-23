@@ -2,12 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
-
         <TextView
             android:id="@+id/tv_pairedlist_title"
             android:layout_width="match_parent"
@@ -15,23 +13,20 @@
             android:text="@string/pairedlist"
             android:visibility="gone"
             style="@style/BluetoothText"/>
-
         <ListView
             android:id="@+id/lv_pairedlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:dividerHeight="1dp"
+            android:layout_weight="1"
             android:divider="#ffff4834"></ListView>
-
         <TextView
             android:id="@+id/tv_newlist_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/newlist"
-            android:visibility="gone"
+            android:visibility="visible"
             style="@style/BluetoothText"/>
-
         <ListView
             android:id="@+id/lv_newlist"
             android:layout_width="match_parent"
@@ -39,7 +34,6 @@
             android:dividerHeight="1dp"
             android:layout_weight="1"
             android:divider="#ff7bff5d"></ListView>
-
         <Button
             android:id="@+id/btn_search"
             android:layout_width="match_parent"

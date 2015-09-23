@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -38,12 +39,12 @@ import java.util.UUID;
  */
 public class BlueToothActivity extends Activity {
     //按钮
-    Button btn_connect, btn_scan;
+    Button btn_connect, btn_clear, btn_request;
     TextView tv_content;
     Spinner sp_device, sp_way;
     //设置蓝牙的适配器
     private BluetoothAdapter mAdapter;
-    //设置返回是否启动的request_code
+    //设置返回是否允许启动蓝牙
     private static final int REQUEST_CODE = 1;
     //数组适配器,包括已经配对和没有配对的
     private static final String TAG = "LIJIAJI";
@@ -62,14 +63,14 @@ public class BlueToothActivity extends Activity {
     //获取连接的方式
     private String mConnectWay;
     //获得全局变量的Data
-    private Data d ;
+    private Data d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
         //获取内容
-        d=(Data) getApplication();
+        d = (Data) getApplication();
         sp_device = (Spinner) findViewById(R.id.sp_device);
         sp_way = (Spinner) findViewById(R.id.sp_way);
         btn_connect = (Button) findViewById(R.id.btn_connect);
@@ -77,6 +78,20 @@ public class BlueToothActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startConnect();
+            }
+        });
+        btn_clear = (Button) findViewById(R.id.btn_clear);
+        btn_clear.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearMessage();
+            }
+        });
+        btn_request = (Button) findViewById(R.id.btn_request);
+        btn_request.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
             }
         });
         tv_content = (TextView) findViewById(R.id.tv_device_info);
@@ -128,12 +143,17 @@ public class BlueToothActivity extends Activity {
         });
     }
 
+    /**
+     * 1.首先判断连接方式
+     * 2.打开蓝牙连接
+     * 3.打开连接后跳转
+     * 4.设置全局变量的打开类型
+     */
     private void startConnect() {
         mConnectWay = sp_way.getSelectedItem().toString();
         if (mConnectWay.equals("蓝牙")) {
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
-                Intent intent = new Intent(this, DeviceListActivity.class);
-                startActivityForResult(intent, DEVICE_MESSAGE);
+                StartDeviceList();
                 d.setConnectType(ConnectType.BlueToothConncet);
             } else {
                 OpenBluetooth();
@@ -155,14 +175,14 @@ public class BlueToothActivity extends Activity {
                     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
                     startActivity(intent);
+                    StartDeviceList();
                 }
                 break;
             case DEVICE_MESSAGE:
                 if (resultCode == RESULT_OK) {
                     String adress = data.getExtras().getString(DeviceListActivity.ADRESS);
-                    Log.d(TAG, adress);
                     mDevice = mAdapter.getRemoteDevice(adress);
-                    //根据地址创建连接对象获得流
+                    //根据地址创建连接
                     connect(mDevice);
                 }
                 break;
@@ -200,9 +220,9 @@ public class BlueToothActivity extends Activity {
                         while (true) {
                             while ((num = in.read(buffer)) != -1) {
                                 byte[] message = buffer;
-                                String msg = new String(buffer, 0, num);
+                                String msg1 = new String(buffer, 0, num);
                                 //sb.append(msg);
-                                Log.d(TAG, msg);
+                                Log.d(TAG, msg1);
                             }
 
                         }
@@ -229,18 +249,31 @@ public class BlueToothActivity extends Activity {
             e.printStackTrace();
         }
     }
+
     /**
-     * 这是请求GGA_LOC数据流
+     * 这里发送命令，获取卫星数据和位置信息
+     * 即发送两条指令，包括($GPGGA和$GPGSV)
+     * 关闭流就是断开连接，然后中间间隔时间才能发送两条命令
      */
     private void sendMessage() {
         try {
             out = mSocket.getOutputStream();
-            //out.write(msg.getBytes());
-            out.write(TrimbleOrder.GGA_LOC);
+
+            out.write(TrimbleOrder.GPGSV);
+            Thread.sleep(100);
+            //out.flush();
+            out.write(TrimbleOrder.GGA);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+    }
+
+    private void StartDeviceList() {
+        Intent intent = new Intent(this, DeviceListActivity.class);
+        startActivityForResult(intent, DEVICE_MESSAGE);
     }
 
     private void OpenBluetooth() {

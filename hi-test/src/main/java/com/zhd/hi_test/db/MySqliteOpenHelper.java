@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * 创建数据库
  */
 public class MySqliteOpenHelper extends SQLiteOpenHelper {
-    private static final String mDBname="Point.db";
+    private static final String mDBname="Points.db";
     public MySqliteOpenHelper(Context context) {
         super(context, mDBname, null, 1);
     }

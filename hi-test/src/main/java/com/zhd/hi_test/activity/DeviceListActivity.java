@@ -1,6 +1,7 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -33,8 +34,8 @@ import static android.view.View.*;
  */
 public class DeviceListActivity extends Activity {
     //device上面的控件
-    Button btn_search,btn_close;
-    ListView lv_pairedlist,lv_newlist;
+    Button btn_search, btn_close;
+    ListView lv_pairedlist, lv_newlist;
     //存放数据的两个Adapter
     ArrayAdapter<String> mPairedAdapter, mNewsAdapter;
     //蓝牙适配器
@@ -46,6 +47,8 @@ public class DeviceListActivity extends Activity {
     private static final String TAG = "DEVICE";
     //设置蓝牙开启返回的对应code
     private static final int REQUES_CODE = 0x1;
+    //设置判断是否开启过蓝牙搜索，只有开启过蓝牙搜索后搜索到为0才能添加没有数据
+    private static boolean isSearch = false;
 
     //要获取适配器中的内容已经匹配的内容，必须一开始就打开蓝牙
     @Override
@@ -55,7 +58,7 @@ public class DeviceListActivity extends Activity {
         setContentView(R.layout.device_list);
         //找到控件
         btn_search = (Button) findViewById(R.id.btn_search);
-        btn_close= (Button) findViewById(R.id.btn_close);
+        btn_close = (Button) findViewById(R.id.btn_close);
         lv_pairedlist = (ListView) findViewById(R.id.lv_pairedlist);
         lv_newlist = (ListView) findViewById(R.id.lv_newlist);
         //获得蓝牙适配器
@@ -83,6 +86,7 @@ public class DeviceListActivity extends Activity {
                 startDiscovery();
                 //搜索完毕后按钮消失
                 v.setVisibility(GONE);
+                mNewsAdapter.clear();
                 btn_close.setVisibility(VISIBLE);
             }
         });
@@ -92,6 +96,8 @@ public class DeviceListActivity extends Activity {
             public void onClick(View v) {
                 if (mAdapter.isDiscovering())
                     mAdapter.cancelDiscovery();
+                v.setVisibility(GONE);
+                btn_search.setVisibility(VISIBLE);
             }
         });
 
@@ -99,12 +105,12 @@ public class DeviceListActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode==REQUES_CODE){
-            if (resultCode==RESULT_OK){
-                Toast.makeText(this,"打开成功",Toast.LENGTH_SHORT).show();
+        if (requestCode == REQUES_CODE) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
                 btn_search.setEnabled(true);
-            }else {
-                Toast.makeText(this,"请打开蓝牙",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "请打开蓝牙", Toast.LENGTH_SHORT).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -137,6 +143,7 @@ public class DeviceListActivity extends Activity {
             mAdapter.cancelDiscovery();
         //开始搜索
         mAdapter.startDiscovery();
+        isSearch = true;
     }
 
     /**
@@ -177,9 +184,9 @@ public class DeviceListActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();//监听两个Action
-            switch (action) {
+            switch (action) {//当搜索结束时
                 case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                    if (mNewsAdapter.getCount() == 0) {
+                    if (mNewsAdapter.getCount() == 0 && isSearch) {
                         mNewsAdapter.add("当前没有设备");
                     }
                     break;

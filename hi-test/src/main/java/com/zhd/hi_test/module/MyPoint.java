@@ -17,7 +17,7 @@ package com.zhd.hi_test.module;
  "ZRMS varchar(32),"+
  "DES text)
  */
-public class Point {
+public class MyPoint {
     private String name;
     private String B;
     private String L;
@@ -31,14 +31,14 @@ public class Point {
     private String ZRMS;
     private String DES;
 
-    public Point(String name, String n, String e, String z) {
-        this.name = name;
-        N = n;
-        E = e;
-        Z = z;
+    public MyPoint(String b, String l, String h, String time) {
+        B = b;
+        L = l;
+        H = h;
+        this.time = time;
     }
 
-    public Point(String name, String b, String l, String h, String n, String e, String z, String time, String NRMS, String ERMS, String ZRMS, String DES) {
+    public MyPoint(String name, String b, String l, String h, String n, String e, String z, String time, String NRMS, String ERMS, String ZRMS, String DES) {
         this.name = name;
         B = b;
         L = l;

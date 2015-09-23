@@ -2,6 +2,7 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.app.LocalActivityManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -247,6 +248,10 @@ public class MainActivity extends Activity {
             mFirsttime=System.currentTimeMillis();
             Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
         }else {
+            //关闭蓝牙
+            BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
+            if (adapter.isEnabled())
+                adapter.disable();
             finish();
         }
     }

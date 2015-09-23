@@ -106,5 +106,17 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:text="注册" />
+        <Button
+            android:id="@+id/btn_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清空发送"
+            android:layout_toRightOf="@id/btn_connect"/>
+        <Button
+            android:id="@+id/btn_request"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取GAA"
+            android:layout_toLeftOf="@id/btn_register"/>
     </RelativeLayout>
 </LinearLayout>
