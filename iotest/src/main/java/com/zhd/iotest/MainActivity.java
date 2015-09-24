@@ -55,6 +55,7 @@ public class MainActivity extends FragmentActivity {
                 startActivity(intent);
             }
         });
+        tv_content.setText("$".getBytes().toString());
     }
 
     //可以了

@@ -36,9 +36,12 @@ public class GPSTestActivity extends Activity {
     private int minDistance = 5;
     //控件对象
     StarView my_view;
-    TextView tv_satellite,tv_locB,tv_locL,tv_locH;
+    TextView tv_satellite, tv_locB, tv_locL, tv_locH;
     //所使用的位置提供器
     private String mProvider;
+    //返回是否打开GPS服务
+    private static final int GPS_REQUEST = 1;
+    private List<String> mProviders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +49,12 @@ public class GPSTestActivity extends Activity {
         setContentView(R.layout.activity_gpstest);
         //找控件
         my_view = (StarView) findViewById(R.id.my_view);
-        tv_satellite= (TextView) findViewById(R.id.tv_satellite);
-        tv_locB= (TextView) findViewById(R.id.tv_LocB);
-        tv_locL= (TextView) findViewById(R.id.tv_LocL);
-        tv_locH= (TextView) findViewById(R.id.tv_locH);
+        tv_satellite = (TextView) findViewById(R.id.tv_satellite);
+        tv_locB = (TextView) findViewById(R.id.tv_LocB);
+        tv_locL = (TextView) findViewById(R.id.tv_LocL);
+        tv_locH = (TextView) findViewById(R.id.tv_locH);
         //GPS初始设定
         GPSinit();
-        mManager.addGpsStatusListener(mListener);
-        mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
     }
     //1.获取位置服务(暂时不考虑位置信息)
     //2.设置卫星监听(没有调用到)
@@ -145,15 +146,36 @@ public class GPSTestActivity extends Activity {
 
     private void GPSinit() {
         mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        List<String> providers = mManager.getProviders(true);
-        providers = mManager.getProviders(true);
-        if (providers.contains(LocationManager.GPS_PROVIDER)) {
+        mProviders = mManager.getProviders(true);
+        if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
             mProvider = LocationManager.GPS_PROVIDER;
+            mManager.addGpsStatusListener(mListener);
+            mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
         } else {
+            Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivityForResult(intent, 0);
+            startActivityForResult(intent, GPS_REQUEST);
         }
     }
 
+    /**
+     * 判断是否打开GPS服务，然后打开打开界面
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case GPS_REQUEST:
+                //判断是否打开，没有打开则提示打开并关闭当前界面，判断的话只能用当前是否包含GPS服务
+                mProviders=mManager.getProviders(true);
+                if (mProviders.contains(LocationManager.GPS_PROVIDER)){
+                    mManager.addGpsStatusListener(mListener);
+                    mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+                }else {
+                    Toast.makeText(this,"请打开GPS服务",Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

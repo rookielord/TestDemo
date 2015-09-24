@@ -52,11 +52,6 @@
             android:prompt="@string/device_title"/>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#ff666666" />
-
     <LinearLayout
         android:layout_weight="1"
         android:layout_width="match_parent"
@@ -86,10 +81,6 @@
             android:duplicateParentState="false"/>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#ff666666" />
     <RelativeLayout
         android:layout_gravity="bottom"
         android:layout_width="match_parent"

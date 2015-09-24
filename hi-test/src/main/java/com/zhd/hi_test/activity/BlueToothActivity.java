@@ -20,10 +20,18 @@ import android.widget.Toast;
 
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.callback.OniRTKListener;
+import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.util.ConnectType;
+import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
+import org.apache.http.util.ByteArrayBuffer;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,6 +58,8 @@ public class BlueToothActivity extends Activity {
     private static final String TAG = "LIJIAJI";
     //启动返回得到地址
     private static final int DEVICE_MESSAGE = 2;
+    //判断是否可以被其它设备搜索
+    private static final int DISCOVERED = 3;
     //连接数据对象和连接数据device
     private BluetoothDevice mDevice;
     private BluetoothSocket mSocket;
@@ -174,8 +184,7 @@ public class BlueToothActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                    startActivity(intent);
-                    StartDeviceList();
+                    startActivityForResult(intent, DISCOVERED);
                 }
                 break;
             case DEVICE_MESSAGE:
@@ -186,12 +195,16 @@ public class BlueToothActivity extends Activity {
                     connect(mDevice);
                 }
                 break;
+            case DISCOVERED:
+                StartDeviceList();
+                break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
      * 这里获取到输入输出流，然后输入流开启线程不断地读
+     * 需要在这里开始解析数据并处理丢包问题
      *
      * @param mDevice
      */
@@ -205,24 +218,42 @@ public class BlueToothActivity extends Activity {
                 Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Toast.makeText(this, "连接失败", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, e.getMessage());
             }
             //开启线程不断的读取其中的数据，因为不知道什么时候发过来，所以一直死循环的读取
+            /**
+             * 1.遍历传过来的数据，并且找到$符号的最后位置
+             * 2.将之间的完整数据存入useInfo[]
+             * 3.在通过skip的方式跳过，完整数据，只读取到不完整数据传入temp[]
+             * 4.将
+             */
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     InputStream in = null;
                     int num = 0;
-                    byte[] buffer = new byte[1024 * 1024];
+                    //缓冲区
+                    byte[] buffer = new byte[1024 * 4];
+                    //不完整数据,用来存放不完整的数据
+                    byte[] temps;
+                    //完整数据用来传输的数据类型
+                    byte[] useInfo;
                     try {
                         in = mSocket.getInputStream();
+//                        DataInputStream datainput=new DataInputStream(in);
+//                        datainput.read(buffer);
+//                        ByteArrayInputStream byteinput=new ByteArrayInputStream(buffer);
+//                        DataInputStream d=new DataInputStream(byteinput);
                         StringBuilder sb = new StringBuilder();
                         while (true) {
                             while ((num = in.read(buffer)) != -1) {
-                                byte[] message = buffer;
+                                //读取buffer,然后
+                                //获取$最后的位置
+                                ByteArrayBuffer k=new ByteArrayBuffer(3333);
+                                int loc = getLastLocation(buffer);
                                 String msg1 = new String(buffer, 0, num);
-                                //sb.append(msg);
+                                //首先要发指令，让其发送位置和卫星信息
                                 Log.d(TAG, msg1);
+                                Infomation.setmInputMsg(msg1);
                             }
 
                         }
@@ -234,6 +265,17 @@ public class BlueToothActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int getLastLocation(byte[] buffer) {
+        byte delimiter = 0x24;//$符号的byte
+        int location = -1;//默认没有找到
+        for (int i = 0; i < buffer.length; i++) {
+            if (buffer[i] == delimiter && i > location) {//判断条件1.当前位置大于位置2.确定是$符
+                location = i;
+            }
+        }
+        return location;
     }
 
     /**
@@ -254,13 +296,14 @@ public class BlueToothActivity extends Activity {
      * 这里发送命令，获取卫星数据和位置信息
      * 即发送两条指令，包括($GPGGA和$GPGSV)
      * 关闭流就是断开连接，然后中间间隔时间才能发送两条命令
+     * 是否第一条必须获得流后就必须发送？
+     * 是否只能一次性发送两次数据？
      */
     private void sendMessage() {
         try {
             out = mSocket.getOutputStream();
-
             out.write(TrimbleOrder.GPGSV);
-            Thread.sleep(100);
+            Thread.sleep(200);
             //out.flush();
             out.write(TrimbleOrder.GGA);
             out.flush();
@@ -285,4 +328,5 @@ public class BlueToothActivity extends Activity {
             Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
         }
     }
+
 }

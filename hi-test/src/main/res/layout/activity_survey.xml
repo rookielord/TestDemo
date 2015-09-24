@@ -7,11 +7,15 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="这是测量页" />
-
+        android:text="这是测量页"
+        />
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
     <TextView
         android:id="@+id/tv_info"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="正则匹配的数据" />
+        android:layout_height="match_parent" />
+</ScrollView>
 </LinearLayout>
