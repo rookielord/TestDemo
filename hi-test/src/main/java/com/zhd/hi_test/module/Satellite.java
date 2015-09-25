@@ -44,6 +44,7 @@ public class Satellite {
     public static final int GPS=1;
     public static final int GLONASS=2;
     public static final int BD=3;
+    public static final int SBAS=4;
 
     public Satellite(String mPrn,String mElevation, String mAzimuth, String mSnr,  int mType) {
         this.mElevation = mElevation;

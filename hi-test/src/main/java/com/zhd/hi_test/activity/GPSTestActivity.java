@@ -110,7 +110,6 @@ public class GPSTestActivity extends Activity {
                     Iterator<GpsSatellite> it = satellites.iterator();
                     //获得最大的卫星数量，对接收的数量进行限制
                     int maxSatellite = status.getMaxSatellites();
-                    Log.d(TAG, "获得的最大卫星数" + maxSatellite);
                     int SatelliteNum = 0;
                     //这里创建需要进行传递的对象
                     List<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();

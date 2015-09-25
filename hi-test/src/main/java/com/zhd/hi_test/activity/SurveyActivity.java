@@ -1,34 +1,19 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
-import android.webkit.WebHistoryItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.OniRTKListener;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.Satellite;
-import com.zhd.hi_test.util.ConnectType;
 import com.zhd.hi_test.util.Infomation;
-import com.zhd.hi_test.util.TrimbleOrder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by 2015032501 on 2015/9/22.

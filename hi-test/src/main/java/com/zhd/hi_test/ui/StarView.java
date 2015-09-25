@@ -1,24 +1,20 @@
 package com.zhd.hi_test.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.Path;
 import android.graphics.Typeface;
 import android.location.GpsSatellite;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 
 
+import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.StarPoint;
-import com.zhd.hi_test.util.Method;
 
-import java.security.interfaces.ECKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +38,6 @@ public class StarView extends View {
     private int mHeight;
     //画卫星图像的大小
     private static float msRadius;
-    private int[] values;
     //画卫星图的中心位置
     private int mX;
     private int mY;
@@ -54,30 +49,44 @@ public class StarView extends View {
      */
     public void SetSatetllite(List<GpsSatellite> gpsSatellites) {
         for (GpsSatellite satellite : gpsSatellites) {
-            //判断定位使用的卫星
-            if (satellite.usedInFix()) {
-                //获得高度角
-                float elevation = satellite.getElevation();
-                //获得方位角
-                double azimuth = satellite.getAzimuth();
-                //计算当前位置距离圆心的距离,根据平分获得
-                double r2 = mRadius * ((90.0f - elevation) / 90.0f);
-                //以(mRadius,mRadius)为参考点，然后根据方位角位置进行判断所在象限，然后对X,Y进行修改
-                //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
-                double radian = degreeToRadian(360 - azimuth + 90);
-                //这个就是转换坐标,就以第一象限作为参考
-                double x = mX + Math.cos(radian) * r2;//x方向上的增量
-                double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
-                //获得x,y方向上的变化后的值
-                //获得卫星的信噪比，并分级绘制
-                int snr = (int) satellite.getSnr();
-                int level = snrToSignalLevel(snr);
-                //卫星编号
-                int num = satellite.getPrn();
-                StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, num, level);
-                mPoints.add(p);
-            }
+            //获得高度角
+            float elevation = satellite.getElevation();
+            //获得方位角
+            double azimuth = satellite.getAzimuth();
+            //计算当前位置距离圆心的距离,根据平分获得
+            double r2 = mRadius * ((90.0f - elevation) / 90.0f);
+            //以(mRadius,mRadius)为参考点，然后根据方位角位置进行判断所在象限，然后对X,Y进行修改
+            //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
+            double radian = degreeToRadian(360 - azimuth + 90);
+            //这个就是转换坐标,就以第一象限作为参考
+            double x = mX + Math.cos(radian) * r2;//x方向上的增量
+            double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
+            //获得x,y方向上的变化后的值
+            //获得卫星的信噪比，并分级绘制
+            int snr = (int) satellite.getSnr();
+            int level = snrToSignalLevel(snr);
+            //卫星编号
+            int prn = satellite.getPrn();
+            //卫星种类
+            int type = getSatelliteType(prn);
+            StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, prn, level, type);
+            mPoints.add(p);
+
         }
+    }
+
+    private int getSatelliteType(int prn) {
+        int type = 0;
+        if (prn >= 1 && prn < 33) {
+            type = Satellite.GPS;
+        } else if (prn >= 120 && prn < 152) {
+            type = Satellite.SBAS;
+        } else if (prn >= 65 && prn < 97) {
+            type = Satellite.GLONASS;
+        } else if (prn >= 161) {
+            type = Satellite.BD;
+        }
+        return type;
     }
 
     public StarView(Context context) {
@@ -140,11 +149,33 @@ public class StarView extends View {
                     mPaint.setColor(Color.GREEN);
                     break;
             }
-            mPaint.setStyle(Paint.Style.FILL);
             float x = (float) point.getmX();
             float y = (float) point.getmY();
+            //根据种类画形状
+            mPaint.setStyle(Paint.Style.FILL);
             mPaint.setHinting(Paint.HINTING_ON);
-            canvas.drawCircle(x, y, (int) msRadius, mPaint);
+            switch (point.getmType()) {
+                case 1://gps圆形
+                    canvas.drawCircle(x, y, msRadius, mPaint);
+                    break;
+                case 2://glonass三角形
+                    Path path = new Path();
+                    path.moveTo(x, y - 5);// 此点为多边形的起点
+                    path.lineTo(x - 2, y + 2);
+                    path.lineTo(x + 2, y + 2);
+                    path.close(); // 使这些点构成封闭的多边形
+                    canvas.drawPath(path, mPaint);
+                    break;
+                case 3://bd矩形
+                    canvas.drawRect(x - 2, y - 2, x + 2, y + 2, mPaint);
+                    break;
+                case 4://SBAS画红圈
+                    mPaint.setColor(Color.RED);
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    canvas.drawCircle(x, y, msRadius, mPaint);
+                    break;
+            }
+
             mPaint.setColor(Color.WHITE);
             mPaint.setTextSize(msRadius);
             mPaint.setTextAlign(Paint.Align.CENTER);
@@ -185,6 +216,7 @@ public class StarView extends View {
         int divideAngel = 360 / divideNum;
         //计算坐标点的值，通过极坐标求得
         //根据坐标角获得x,y的值，但需要考虑到不同象限的加减值,经过考虑只有y轴为相反值
+        //mX
         double x = 0;
         double y = 0;
         for (int i = 0; i < divideNum; i++) {
@@ -257,8 +289,8 @@ public class StarView extends View {
     private void getWindowValue() {
         int length = (mWidth < mHeight) ? mWidth : mHeight;
         mRadius = length / 2 - 30;
-        mX=mWidth/2;
-        mY=mHeight/2;
+        mX = mWidth / 2;
+        mY = mHeight / 2;
         msRadius = (float) 0.06d * mRadius;
     }
 

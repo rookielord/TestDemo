@@ -3,14 +3,10 @@ package com.zhd.hi_test.util;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
-import com.zhd.hi_test.callback.OniRTKListener;
 import com.zhd.hi_test.module.MyLocation;
-import com.zhd.hi_test.module.MyPoint;
 import com.zhd.hi_test.module.Satellite;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,16 +17,7 @@ import java.util.regex.Pattern;
  */
 public class Infomation {
 
-    private static OniRTKListener mListener;
     private static Handler mHandler;
-
-    public static OniRTKListener getmListener() {
-        return mListener;
-    }
-
-    public static void setmListener(OniRTKListener mListener) {
-        Infomation.mListener = mListener;
-    }
 
     public static void setHandler(Handler handler){
         mHandler=handler;
@@ -74,7 +61,6 @@ public class Infomation {
         String H=info[8];
         //形成对象
         location=new MyLocation(B,L,H,time);
-//        mListener.onLocationinfo(location);
         Message m=Message.obtain();
         m.obj=location;
         m.what=1;
@@ -100,8 +86,6 @@ public class Infomation {
         for (int i = 0; i < num; i++) {
             int loc = 4 * (i + 1);
             //最后一个信噪比可能为空值，如果为空值则赋值0,表示没有收到信号
-//            if (info[loc+3]=="")
-//                info[loc+3]="0";
             s = new Satellite(info[loc], info[loc + 1], info[loc + 2], info[loc + 3], type);
             mSatellites.add(s);
         }
@@ -112,12 +96,7 @@ public class Infomation {
         m.what=2;
         mHandler.sendMessage(m);
         mSatellites.clear();
-        //即使传输
-//        mListener.onSatelliteinfo(mSatellites);
         //然后清空其中的东西
     }
 
-    public static ArrayList<Satellite> getmSatellites() {
-        return mSatellites;
-    }
 }

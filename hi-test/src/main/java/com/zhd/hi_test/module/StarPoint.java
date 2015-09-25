@@ -6,21 +6,22 @@ package com.zhd.hi_test.module;
  */
 public class StarPoint {
 
-    private static final int TYPE_GPS = 1;
-    private static final int TYPE_GLONASS = 2;
-    private static final int TYPE_BD = 3;
     private int mNum;
     private double mX;
     private double mY;
     private int mLevel;
+    private int mType;
 
+    public int getmType() {
+        return mType;
+    }
 
-
-    public StarPoint(double mX, double mY, int mNum,int mLevel) {
+    public StarPoint(double mX, double mY, int mNum, int mLevel, int mType) {
         this.mX = mX;
         this.mY = mY;
-        this.mNum=mNum;
-        this.mLevel=mLevel;
+        this.mNum = mNum;
+        this.mLevel = mLevel;
+        this.mType = mType;
     }
 
     public int getmLevel() {

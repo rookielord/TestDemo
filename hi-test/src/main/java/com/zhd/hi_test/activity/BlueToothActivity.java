@@ -1,11 +1,14 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,31 +16,23 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.OniRTKListener;
-import com.zhd.hi_test.module.MyLocation;
-import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.util.ConnectType;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
+
 import org.apache.http.util.ByteArrayBuffer;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -46,7 +41,7 @@ import java.util.UUID;
  * 这里进行设备的连接和数据的读取，因为是测试用，所以就使用固定的命令
  */
 public class BlueToothActivity extends Activity {
-    //按钮
+    //控件
     Button btn_connect, btn_clear, btn_request;
     TextView tv_content;
     Spinner sp_device, sp_way;
@@ -54,8 +49,6 @@ public class BlueToothActivity extends Activity {
     private BluetoothAdapter mAdapter;
     //设置返回是否允许启动蓝牙
     private static final int REQUEST_CODE = 1;
-    //数组适配器,包括已经配对和没有配对的
-    private static final String TAG = "LIJIAJI";
     //启动返回得到地址
     private static final int DEVICE_MESSAGE = 2;
     //判断是否可以被其它设备搜索
@@ -74,6 +67,22 @@ public class BlueToothActivity extends Activity {
     private String mConnectWay;
     //获得全局变量的Data
     private Data d;
+    //判断是否开启连接
+    private static boolean mIsConnect = false;
+    //通过绑定handler确定信息
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.arg1 == 1) {
+                Toast.makeText(BlueToothActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+
+            } else if (msg.arg1 == -1) {
+                Toast.makeText(BlueToothActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+            }
+            dialog.dismiss();
+        }
+    };
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +124,7 @@ public class BlueToothActivity extends Activity {
         sp_device.setAdapter(deviceAdapter);
         //获得蓝牙的适配器
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-        //根据所选择仪器类型，对连接方式进行设置
+        //根据所选择仪器类型，对连接方式进行设置,注意是onItemSelected
         sp_device.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -205,77 +214,152 @@ public class BlueToothActivity extends Activity {
     /**
      * 这里获取到输入输出流，然后输入流开启线程不断地读
      * 需要在这里开始解析数据并处理丢包问题
+     * 这里也需要开启一个线程用来确认用户蓝牙连接成功和失败
      *
      * @param mDevice
      */
-    private void connect(BluetoothDevice mDevice) {
+    private void connect(final BluetoothDevice mDevice) {
+        //显示进度条，开始连接蓝牙
+        dialog = new ProgressDialog(this);
+        dialog.setTitle("蓝牙连接中……");
+        dialog.show();
+        //在这里进行连接，连接发送消息
         try {
             mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
-            //设为全局变量
-            //建立连接，就可以不断的从里面获取输入流和输出流
-            try {
-                mSocket.connect();
-                Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Toast.makeText(this, "连接失败", Toast.LENGTH_SHORT).show();
-            }
-            //开启线程不断的读取其中的数据，因为不知道什么时候发过来，所以一直死循环的读取
-            /**
-             * 1.遍历传过来的数据，并且找到$符号的最后位置
-             * 2.将之间的完整数据存入useInfo[]
-             * 3.在通过skip的方式跳过，完整数据，只读取到不完整数据传入temp[]
-             * 4.将
-             */
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    InputStream in = null;
-                    int num = 0;
-                    //缓冲区
-                    byte[] buffer = new byte[1024 * 4];
-                    //不完整数据,用来存放不完整的数据
-                    byte[] temps;
-                    //完整数据用来传输的数据类型
-                    byte[] useInfo;
-                    try {
-                        in = mSocket.getInputStream();
-//                        DataInputStream datainput=new DataInputStream(in);
-//                        datainput.read(buffer);
-//                        ByteArrayInputStream byteinput=new ByteArrayInputStream(buffer);
-//                        DataInputStream d=new DataInputStream(byteinput);
-                        StringBuilder sb = new StringBuilder();
-                        while (true) {
-                            while ((num = in.read(buffer)) != -1) {
-                                //读取buffer,然后
-                                //获取$最后的位置
-                                ByteArrayBuffer k=new ByteArrayBuffer(3333);
-                                int loc = getLastLocation(buffer);
-                                String msg1 = new String(buffer, 0, num);
-                                //首先要发指令，让其发送位置和卫星信息
-                                Log.d(TAG, msg1);
-                                Infomation.setmInputMsg(msg1);
-                            }
-
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
+            mSocket.connect();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                InputStream in = null;
+                //用来查看读取了多少的数据
+                int num = 0;
+                //缓冲区,用来读取数据
+                byte[] buffer = new byte[1024 * 4];
+                //  1、用来接收每次读取到的数据
+                //  2、把每次读到的数据装入buffer缓冲区
+                //  3、去装好的缓冲区Buffer搜索解析
+                //$符号之前的数据，用来和上一次的不完整数据进行拼接
+                byte[] completeInfo;
+                //$符号之后不完整的数据，用来和下一次的数据进行拼接
+                byte[] uncompleteInfo = null;
+                //拼接后得到的完整数据
+                byte[] useInfo;
+                try {
+                    in = mSocket.getInputStream();
+                    while (true) {
+                        while ((num = in.read(buffer)) != -1) {
+                            //获取$最后的位置
+                            int loc = getLastLocation(buffer, num);
+                            //获取最后$之前的数据的所有数据
+                            completeInfo = getcomplete(buffer, loc);
+                            //拼接之前的不完整的数据，得到的完整的数据
+                            useInfo = MergeInfo(completeInfo, uncompleteInfo);
+                            //获取不完整的数据
+                            uncompleteInfo = getuncomplete(buffer, loc, num);
+                            //首先要发指令，让其发送位置和卫星信息
+                            if (useInfo != null) {
+                                String msg1 = new String(useInfo);
+                                Log.d(Constant.TAG, msg1);
+                                Infomation.setmInputMsg(msg1);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
-    private int getLastLocation(byte[] buffer) {
-        byte delimiter = 0x24;//$符号的byte
-        int location = -1;//默认没有找到
-        for (int i = 0; i < buffer.length; i++) {
-            if (buffer[i] == delimiter && i > location) {//判断条件1.当前位置大于位置2.确定是$符
+
+    /**
+     * 获得不完整的数据，如果没有找到$符号的话，则返回整个读到的byte[] buffer，其长度为num
+     *
+     * @param buffer
+     * @param loc
+     * @param num
+     * @return
+     */
+    private byte[] getuncomplete(byte[] buffer, int loc, int num) {
+        byte[] temp;
+        if (loc == -2) {
+            temp = new byte[num];
+            for (int i = 0; i < num; i++) {
+                temp[i] = buffer[i];
+            }
+        } else {
+            int length = num - loc;//正确
+            temp = new byte[length];//创建不完整数据的长度
+            for (int i = 0; i < length; i++) {//赋值
+                temp[i] = buffer[i + loc];
+            }
+        }
+        return temp;
+    }
+
+    /**
+     * 通过$的位置来创建完整的byte[] complete
+     * 需要注意不包含$符号的情况，需要分情况讨论
+     * 如果不包含$符号，则整条数据都是不完整的，当前返回为null
+     *
+     * @param buffer
+     * @param loc
+     * @return
+     */
+    private byte[] getcomplete(byte[] buffer, int loc) {
+        if (loc == -2) {
+            return null;
+        }
+        byte[] temp = new byte[loc];
+        for (int i = 0; i < loc; i++) {
+            temp[i] = buffer[i];
+        }
+        return temp;
+    }
+
+    /**
+     * 这里进行 本次查询到完整的数据，以及上次查词到的不完整的数据的拼接
+     * 注意：
+     * 1.第一次进行合并时，uncompleteInfo为null,需要返回完整数据
+     * 2.有时会有没有包含$符的情况，则整个buffer都是不完整的数据，让其和下一次进行拼接，其返回null
+     * 3.首先判断是否有completeinfo[]然后再判断uncompleteinfo
+     *
+     * @param completeInfo
+     * @param uncompleteInfo
+     * @return
+     */
+    private byte[] MergeInfo(byte[] completeInfo, byte[] uncompleteInfo) {
+        if (completeInfo == null)
+            return null;
+        if (uncompleteInfo == null)
+            return completeInfo;
+        byte[] useinfo = new byte[completeInfo.length + uncompleteInfo.length];
+        System.arraycopy(uncompleteInfo, 0, useinfo, 0, uncompleteInfo.length);
+        System.arraycopy(completeInfo, 0, useinfo, uncompleteInfo.length, completeInfo.length);
+        return useinfo;
+    }
+
+    /**
+     * 需要考虑当前数据没有$符号的状态，如果没有则会返回null
+     *
+     * @param buffer
+     * @param num
+     * @return
+     */
+    private int getLastLocation(byte[] buffer, int num) {
+        byte Fdelimiter = 0x24;//$符号的byte
+        int location = -1;//默认没有找到$符的位置
+        for (int i = 0; i < num; i++) {
+            if (buffer[i] == Fdelimiter && i > location) {//判断条件1.当前位置大于位置2.确定是$符
                 location = i;
             }
         }
-        return location;
+        //因为获取到的是$之前的数据，而找到的是$符号的位置，所以要-1
+        return location - 1;
     }
 
     /**

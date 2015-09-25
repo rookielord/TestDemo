@@ -15,12 +15,10 @@ import java.util.ArrayList;
 
 /**
  * Created by 2015032501 on 2015/9/19.
- * 在这里根据传过来的ID来进行其它九宫图的各个界面的填充，然后使用回调来对各个Item功能实现
+ * 在这里根据穿过来的数据进行内容的填充
  */
 public class GridAdapter extends BaseAdapter {
     //设置所有的显示数据
-
-
     private ArrayList<Icon> mSource = new ArrayList<>();
     private Context mContext;
     private IiconCallback mIicon;
@@ -29,11 +27,6 @@ public class GridAdapter extends BaseAdapter {
         this.mIicon = mIicon;
     }
 
-    /**
-     * 根据传过来的PageNum来生成对应的资源变量
-     *
-     * @return
-     */
     public GridAdapter(Context context, ArrayList<Icon> resource) {
         this.mContext = context;
         this.mSource = resource;
@@ -43,7 +36,6 @@ public class GridAdapter extends BaseAdapter {
         TextView itemText;
         ImageView itemImage;
     }
-
 
     @Override
     public int getCount() {

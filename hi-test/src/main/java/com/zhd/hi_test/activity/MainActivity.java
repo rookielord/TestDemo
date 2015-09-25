@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_viewpager);
+        setContentView(R.layout.activity_main);
 
         //获取屏幕的参数和项目文件夹路径,并传给全局变量
         Method.getWindowValue(this);
