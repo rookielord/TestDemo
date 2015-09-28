@@ -23,12 +23,9 @@ import android.widget.Toast;
 import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.util.ConnectType;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
-
-import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,20 +66,9 @@ public class BlueToothActivity extends Activity {
     private Data d;
     //判断是否开启连接
     private static boolean mIsConnect = false;
-    //通过绑定handler确定信息
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.arg1 == 1) {
-                Toast.makeText(BlueToothActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-
-            } else if (msg.arg1 == -1) {
-                Toast.makeText(BlueToothActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-            }
-            dialog.dismiss();
-        }
-    };
     private ProgressDialog dialog;
+    //通过绑定handler确定信息
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,12 +159,12 @@ public class BlueToothActivity extends Activity {
         if (mConnectWay.equals("蓝牙")) {
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
                 StartDeviceList();
-                d.setConnectType(ConnectType.BlueToothConncet);
+                d.setConnectType(Constant.BlueToothConncet);
             } else {
                 OpenBluetooth();
             }
         } else if (mConnectWay.equals("内置GPS")) {
-            d.setConnectType(ConnectType.InnerGPSConnect);
+            d.setConnectType(Constant.InnerGPSConnect);
         }
     }
 
@@ -200,7 +186,9 @@ public class BlueToothActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     String adress = data.getExtras().getString(DeviceListActivity.ADRESS);
                     mDevice = mAdapter.getRemoteDevice(adress);
-                    //根据地址创建连接
+                    //在这里打开进度条
+                    dialog = new ProgressDialog(this);
+                    dialog.setTitle("蓝牙连接中……");
                     connect(mDevice);
                 }
                 break;
@@ -218,19 +206,24 @@ public class BlueToothActivity extends Activity {
      *
      * @param mDevice
      */
-    private void connect(final BluetoothDevice mDevice) {
+    private void connect(BluetoothDevice mDevice) {
         //显示进度条，开始连接蓝牙
-        dialog = new ProgressDialog(this);
-        dialog.setTitle("蓝牙连接中……");
-        dialog.show();
         //在这里进行连接，连接发送消息
         try {
             mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
             mSocket.connect();
+            Toast.makeText(BlueToothActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(BlueToothActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
         }
-
+        dialog.dismiss();
+        /**<黄杰思路>
+         1、用来接收每次读取到的数据
+         2、把每次读到的数据装入buffer缓冲区
+         3、去装好的缓冲区Buffer搜索解析
+         </黄杰思路>
+         */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -239,9 +232,6 @@ public class BlueToothActivity extends Activity {
                 int num = 0;
                 //缓冲区,用来读取数据
                 byte[] buffer = new byte[1024 * 4];
-                //  1、用来接收每次读取到的数据
-                //  2、把每次读到的数据装入buffer缓冲区
-                //  3、去装好的缓冲区Buffer搜索解析
                 //$符号之前的数据，用来和上一次的不完整数据进行拼接
                 byte[] completeInfo;
                 //$符号之后不完整的数据，用来和下一次的数据进行拼接
@@ -263,7 +253,8 @@ public class BlueToothActivity extends Activity {
                             //首先要发指令，让其发送位置和卫星信息
                             if (useInfo != null) {
                                 String msg1 = new String(useInfo);
-                                Log.d(Constant.TAG, msg1);
+                                //注意，显示数据是不完善的，经过调试后发现是完整拼接
+//                                Log.d(Constant.TAG, msg1);
                                 Infomation.setmInputMsg(msg1);
                             }
                         }
@@ -278,7 +269,9 @@ public class BlueToothActivity extends Activity {
 
     /**
      * 获得不完整的数据，如果没有找到$符号的话，则返回整个读到的byte[] buffer，其长度为num
-     *
+     * 注意$符号位置的情况：
+     * 1.$不存在，2.$位于第一位，整条数据都是不完整的，返回<读到的>整条数据
+     * 3.$正常位置，返回$位置之后<读到的>数据4.$位于最后一位，不会返回数据
      * @param buffer
      * @param loc
      * @param num
@@ -286,38 +279,41 @@ public class BlueToothActivity extends Activity {
      */
     private byte[] getuncomplete(byte[] buffer, int loc, int num) {
         byte[] temp;
-        if (loc == -2) {
+        if (loc == -2||loc==-1) {//不存在$的情况和$位置是第一位的情况
             temp = new byte[num];
             for (int i = 0; i < num; i++) {
                 temp[i] = buffer[i];
             }
-        } else {
+        }
+        else {
             int length = num - loc;//正确
             temp = new byte[length];//创建不完整数据的长度
             for (int i = 0; i < length; i++) {//赋值
                 temp[i] = buffer[i + loc];
             }
         }
+//        String msg=new String(temp);
         return temp;
     }
 
     /**
      * 通过$的位置来创建完整的byte[] complete
      * 需要注意不包含$符号的情况，需要分情况讨论
-     * 如果不包含$符号，则整条数据都是不完整的，当前返回为null
-     *
+     * 1.不包含$符号和2.$符号为第一位==当条数据都不完整
+     * 3.最后一位和4.通常位置==获得$之前的数据
      * @param buffer
      * @param loc
      * @return
      */
     private byte[] getcomplete(byte[] buffer, int loc) {
-        if (loc == -2) {
+        if (loc == -2||loc==-1) {
             return null;
         }
         byte[] temp = new byte[loc];
         for (int i = 0; i < loc; i++) {
             temp[i] = buffer[i];
         }
+//        String msg=new String(temp);
         return temp;
     }
 
@@ -340,12 +336,16 @@ public class BlueToothActivity extends Activity {
         byte[] useinfo = new byte[completeInfo.length + uncompleteInfo.length];
         System.arraycopy(uncompleteInfo, 0, useinfo, 0, uncompleteInfo.length);
         System.arraycopy(completeInfo, 0, useinfo, uncompleteInfo.length, completeInfo.length);
+//        String msg=new String(useinfo);
         return useinfo;
     }
 
     /**
-     * 需要考虑当前数据没有$符号的状态，如果没有则会返回null
-     *
+     * 最后一个$位置的4种状态：
+     * 1.通常状态，介于(0,length-1)之间；
+     * 2.不存在，返回值为-2
+     * 3.位于首位，返回值为-1
+     * 4.位于末尾，返回值为length-1
      * @param buffer
      * @param num
      * @return

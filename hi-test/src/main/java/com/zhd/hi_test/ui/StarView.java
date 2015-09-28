@@ -30,7 +30,7 @@ public class StarView extends View {
     private Paint mPaint;
     //设置需要画的点的集合,用一个listView就可以了，每次画完后清空
     //private Map<Integer,StarPoint> mPoints=new Hashtable<>();
-    List<StarPoint> mPoints = new ArrayList<>();
+    List<StarPoint> mPoints = new ArrayList<StarPoint>();
     //画背景的圆的大小,这里是写死的需要重新弄
     private static int mRadius;
     //屏幕的宽和高

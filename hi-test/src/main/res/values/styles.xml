@@ -9,4 +9,14 @@
         <item name="android:textColor">#ff000000</item>
         <item name="android:background">#ffc4c4c4</item>
     </style>
+    <style name="SurveyText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#ff666666</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="AddPointText">
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#ff000000</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

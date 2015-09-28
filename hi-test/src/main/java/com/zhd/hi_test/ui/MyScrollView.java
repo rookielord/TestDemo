@@ -51,7 +51,7 @@ public class MyScrollView extends HorizontalScrollView {
     }
 
     /**
-     * 当滑动的时候触发，如果
+     * 当滑动的时候触发，即
      *
      * @param l 现在的left,距离控件左侧的距离
      * @param t 现在的top,距离控件顶端的距离

@@ -17,7 +17,7 @@ public class Curd {
 
     public Curd(String tablename, Context context) {
         mTablename = tablename;
-        mSQoh = new MySqliteOpenHelper(context);
+        mSQoh = new MySqliteOpenHelper(context, 1);
         //获得可以操作的数据库对象
         mDb = mSQoh.getWritableDatabase();
     }
@@ -33,10 +33,11 @@ public class Curd {
                 "N varchar(32) ," +
                 "E varchar(32) ," +
                 "Z varchar(32) ," +
-                "time varchar(32),"+
-                "NRMS varchar(32),"+
-                "ERMS varchar(32),"+
-                "ZRMS varchar(32),"+
+                "time varchar(32)," +
+                "height char(5)," +
+                "NRMS varchar(32)," +
+                "ERMS varchar(32)," +
+                "ZRMS varchar(32)," +
                 "DES text);";
         mDb.execSQL(create_table);
     }

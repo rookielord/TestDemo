@@ -1,23 +1,17 @@
 package com.zhd.hi_test.adapter;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.activity.ProjectListActivity;
 import com.zhd.hi_test.callback.IProject;
 import com.zhd.hi_test.module.Project;
 
@@ -84,10 +78,10 @@ public class ProjectAdapter extends BaseAdapter {
         //就是缓存view被销毁
         if (convertView == null) {
             //使用内容填充器填充对象
-            convertView = inflater.inflate(R.layout.pro_item, null);
+            convertView = inflater.inflate(R.layout.project_item, null);
             //创建holder对象
             holder = new ViewHolder();
-            //将layout上面的控件给holder中的控件属性
+            //将layout上面的控件给holder中的控件属性，需要赋值的属性
             holder.pro_name = (TextView) convertView.findViewById(R.id.tv_proname);
             holder.pro_back = (TextView) convertView.findViewById(R.id.tv_proback);
             holder.pro_time = (TextView) convertView.findViewById(R.id.tv_protime);
@@ -106,7 +100,6 @@ public class ProjectAdapter extends BaseAdapter {
         //给Holder中的radio附上对象
         holder.radio = radio;
         //这里是将选中的view获得到
-        final View finalConvertView = convertView;
         //这里将所有radioButton的状态赋值为false,在点击事件开始之前下面已经将states赋值
         //对radio控件实施监听，点击后会点击后，全部设置为false
         mClick=new OnClickListener() {

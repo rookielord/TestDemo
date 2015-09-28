@@ -2,17 +2,21 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.ui.MyScrollView;
 
 import java.util.ArrayList;
@@ -29,57 +33,70 @@ public class ManageActivity extends Activity {
     private ListView mListView;
     //找到自定义控件
     public HorizontalScrollView mTouchView;
-    //装入所有的HScrollView
-    protected List<MyScrollView> mHScrollViews =new ArrayList<MyScrollView>();
+    //装入所有的自定义控件的集合
+    protected List<MyScrollView> mHScrollViews = new ArrayList<MyScrollView>();
+    //项目的对应表名
+    private String mTableName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.scroll);
+        setContentView(R.layout.activity_manage);
+        Data d = (Data) getApplication();
+        mTableName = d.getmProject().getmTableName();
         initViews();
     }
 
     private void initViews() {
-        //可以滑动的表头
+        //固定表头的textview
         MyScrollView headerScroll = (MyScrollView) findViewById(R.id.item_scroll_title);
         //添加头滑动事件，把xml控件上的自定义控件放入MyScrollView的集合
         mHScrollViews.add(headerScroll);
         //找到listview,并向里面填充数据
         //准备数据
-        List<Map<String, String>> datas = new ArrayList<Map<String,String>>();
-        Map<String, String> data = null;
-        mListView = (ListView) findViewById(R.id.scroll_list);
-        for(int i = 0; i < 100; i++) {
-            data = new HashMap<String, String>();
-            data.put("title", "Title_" + i);
-            data.put("data_" + 1, "Date_" + 1 + "_" +i );
-            data.put("data_" + 2, "Date_" + 2 + "_" +i );
-            data.put("data_" + 3, "Date_" + 3 + "_" +i );
-            data.put("data_" + 4, "Date_" + 4 + "_" +i );
-            data.put("data_" + 5, "Date_" + 5 + "_" +i );
-            data.put("data_" + 6, "Date_" + 6 + "_" +i );
-            datas.add(data);
+        //数据库中
+        Curd curd = new Curd(mTableName, this);
+        Cursor cursor = curd.queryData(new String[]{"*"}, null, null, null, null, null);
+        //创建Data来填充数据
+        List<Map<String, String>> points = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            Map<String, String> point = new HashMap<>();
+            point.put("name", "pt" + cursor.getString(cursor.getColumnIndex("id")));//通过pt+id来得到name,其实只是id
+            point.put("B", cursor.getString(cursor.getColumnIndex("B")));
+            point.put("L", cursor.getString(cursor.getColumnIndex("L")));
+            point.put("H", cursor.getString(cursor.getColumnIndex("H")));
+            point.put("DES", cursor.getString(cursor.getColumnIndex("DES")));
+            points.add(point);
         }
+        //找到显示的listview
+        mListView = (ListView) findViewById(R.id.scroll_list);
         //注意：这里是调用的自定义的Adapter，但是为什么继承的是SimpleAdapter,没有继承BaseAdapter
-        SimpleAdapter adapter = new ScrollAdapter(this, datas, R.layout.item
-                , new String[] { "title", "data_1", "data_2", "data_3", "data_4", "data_5", "data_6", }
-                , new int[] { R.id.item_title
-                , R.id.item_data1
-                , R.id.item_data2
-                , R.id.item_data3
-                , R.id.item_data4
-                , R.id.item_data5
-                , R.id.item_data6 });
+        SimpleAdapter adapter = new ScrollAdapter(this, points, R.layout.point_item
+                , new String[]{"name", "B", "L", "H", "DES"}
+                , new int[]{
+                R.id.item_name
+                , R.id.item_B
+                , R.id.item_L
+                , R.id.item_H
+                , R.id.item_DES
+        });
         mListView.setAdapter(adapter);
     }
 
+    /**
+     * 添加自定义的view
+     *
+     * @param hScrollView
+     */
     public void addHViews(final MyScrollView hScrollView) {
-        if(!mHScrollViews.isEmpty()) {
+        if (!mHScrollViews.isEmpty()) {//如果自定义控件集合不为空
             int size = mHScrollViews.size();
+            //获得最后一个移动的scrollview
             MyScrollView scrollView = mHScrollViews.get(size - 1);
+            //获得边缘显示的view
             final int scrollX = scrollView.getScrollX();
             //第一次满屏后，向下滑动，有一条数据在开始时未加入
-            if(scrollX != 0) {
+            if (scrollX != 0) {
                 mListView.post(new Runnable() {
                     @Override
                     public void run() {
@@ -92,10 +109,20 @@ public class ManageActivity extends Activity {
         mHScrollViews.add(hScrollView);
     }
 
-    public void onScrollChanged(int l, int t, int oldl, int oldt){
-        for(MyScrollView scrollView : mHScrollViews) {
+    /**
+     * 当滑动时触发的事件
+     * 遍历mHScrollViews中的元素，然后把新的l,r传给它
+     * 即实现联动效果
+     *
+     * @param l
+     * @param t
+     * @param oldl
+     * @param oldt
+     */
+    public void onScrollChanged(int l, int t, int oldl, int oldt) {
+        for (MyScrollView scrollView : mHScrollViews) {
             //防止重复滑动
-            if(mTouchView != scrollView)
+            if (mTouchView != scrollView)
                 scrollView.smoothScrollTo(l, t);
         }
     }
@@ -103,10 +130,12 @@ public class ManageActivity extends Activity {
     class ScrollAdapter extends SimpleAdapter {
 
         private List<? extends Map<String, ?>> datas;
-        private int res;
-        private String[] from;
-        private int[] to;
+        private int res;//资源布局文档
+        private String[] from;//数据内容在datas中的Map的String
+        private int[] to;//view上面对应的资源布局ID
         private Context context;
+
+        //自定义函数传入的内容，
         public ScrollAdapter(Context context,
                              List<? extends Map<String, ?>> data, int resource,
                              String[] from, int[] to) {
@@ -120,23 +149,28 @@ public class ManageActivity extends Activity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            //如果当前没有对象被销毁
             View v = convertView;
-            if(v == null) {
+            if (v == null) {
+                //根据xml来创建view对象
                 v = LayoutInflater.from(context).inflate(res, null);
-                //第一次初始化的时候装进来
+                //这里找到的是自定义控件的Horizon scrollView,然后添加进
                 addHViews((MyScrollView) v.findViewById(R.id.item_scroll));
+                //根据插入对应数据的长度来创建views
                 View[] views = new View[to.length];
-                for(int i = 0; i < to.length; i++) {
-                    View tv = v.findViewById(to[i]);;
+                //找到views上面的对象，创建点击事件
+                for (int i = 0; i < to.length; i++) {
+                    View tv = v.findViewById(to[i]);
                     tv.setOnClickListener(clickListener);
                     views[i] = tv;
                 }
                 v.setTag(views);
             }
+            //这里开始向里面填充内容
             View[] holders = (View[]) v.getTag();
             int len = holders.length;
-            for(int i = 0 ; i < len; i++) {
-                ((TextView)holders[i]).setText(this.datas.get(position).get(from[i]).toString());
+            for (int i = 0; i < len; i++) {
+                ((TextView) holders[i]).setText(this.datas.get(position).get(from[i]).toString());
             }
             return v;
         }

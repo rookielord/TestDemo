@@ -6,47 +6,77 @@ package com.zhd.hi_test.module;
  * 需要显示到屏幕上的数据，其中包括有位置信息和时间信息
  */
 public class MyLocation {
-    private String B;
-    private String L;
-    private String H;
-    private String Time;
+    private String mB;
+    private String mL;
+    private String mH;
+    private String mTime;
+    private String mDES;
+    private int mType;
 
-    public MyLocation(String b, String l, String h, String time) {
-        B = b;
-        L = l;
-        H = h;
-        Time = time;
+    //点的类型
+    public static final int COOR_POINT = 1;
+    public static final int LAYOUT_POINT = 2;
+    public static final int CONTROL_POINT = 3;
+
+    public MyLocation(String mB, String mL, String mH, String mDES, int mType) {
+        this.mB = mB;
+        this.mL = mL;
+        this.mH = mH;
+        this.mDES = mDES;
+        this.mType = mType;
     }
 
-    public String getB() {
-        return B;
+    public MyLocation(String mB, String mL, String mH) {
+        this.mB = mB;
+        this.mL = mL;
+        this.mH = mH;
     }
 
-    public String getL() {
-        return L;
+    public String getmB() {
+        return mB;
     }
 
-    public String getTime() {
-        return Time;
+    public void setmB(String mB) {
+        this.mB = mB;
     }
 
-    public String getH() {
-        return H;
+    public String getmL() {
+        return mL;
     }
 
-    public void setB(String b) {
-        B = b;
+    public void setmL(String mL) {
+        this.mL = mL;
     }
 
-    public void setL(String l) {
-        L = l;
+    public String getmH() {
+        return mH;
     }
 
-    public void setH(String h) {
-        H = h;
+    public void setmH(String mH) {
+        this.mH = mH;
     }
 
-    public void setTime(String time) {
-        Time = time;
+    public String getmTime() {
+        return mTime;
+    }
+
+    public void setmTime(String mTime) {
+        this.mTime = mTime;
+    }
+
+    public String getmDES() {
+        return mDES;
+    }
+
+    public void setmDES(String mDES) {
+        this.mDES = mDES;
+    }
+
+    public int getmType() {
+        return mType;
+    }
+
+    public void setmType(int mType) {
+        this.mType = mType;
     }
 }

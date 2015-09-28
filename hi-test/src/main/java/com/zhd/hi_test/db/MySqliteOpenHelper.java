@@ -10,8 +10,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class MySqliteOpenHelper extends SQLiteOpenHelper {
     private static final String mDBname="Points.db";
-    public MySqliteOpenHelper(Context context) {
-        super(context, mDBname, null, 1);
+    public MySqliteOpenHelper(Context context,int version) {
+        super(context, mDBname, null, version);
     }
 
     @Override
@@ -23,5 +23,4 @@ public class MySqliteOpenHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
     }
-
 }

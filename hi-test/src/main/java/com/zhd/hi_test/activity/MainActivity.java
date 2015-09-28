@@ -2,6 +2,7 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.app.LocalActivityManager;
+import android.app.WallpaperManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.MyPagerAdapter;
+import com.zhd.hi_test.module.Project;
 import com.zhd.hi_test.util.Method;
 
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public class MainActivity extends Activity {
     private int bmpW;// 动画图片宽度
     private ImageView cursor;// 动画图片
     private List<TextView> tv_list;
+    private Data d;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,7 @@ public class MainActivity extends Activity {
 
         //获取屏幕的参数和项目文件夹路径,并传给全局变量
         Method.getWindowValue(this);
-        Data d = (Data) getApplication();
+        d = (Data) getApplication();
         d.setmPath(Method.createDirectory(this));
 
         context = MainActivity.this;
@@ -254,5 +257,20 @@ public class MainActivity extends Activity {
                 adapter.disable();
             finish();
         }
+    }
+
+    /**
+     * 当程序退出时，将当前项目的打开时间进行跟新
+     * 重新写入程序
+     */
+    @Override
+    protected void onDestroy() {
+        Project p=d.getmProject();
+        if(p!=null){
+            Method.updateProject(p);
+        }
+        //将全局变量project清空
+        d.setmProject(null);
+        super.onDestroy();
     }
 }

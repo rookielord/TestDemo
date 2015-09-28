@@ -8,8 +8,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,7 +65,7 @@ public class ProjectListActivity extends Activity {
             showProjectInfo(mProject);
         if (mHasProject) {
             mProjects = getProjectInstance(mPath);
-            //将对象传给适配器，然后对item内容进行填充
+            //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示
             pa = new ProjectAdapter(mProjects, getApplicationContext());
             pa.setmP(new IProject() {
                 @Override
@@ -127,7 +129,7 @@ public class ProjectListActivity extends Activity {
                 //读取完后进行分割
                 String[] messges = sb.toString().split(";");
                 //创建project对象
-                Project p = new Project(messges[0], messges[1], messges[2], messges[3], messges[4], pro_file);
+                Project p = new Project(messges[0], messges[1], messges[2], messges[3], messges[4], config);
                 projectList.add(p);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -164,6 +166,10 @@ public class ProjectListActivity extends Activity {
                 //这里实现创建项目,使用dialog来创建
                 View view = null;
                 view = inflater.inflate(R.layout.dialog_sign, null);
+                //填充Spinner的数据
+                Spinner sp= (Spinner) view.findViewById(R.id.sp_coordinate);
+                ArrayAdapter<String> adapter=new ArrayAdapter<String>(this,R.layout.coordinate_item,getResources().getStringArray(R.array.coordinate));
+                sp.setAdapter(adapter);
                 final View finalView = view;
                 AlertDialog dialog = new AlertDialog.Builder(this)
                         .setView(view)
@@ -193,9 +199,8 @@ public class ProjectListActivity extends Activity {
                                     Toast.makeText(ProjectListActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
                                     //刷新
                                     refresh();
-                                    //全局变量中
+                                    //将现在的对象存入全局变量中
                                     d.setmProject(mProject);
-                                    mProject = null;
                                 } else
                                     Toast.makeText(ProjectListActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
                             }

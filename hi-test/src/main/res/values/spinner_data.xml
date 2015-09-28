@@ -10,4 +10,10 @@
     <string-array name="phone_way">
         <item>内置GPS</item>
     </string-array>
+    <string-array name="coordinate">
+        <item>WGS84坐标系</item>
+        <item>国家2000坐标系</item>
+        <item>北京54坐标系</item>
+        <item>西安80坐标系</item>
+    </string-array>
 </resources>

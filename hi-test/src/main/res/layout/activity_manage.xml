@@ -10,7 +10,7 @@
         android:minHeight="40dip"
         android:background="#ccc"
         android:orientation="horizontal" >
-
+<!--这个是点名-->
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -18,7 +18,7 @@
             android:textColor="#850"
             android:gravity="center"
             android:text="点名" />
-
+<!--这个是可以滑动的表头B,L,H等数据的<标题>-->
         <com.zhd.hi_test.ui.MyScrollView
             android:id="@+id/item_scroll_title"
             android:layout_width="fill_parent"
@@ -31,21 +31,21 @@
                 android:layout_height="fill_parent"
                 android:orientation="horizontal" >
                 <TextView
-                    android:text="N"
+                    android:text="B"
                     android:layout_width="100dip"
                     android:layout_height="fill_parent"
                     android:textColor="#850"
                     android:gravity="center" />
 
                 <TextView
-                    android:text="E"
+                    android:text="L"
                     android:layout_width="100dip"
                     android:layout_height="fill_parent"
                     android:textColor="#850"
                     android:gravity="center" />
 
                 <TextView
-                    android:text="Z"
+                    android:text="H"
                     android:layout_width="100dip"
                     android:textColor="#850"
                     android:layout_height="fill_parent"
@@ -53,20 +53,6 @@
 
                 <TextView
                     android:text="DES"
-                    android:layout_width="100dip"
-                    android:textColor="#850"
-                    android:layout_height="fill_parent"
-                    android:gravity="center" />
-
-                <TextView
-                    android:text="Date5"
-                    android:layout_width="100dip"
-                    android:textColor="#850"
-                    android:layout_height="fill_parent"
-                    android:gravity="center" />
-
-                <TextView
-                    android:text="Date6"
                     android:layout_width="100dip"
                     android:textColor="#850"
                     android:layout_height="fill_parent"

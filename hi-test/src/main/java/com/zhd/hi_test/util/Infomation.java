@@ -60,7 +60,7 @@ public class Infomation {
         String HDPO=info[7];
         String H=info[8];
         //形成对象
-        location=new MyLocation(B,L,H,time);
+        location=new MyLocation(B,L,H,null,MyLocation.COOR_POINT);
         Message m=Message.obtain();
         m.obj=location;
         m.what=1;

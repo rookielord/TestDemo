@@ -9,10 +9,14 @@ import android.view.WindowManager;
 
 
 import com.zhd.hi_test.db.Curd;
+import com.zhd.hi_test.module.Project;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -23,7 +27,6 @@ import java.util.regex.Pattern;
 /**
  * Created by 2015032501 on 2015/9/8.
  * 用来存放一些静态方法来做一些小功能，例如获得时间或者输入内容检查……
- *
  */
 public class Method {
 
@@ -49,7 +52,6 @@ public class Method {
     }
 
     /**
-     *
      * @param path
      * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
      * @param context
@@ -148,9 +150,41 @@ public class Method {
         //获得宽和高,就是整个屏幕的宽和高
         int width = p.x;
         int height = p.y;
-        int[] values={width,height};
+        int[] values = {width, height};
         return values;
 
+    }
+
+    /**
+     * [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
+     *
+     * @param project
+     */
+    public static void updateProject(Project project) {
+        BufferedWriter bw=null;
+        try {
+             bw= new BufferedWriter(new FileWriter(project.getmConfig()));
+            //拼接信息
+            String time = Method.getCurrentTime();
+            String msg = project.getmName() + ";" +
+                    project.getmBackup() + ";" +
+                    project.getmTime() + ";" +
+                    time + ";" +
+                    project.getmTableName();
+            //写入内容
+            bw.write(msg);
+            bw.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
