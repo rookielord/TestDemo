@@ -6,12 +6,11 @@
 
     <TextView
         android:id="@+id/tv_title"
+        style="@style/ProjectTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff969696"
         android:gravity="left"
-        android:text="当前项目信息"
-        android:textSize="16sp" />
+        android:text="当前项目信息" />
 
     <LinearLayout
         android:id="@+id/ll_proinfo"
@@ -21,66 +20,104 @@
         android:orientation="vertical">
 
         <LinearLayout
+            style="@style/ProjectLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
+                style="@style/ProjectInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="项目名称" />
 
             <TextView
+                android:id="@+id/tv_name"
+                style="@style/ProjectInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="项目投影" />
+
+            <TextView
+                android:id="@+id/tv_coordinate"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="创建时间" />
+
+            <TextView
+                android:id="@+id/tv_time"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
 
         </LinearLayout>
         <LinearLayout
+            style="@style/ProjectLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
+                style="@style/ProjectInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="项目名称" />
+                android:text="最后使用时间" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
+                android:id="@+id/tv_lasttime"
+                style="@style/ProjectInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="项目名称" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:textColor="#000" />
 
         </LinearLayout>
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_pro_title"
+        style="@style/ProjectTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/ll_proinfo"
-        android:background="#ff969696"
-        android:text="已创建项目"
-        android:textSize="16sp" />
+        android:text="已创建项目" />
 
     <ListView
         android:id="@+id/lv"
@@ -89,5 +126,5 @@
         android:layout_alignParentBottom="true"
         android:layout_below="@id/tv_pro_title"
         android:background="@drawable/tab_selector"
-        android:dividerHeight="3dp"></ListView>
+        android:dividerHeight="2dp"></ListView>
 </RelativeLayout>

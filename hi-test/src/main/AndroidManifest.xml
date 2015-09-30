@@ -34,7 +34,7 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".activity.BlueToothActivity">
+        <activity android:name=".activity.ConnectActivity">
             <intent-filter>
                 <action android:name="com.zhd.bluetooth.START" />
                 <category android:name="android.intent.category.DEFAULT" />

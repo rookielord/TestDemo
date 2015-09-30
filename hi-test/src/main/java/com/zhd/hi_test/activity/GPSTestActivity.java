@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.ui.StarView;
@@ -30,13 +31,13 @@ import java.util.List;
  */
 public class GPSTestActivity extends Activity {
 
-    private static final String TAG = "GPS";
+
     private LocationManager mManager;
     private int minTime = 5000;
     private int minDistance = 5;
     //控件对象
     StarView my_view;
-    TextView tv_satellite, tv_locB, tv_locL, tv_locH;
+    TextView tv_satellite, tv_locB, tv_locL, tv_locH, tv_connect;
     //所使用的位置提供器
     private String mProvider;
     //返回是否打开GPS服务
@@ -53,21 +54,29 @@ public class GPSTestActivity extends Activity {
         tv_locB = (TextView) findViewById(R.id.tv_LocB);
         tv_locL = (TextView) findViewById(R.id.tv_LocL);
         tv_locH = (TextView) findViewById(R.id.tv_locH);
-        //GPS初始设定
-        GPSinit();
+        tv_connect = (TextView) findViewById(R.id.tv_connect);
+        //根据所选连接方式来获得对应的数据
+        Data d = (Data) getApplication();
+        int connect = d.getmConnectType();
+        if (connect==Constant.InnerGPSConnect) {
+            GPSinit();
+            tv_connect.setText("内置GPS");
+        } else if(connect==Constant.BlueToothConncet){
+            tv_connect.setText("蓝牙");
+            //进行从IRTK中获得数据进行处理
+        }else {
+            tv_connect.setText("仪器尚未连接");
+        }
     }
-    //1.获取位置服务(暂时不考虑位置信息)
-    //2.设置卫星监听(没有调用到)
-    //3.打印内容
 
     private LocationListener mLocListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            double longtitude = location.getLongitude();
+            double longitude = location.getLongitude();
             double altitude = location.getAltitude();
             double latitude = location.getLatitude();
             tv_locB.setText(String.valueOf(latitude));
-            tv_locL.setText(String.valueOf(longtitude));
+            tv_locL.setText(String.valueOf(longitude));
             tv_locH.setText(String.valueOf(altitude));
         }
 
@@ -97,11 +106,11 @@ public class GPSTestActivity extends Activity {
             switch (event) {
                 //第一次定位
                 case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    Log.d(TAG, "卫星第一次锁定");
+                    Log.d(Constant.GPS_TAG, "卫星第一次锁定");
                     break;
                 //卫星状态改变,当定位信息启动一次，那么它就会调用一次
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                    Log.d(TAG, "卫星的状态");
+                    Log.d(Constant.GPS_TAG, "卫星的状态");
                     //获取当前接收到的卫星情况
                     GpsStatus status = mManager.getGpsStatus(null);
                     //迭代接口，只有实现了这个接口才能实现其迭代器对象,可以对数据进行修改
@@ -124,10 +133,10 @@ public class GPSTestActivity extends Activity {
                     break;
                 //GPS定位启动
                 case GpsStatus.GPS_EVENT_STARTED:
-                    Log.d(TAG, "定位启动");
+                    Log.d(Constant.GPS_TAG, "定位启动");
                     break;
                 case GpsStatus.GPS_EVENT_STOPPED:
-                    Log.d(TAG, "定位结束");
+                    Log.d(Constant.GPS_TAG, "定位结束");
                     break;
             }
         }
@@ -166,12 +175,12 @@ public class GPSTestActivity extends Activity {
         switch (requestCode) {
             case GPS_REQUEST:
                 //判断是否打开，没有打开则提示打开并关闭当前界面，判断的话只能用当前是否包含GPS服务
-                mProviders=mManager.getProviders(true);
-                if (mProviders.contains(LocationManager.GPS_PROVIDER)){
+                mProviders = mManager.getProviders(true);
+                if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
                     mManager.addGpsStatusListener(mListener);
                     mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
-                }else {
-                    Toast.makeText(this,"请打开GPS服务",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

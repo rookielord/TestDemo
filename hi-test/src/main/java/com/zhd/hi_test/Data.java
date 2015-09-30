@@ -15,33 +15,15 @@ import com.zhd.hi_test.module.Project;
 public class Data extends Application {
     private Project mProject;
     private String mPath;
-    private BluetoothDevice mDevice;
-    private BluetoothSocket mSocket;
     //1为蓝牙连接;2为内置GPS
-    private int ConnectType = 0;
+    private int mConnectType=0;
 
-    public int getConnectType() {
-        return this.ConnectType;
+    public int getmConnectType() {
+        return mConnectType;
     }
 
-    public void setConnectType(int connectType) {
-        this.ConnectType = connectType;
-    }
-
-    public BluetoothDevice getmDevice() {
-        return mDevice;
-    }
-
-    public void setmDevice(BluetoothDevice mDevice) {
-        this.mDevice = mDevice;
-    }
-
-    public BluetoothSocket getmSocket() {
-        return mSocket;
-    }
-
-    public void setmSocket(BluetoothSocket mSocket) {
-        this.mSocket = mSocket;
+    public void setmConnectType(int mConnectType) {
+        this.mConnectType = mConnectType;
     }
 
     public String getmPath() {

@@ -2,7 +2,7 @@
 <!--这个是listview中显示的数据，相当于getView中自定义的view-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:minHeight="50dip"
     android:orientation="horizontal" >
 
@@ -10,7 +10,7 @@
         android:id="@+id/item_name"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="2"
+        android:layout_weight="3"
         android:gravity="center"
         />
 
@@ -28,24 +28,37 @@
 
             <TextView
                 android:id="@+id/item_B"
-                android:layout_width="100dip"
+                android:layout_width="150dip"
                 android:layout_height="fill_parent"
                 android:textColor="#011"
                 android:gravity="center" />
-
+            <TextView
+                android:layout_width="2dip"
+                android:layout_height="fill_parent"
+                android:textColor="#011"
+                android:padding="3dp" />
             <TextView
                 android:id="@+id/item_L"
-                android:layout_width="100dip"
+                android:layout_width="150dip"
                 android:layout_height="fill_parent"
                 android:textColor="#191"
                 android:gravity="center" />
-
+            <TextView
+                android:layout_width="1dip"
+                android:layout_height="fill_parent"
+                android:textColor="#011"
+                android:padding="3dp" />
             <TextView
                 android:id="@+id/item_H"
-                android:layout_width="100dip"
+                android:layout_width="150dip"
                 android:layout_height="fill_parent"
                 android:textColor="#101"
                 android:gravity="center" />
+            <TextView
+                android:layout_width="1dip"
+                android:layout_height="fill_parent"
+                android:textColor="#011"
+                android:padding="3dp" />
 
             <TextView
                 android:id="@+id/item_DES"

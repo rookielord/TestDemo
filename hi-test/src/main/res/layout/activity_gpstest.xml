@@ -3,11 +3,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/gpsmapshape">
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="当前连接状态"
+            style="@style/GPSinfo"/>
+        <TextView
+            android:id="@+id/tv_connect"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="仪器尚未连接"
+            android:gravity="center"/>
+    </LinearLayout>
+</LinearLayout>
+    <com.zhd.hi_test.ui.StarView
+        android:id="@+id/my_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_gravity="center"
+        android:background="#ffc4c4c4"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/gpsmapshape">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -17,7 +49,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="卫星数量" />
+                android:text="卫星数量:"
+                style="@style/GPSinfo"/>
 
             <TextView
                 android:id="@+id/tv_satellite"
@@ -33,7 +66,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前位置坐标B:" />
+                android:text="当前位置坐标B:"
+                style="@style/GPSinfo"/>
 
             <TextView
                 android:id="@+id/tv_LocB"
@@ -44,11 +78,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前位置坐标L:" />
+                android:text="当前位置坐标L:"
+                style="@style/GPSinfo"/>
 
             <TextView
                 android:id="@+id/tv_LocL"
@@ -64,7 +101,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前位置坐标H:" />
+                android:text="当前位置坐标H:"
+                style="@style/GPSinfo"/>
 
             <TextView
                 android:id="@+id/tv_locH"
@@ -72,12 +110,5 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
-
-    <com.zhd.hi_test.ui.StarView
-        android:id="@+id/my_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:background="#ffc4c4c4" />
 
 </LinearLayout>

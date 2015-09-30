@@ -26,7 +26,7 @@ public class AddPointActivity extends Activity {
     //控件
     TextView tv_B,tv_L,tv_H;
     EditText et_des,et_height;
-    Button btn_add;
+    TextView tv_add,tv_back;
 
     //添加进数据库中需要的东西
     private String mTableName;
@@ -42,7 +42,8 @@ public class AddPointActivity extends Activity {
         tv_H= (TextView) findViewById(R.id.tv_H);
         et_des= (EditText) findViewById(R.id.et_des);
         et_height= (EditText) findViewById(R.id.et_height);
-        btn_add= (Button) findViewById(R.id.btn_add);
+        tv_add= (TextView) findViewById(R.id.tv_add);
+        tv_back= (TextView) findViewById(R.id.tv_back);
         //根据传过来的数据TextView
         Intent intent=getIntent();
         tv_B.setText(intent.getStringExtra("B"));
@@ -52,7 +53,7 @@ public class AddPointActivity extends Activity {
         Data d=(Data)getApplication();
         mTableName=d.getmProject().getmTableName();
         mContext=this;
-        btn_add.setOnClickListener(new View.OnClickListener() {
+        tv_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //获取信息，添加进数据库
@@ -71,6 +72,12 @@ public class AddPointActivity extends Activity {
                 }else {
                     Toast.makeText(AddPointActivity.this,"添加失败",Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        tv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AddPointActivity.this.finish();
             }
         });
     }

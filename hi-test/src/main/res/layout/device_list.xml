@@ -19,7 +19,7 @@
             android:layout_height="match_parent"
             android:dividerHeight="1dp"
             android:layout_weight="1"
-            android:divider="#ffff4834"></ListView>
+            android:divider="#4e181818"></ListView>
         <TextView
             android:id="@+id/tv_newlist_title"
             android:layout_width="match_parent"
@@ -33,7 +33,7 @@
             android:layout_height="match_parent"
             android:dividerHeight="1dp"
             android:layout_weight="1"
-            android:divider="#ff7bff5d"></ListView>
+            android:divider="#5f2de8f8"></ListView>
         <Button
             android:id="@+id/btn_search"
             android:layout_width="match_parent"

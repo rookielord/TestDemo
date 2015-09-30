@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.IProject;
+import com.zhd.hi_test.callback.OnProjectListener;
 import com.zhd.hi_test.module.Project;
 
 import java.util.HashMap;
@@ -25,18 +25,17 @@ import java.util.Map;
  */
 public class ProjectAdapter extends BaseAdapter {
     //回调函数来获取选中
-    private IProject mP;
+    private OnProjectListener mP;
 
     private OnClickListener mClick;
 
-    public void setmP(IProject mP) {
+    public void setmP(OnProjectListener mP) {
         this.mP = mP;
     }
 
     //闯过来所有Project对象
     private List<Project> mProjects;
     private Context mContext;
-    private static String TAG = "ProjectAdapter";
     //用来存放所有的Radio状态
     Map<String, Boolean> states = new HashMap<String, Boolean>();
 

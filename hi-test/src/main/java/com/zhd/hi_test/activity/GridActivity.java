@@ -3,23 +3,19 @@ package com.zhd.hi_test.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.GridAdapter;
-import com.zhd.hi_test.callback.IiconCallback;
+import com.zhd.hi_test.callback.OnIconChangeListener;
 import com.zhd.hi_test.module.Icon;
-import com.zhd.hi_test.util.Method;
 
 import java.util.ArrayList;
 
 
 /**
  * Created by 2015032501 on 2015/9/19.
+ * 这里是显示滑动的页面，每个页面包括图标信息和跳转的intent
  */
 public class GridActivity extends Activity {
 
@@ -33,18 +29,14 @@ public class GridActivity extends Activity {
         AllSource.add(new Icon("数据采集", R.drawable.ic_root_survey_point, 4, new Intent("com.zhd.survey.START")));
     }
 
-    private GridView gridView;
-    int PageID;
-    GridAdapter myAdapter = null;
-    private static final String TAG = "LIJIAJI";
+    GridView gridView;
+    private int PageID;
+    private GridAdapter myAdapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.grid_main);
-        //在储存卡创建文件夹，并将路径设为全局变量
-        Method.createDirectory(this);
-        Method.getWindowValue(this);
         getMyadapter();
         gridView = (GridView) findViewById(R.id.project_gridview);
         gridView.setAdapter(myAdapter);
@@ -77,7 +69,7 @@ public class GridActivity extends Activity {
                 myAdapter = new GridAdapter(this, list4);
                 break;
         }
-        myAdapter.setmIicon(new IiconCallback() {
+        myAdapter.setmIicon(new OnIconChangeListener() {
             @Override
             public void Onclick(Icon icon) {
                 startActivity(icon.getIcon_intent());

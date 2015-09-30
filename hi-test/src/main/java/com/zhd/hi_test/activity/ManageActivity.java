@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,8 +91,8 @@ public class ManageActivity extends Activity {
      */
     public void addHViews(final MyScrollView hScrollView) {
         if (!mHScrollViews.isEmpty()) {//如果自定义控件集合不为空
+            //获得其中的Scrollview的数量
             int size = mHScrollViews.size();
-            //获得最后一个移动的scrollview
             MyScrollView scrollView = mHScrollViews.get(size - 1);
             //获得边缘显示的view
             final int scrollX = scrollView.getScrollX();
@@ -106,6 +107,7 @@ public class ManageActivity extends Activity {
                 });
             }
         }
+
         mHScrollViews.add(hScrollView);
     }
 
@@ -113,6 +115,7 @@ public class ManageActivity extends Activity {
      * 当滑动时触发的事件
      * 遍历mHScrollViews中的元素，然后把新的l,r传给它
      * 即实现联动效果
+     * 遍历每个
      *
      * @param l
      * @param t
@@ -130,7 +133,7 @@ public class ManageActivity extends Activity {
     class ScrollAdapter extends SimpleAdapter {
 
         private List<? extends Map<String, ?>> datas;
-        private int res;//资源布局文档
+        private int res;//资源布局文档R.layout.point_item
         private String[] from;//数据内容在datas中的Map的String
         private int[] to;//view上面对应的资源布局ID
         private Context context;
@@ -141,46 +144,56 @@ public class ManageActivity extends Activity {
                              String[] from, int[] to) {
             super(context, data, resource, from, to);
             this.context = context;
-            this.datas = data;
-            this.res = resource;
-            this.from = from;
-            this.to = to;
+            this.datas = data;//数据内容
+            this.res = resource;//用来填充的布局文件
+            this.from = from;//数据的来源
+            this.to = to;//数据的存放对象
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             //如果当前没有对象被销毁
-            View v = convertView;
-            if (v == null) {
+//            View v = convertView;
+            if (convertView == null) {
                 //根据xml来创建view对象
-                v = LayoutInflater.from(context).inflate(res, null);
-                //这里找到的是自定义控件的Horizon scrollView,然后添加进
-                addHViews((MyScrollView) v.findViewById(R.id.item_scroll));
-                //根据插入对应数据的长度来创建views
+                convertView = LayoutInflater.from(context).inflate(res, null);
+                //这里找到的是自定义控件的HorizonscrollView，然后加入到集合里面，滑动时处理里面的自定义控件集合
+                addHViews((MyScrollView) convertView.findViewById(R.id.item_scroll));
+                //根据插入对应数据的长度来创建views，
                 View[] views = new View[to.length];
                 //找到views上面的对象，创建点击事件
                 for (int i = 0; i < to.length; i++) {
-                    View tv = v.findViewById(to[i]);
-                    tv.setOnClickListener(clickListener);
+                    //这里是找到textview
+                    View tv = convertView.findViewById(to[i]);
+//                    tv.setOnClickListener(clickListener);
                     views[i] = tv;
                 }
-                v.setTag(views);
+                convertView.setTag(views);
             }
-            //这里开始向里面填充内容
-            View[] holders = (View[]) v.getTag();
+            //如果没有里面缓存数据没有被销毁，就获得其中的textview
+            View[] holders = (View[]) convertView.getTag();
             int len = holders.length;
+            //向里面填充数据
             for (int i = 0; i < len; i++) {
-                ((TextView) holders[i]).setText(this.datas.get(position).get(from[i]).toString());
+                ((TextView) holders[i]).setText(datas.get(position).get(from[i]).toString());
             }
-            return v;
+            convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    menu.setHeaderTitle("点信息操作");
+                    menu.add(0, 0, 0, "修改");
+                    menu.add(0, 1, 0, "删除");
+                }
+            });
+            return convertView;
         }
     }
 
-    //测试点击的事件
-    protected View.OnClickListener clickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(ManageActivity.this, ((TextView) v).getText(), Toast.LENGTH_SHORT).show();
-        }
-    };
+//    //测试点击的事件
+//    protected View.OnClickListener clickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            Toast.makeText(ManageActivity.this, ((TextView) v).getText(), Toast.LENGTH_SHORT).show();
+//        }
+//    };
 }

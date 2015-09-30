@@ -1,24 +1,35 @@
 package com.zhd.hi_test.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Point;
 import android.os.Environment;
 import android.view.Display;
 import android.view.WindowManager;
 
 
+import com.zhd.hi_test.Data;
+import com.zhd.hi_test.activity.MainActivity;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.Project;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.OutputStream;
+import java.io.StreamCorruptedException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -52,27 +63,33 @@ public class Method {
     }
 
     /**
+     * 进行大改，使用objectOutputStream
+     *
      * @param path
-     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
-     * @param context
+     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间 [4]坐标系统
+     * @param activity
      * @return
      */
-    public static boolean createProject(String path, String[] configs, Context context) {
+    public static boolean createProject(String path, String[] configs, Activity activity) {
         File pro_file = new File(path + "/" + configs[0]);
+        Data d= (Data) activity.getApplication();
         if (!pro_file.exists()) {
             pro_file.mkdir();
             //写入配置文件
             File config_file = new File(pro_file, "config.txt");
-            OutputStream out = null;
+            ObjectOutputStream out = null;
             try {
                 //写入文件流
-                out = new BufferedOutputStream(new FileOutputStream(config_file));
+                out = new ObjectOutputStream(new FileOutputStream(config_file));
                 //写入内容
                 String tableName = createTableName();
-                String msg = configs[0] + ";" + configs[1] + ";" + configs[2] + ";" + configs[3] + ";" + tableName;
-                out.write(msg.getBytes());
+                //创建project对象,最后一个是配置文件的File路径
+                Project p = new Project(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file);
+                out.writeObject(p);
+                //将其设为全局变量
+                d.setmProject(p);
                 //并创建对应的数据库表
-                Curd curd = new Curd(tableName, context);
+                Curd curd = new Curd(tableName, activity);
                 curd.createTable(tableName);
                 //写入
                 out.flush();
@@ -119,7 +136,8 @@ public class Method {
     }
 
     //在储存卡上创建文件夹
-    public static String createDirectory(Context context) {
+    public static void createDirectory(Activity activity) {
+        Data d = (Data) activity.getApplication();
         String mPath = null;
         File ext_path = Environment.getExternalStorageDirectory();
         File file = new File(ext_path, "ZHD_TEST");
@@ -135,10 +153,7 @@ public class Method {
         }
         //最终获取其路径,并将其赋值给全局变量
         mPath = pro_file.getPath();
-        SharedPreferences.Editor sp = context.getSharedPreferences("VALUE", context.MODE_PRIVATE).edit();
-        sp.putString("path", mPath);
-        sp.commit();
-        return mPath;
+        d.setmPath(mPath);
     }
 
     //获取数据参数
@@ -161,30 +176,142 @@ public class Method {
      * @param project
      */
     public static void updateProject(Project project) {
-        BufferedWriter bw=null;
+        ObjectOutputStream out=null;
         try {
-             bw= new BufferedWriter(new FileWriter(project.getmConfig()));
-            //拼接信息
-            String time = Method.getCurrentTime();
-            String msg = project.getmName() + ";" +
-                    project.getmBackup() + ";" +
-                    project.getmTime() + ";" +
-                    time + ";" +
-                    project.getmTableName();
+            //这边应该可以获得的是config.txt的位置啊？,在创建的时候出错了，导致File的路径
+            out=new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
             //写入内容
-            bw.write(msg);
-            bw.flush();
+            project.setmLastTime(getCurrentTime());
+            out.writeObject(project);
+            out.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
-                bw.close();
+                out.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    /**
+     * 所以最好加一次判断，确定这是第一次执行
+     * [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间
+     *
+     * @param activity
+     */
+    public static void createDefaultProject(Activity activity) {
+        //获得路径
+        Data d = (Data) activity.getApplication();
+        //获得当前是否第一次运行
+        SharedPreferences sp = activity.getSharedPreferences("VALUE", Context.MODE_PRIVATE);
+        Editor editor = sp.edit();
+        boolean isFirst = sp.getBoolean("isFirst", true);
+        //获得全局变量的Project路径
+        if (isFirst) {
+            String path = d.getmPath();//path是指Project的位置
+            String time = Method.getCurrentTime();
+            String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系"};
+            //创建默认项目
+            Method.createProject(path, configs, activity);
+            //然后读取config.txt来创建项目
+            Project p = Method.getDefaultProject(path);
+            //设置为全局变量
+            d.setmProject(p);
+            //设置其为false，不是第一次启动
+            editor.putBoolean("isFirst", false);
+            editor.commit();
+        }
+    }
+
+    public static Project getDefaultProject(String path) {
+
+        File config = new File(path + "/" + "default", "config.txt");
+        Project p = null;
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(new FileInputStream(config));
+            p= (Project) in.readObject();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return p;
+    }
+
+    public static void savelastProject(Project p, Activity activity) {
+        ObjectOutputStream oos = null;
+        File file = new File(activity.getFilesDir(), "last.txt");
+        try {
+            oos = new ObjectOutputStream(new FileOutputStream(file));
+            p.setmLastTime(Method.getCurrentTime());
+            oos.writeObject(p);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                oos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public static void getLastProject(MainActivity mainActivity) {
+        Data d = (Data) mainActivity.getApplication();
+        //先检测是否存在
+        File file = new File(mainActivity.getFilesDir(), "last.txt");
+        if (file.exists()) {
+            FileInputStream fis = null;
+            ObjectInputStream ois = null;
+            try {
+                fis = new FileInputStream(file);
+                //读取对象
+                ois = new ObjectInputStream(fis);
+                Project p = (Project) ois.readObject();
+                //设置为全局变量
+                d.setmProject(p);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (OptionalDataException e) {
+                e.printStackTrace();
+            } catch (StreamCorruptedException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fis != null)
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                if (ois != null)
+                    try {
+                        ois.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }
+    }
 }

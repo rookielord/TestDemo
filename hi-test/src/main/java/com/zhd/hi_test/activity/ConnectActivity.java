@@ -6,9 +6,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +30,7 @@ import com.zhd.hi_test.util.TrimbleOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -37,7 +38,7 @@ import java.util.UUID;
  * Created by 2015032501 on 2015/9/16.
  * 这里进行设备的连接和数据的读取，因为是测试用，所以就使用固定的命令
  */
-public class BlueToothActivity extends Activity {
+public class ConnectActivity extends Activity {
     //控件
     Button btn_connect, btn_clear, btn_request;
     TextView tv_content;
@@ -50,6 +51,8 @@ public class BlueToothActivity extends Activity {
     private static final int DEVICE_MESSAGE = 2;
     //判断是否可以被其它设备搜索
     private static final int DISCOVERED = 3;
+    //判断GPS是否开启
+    private static final int GPS_REQUEST = 4;
     //连接数据对象和连接数据device
     private BluetoothDevice mDevice;
     private BluetoothSocket mSocket;
@@ -61,13 +64,12 @@ public class BlueToothActivity extends Activity {
     private String[] way_items;
     private ArrayAdapter<String> wayAdapter;
     //获取连接的方式
-    private String mConnectWay;
+    private int mConnectWay;
     //获得全局变量的Data
     private Data d;
     //判断是否开启连接
-    private static boolean mIsConnect = false;
-    private ProgressDialog dialog;
-    //通过绑定handler确定信息
+    private LocationManager mManager;
+    private List<String> mProviders;
 
 
     @Override
@@ -118,16 +120,15 @@ public class BlueToothActivity extends Activity {
                     case 0://中海达
                         //创建Adapter来填充内容
                         way_items = getResources().getStringArray(R.array.zhd_way);
-                        wayAdapter = new ArrayAdapter<String>(BlueToothActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
                         sp_way.setAdapter(wayAdapter);
                         break;
                     case 1://安卓设备
                         way_items = getResources().getStringArray(R.array.phone_way);
-                        wayAdapter = new ArrayAdapter<String>(BlueToothActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
                         sp_way.setAdapter(wayAdapter);
                         break;
                 }
-                mConnectWay = parent.getItemAtPosition(position).toString();
             }
 
             @Override
@@ -138,7 +139,11 @@ public class BlueToothActivity extends Activity {
         sp_way.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mConnectWay = parent.getItemAtPosition(position).toString();
+                String way = parent.getItemAtPosition(position).toString();
+                if (way.equals("蓝牙"))
+                    mConnectWay = Constant.BlueToothConncet;
+                else if (way.equals("内置GPS"))
+                    mConnectWay = Constant.InnerGPSConnect;
             }
 
             @Override
@@ -155,16 +160,15 @@ public class BlueToothActivity extends Activity {
      * 4.设置全局变量的打开类型
      */
     private void startConnect() {
-        mConnectWay = sp_way.getSelectedItem().toString();
-        if (mConnectWay.equals("蓝牙")) {
+
+        if (mConnectWay == Constant.BlueToothConncet) {
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
                 StartDeviceList();
-                d.setConnectType(Constant.BlueToothConncet);
             } else {
                 OpenBluetooth();
             }
-        } else if (mConnectWay.equals("内置GPS")) {
-            d.setConnectType(Constant.InnerGPSConnect);
+        } else if (mConnectWay == Constant.InnerGPSConnect) {
+            GPSinit();
         }
     }
 
@@ -186,14 +190,17 @@ public class BlueToothActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     String adress = data.getExtras().getString(DeviceListActivity.ADRESS);
                     mDevice = mAdapter.getRemoteDevice(adress);
-                    //在这里打开进度条
-                    dialog = new ProgressDialog(this);
-                    dialog.setTitle("蓝牙连接中……");
+                    //这里的device只有一个地址
+                    //开始连接前关闭蓝牙搜索
                     connect(mDevice);
                 }
                 break;
             case DISCOVERED:
                 StartDeviceList();
+                break;
+            case GPS_REQUEST:
+                if (resultCode == RESULT_OK)
+                    d.setmConnectType(Constant.InnerGPSConnect);
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -207,23 +214,30 @@ public class BlueToothActivity extends Activity {
      * @param mDevice
      */
     private void connect(BluetoothDevice mDevice) {
-        //显示进度条，开始连接蓝牙
-        //在这里进行连接，连接发送消息
+
         try {
+            //这里打开socket连接
             mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
-            mSocket.connect();
-            Toast.makeText(BlueToothActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(BlueToothActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
         }
-        dialog.dismiss();
-        /**<黄杰思路>
-         1、用来接收每次读取到的数据
-         2、把每次读到的数据装入buffer缓冲区
-         3、去装好的缓冲区Buffer搜索解析
-         </黄杰思路>
-         */
+        try {
+            //进行判断蓝牙搜索是否打开，打开就先关闭
+            if (mSocket!=null)
+                BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+            //这里进行配对,主要是这一步
+            mSocket.connect();
+            //这里执行的太快
+            //在这里进行适配，如果连接成功，正确执行
+            Toast.makeText(ConnectActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+            //连接成功设置
+            sendMessage();
+            d.setmConnectType(Constant.BlueToothConncet);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(ConnectActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -272,6 +286,7 @@ public class BlueToothActivity extends Activity {
      * 注意$符号位置的情况：
      * 1.$不存在，2.$位于第一位，整条数据都是不完整的，返回<读到的>整条数据
      * 3.$正常位置，返回$位置之后<读到的>数据4.$位于最后一位，不会返回数据
+     *
      * @param buffer
      * @param loc
      * @param num
@@ -279,13 +294,12 @@ public class BlueToothActivity extends Activity {
      */
     private byte[] getuncomplete(byte[] buffer, int loc, int num) {
         byte[] temp;
-        if (loc == -2||loc==-1) {//不存在$的情况和$位置是第一位的情况
+        if (loc == -2 || loc == -1) {//不存在$的情况和$位置是第一位的情况
             temp = new byte[num];
             for (int i = 0; i < num; i++) {
                 temp[i] = buffer[i];
             }
-        }
-        else {
+        } else {
             int length = num - loc;//正确
             temp = new byte[length];//创建不完整数据的长度
             for (int i = 0; i < length; i++) {//赋值
@@ -301,19 +315,19 @@ public class BlueToothActivity extends Activity {
      * 需要注意不包含$符号的情况，需要分情况讨论
      * 1.不包含$符号和2.$符号为第一位==当条数据都不完整
      * 3.最后一位和4.通常位置==获得$之前的数据
+     *
      * @param buffer
      * @param loc
      * @return
      */
     private byte[] getcomplete(byte[] buffer, int loc) {
-        if (loc == -2||loc==-1) {
+        if (loc == -2 || loc == -1) {
             return null;
         }
         byte[] temp = new byte[loc];
         for (int i = 0; i < loc; i++) {
             temp[i] = buffer[i];
         }
-//        String msg=new String(temp);
         return temp;
     }
 
@@ -336,7 +350,6 @@ public class BlueToothActivity extends Activity {
         byte[] useinfo = new byte[completeInfo.length + uncompleteInfo.length];
         System.arraycopy(uncompleteInfo, 0, useinfo, 0, uncompleteInfo.length);
         System.arraycopy(completeInfo, 0, useinfo, uncompleteInfo.length, completeInfo.length);
-//        String msg=new String(useinfo);
         return useinfo;
     }
 
@@ -346,6 +359,7 @@ public class BlueToothActivity extends Activity {
      * 2.不存在，返回值为-2
      * 3.位于首位，返回值为-1
      * 4.位于末尾，返回值为length-1
+     *
      * @param buffer
      * @param num
      * @return
@@ -410,6 +424,19 @@ public class BlueToothActivity extends Activity {
             startActivityForResult(intent, REQUEST_CODE);
         } else {
             Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void GPSinit() {
+        mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mProviders = mManager.getProviders(true);
+        if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
+            d.setmConnectType(Constant.InnerGPSConnect);
+        } else {
+            Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent, GPS_REQUEST);
         }
     }
 

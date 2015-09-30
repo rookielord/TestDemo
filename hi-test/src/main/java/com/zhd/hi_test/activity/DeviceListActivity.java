@@ -47,9 +47,9 @@ public class DeviceListActivity extends Activity {
     public static final String ADRESS = "ADRESS";
     private static final String TAG = "DEVICE";
     //设置蓝牙开启返回的对应code
-    private static final int REQUES_CODE = 0x1;
+    private static final int BLUETOOTH_REQUEST = 0x1;
     //设置判断是否开启过蓝牙搜索，只有开启过蓝牙搜索后搜索到为0才能添加没有数据
-    private static boolean isSearch = false;
+    private boolean isSearch;
 
     //要获取适配器中的内容已经匹配的内容，必须一开始就打开蓝牙
     @Override
@@ -57,6 +57,8 @@ public class DeviceListActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_list);
+        //默认设置是没有找到的
+        isSearch=false;
         //找到控件
         btn_search = (Button) findViewById(R.id.btn_search);
         btn_close = (Button) findViewById(R.id.btn_close);
@@ -106,7 +108,7 @@ public class DeviceListActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUES_CODE) {
+        if (requestCode == BLUETOOTH_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
                 btn_search.setEnabled(true);
@@ -117,6 +119,9 @@ public class DeviceListActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * 获取已绑定的蓝牙适配器
+     */
     private void getPairedAdaper() {
         Set<BluetoothDevice> devices = mAdapter.getBondedDevices();
         //这里需要保证devices大于0

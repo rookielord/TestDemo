@@ -29,7 +29,6 @@ public class StarView extends View {
     //设置画笔对象
     private Paint mPaint;
     //设置需要画的点的集合,用一个listView就可以了，每次画完后清空
-    //private Map<Integer,StarPoint> mPoints=new Hashtable<>();
     List<StarPoint> mPoints = new ArrayList<StarPoint>();
     //画背景的圆的大小,这里是写死的需要重新弄
     private static int mRadius;
@@ -137,15 +136,12 @@ public class StarView extends View {
         for (StarPoint point : mPoints) {
             switch (point.getmLevel()) {
                 case 0:
-                    //Color.parseColor("#FF34CA3C")
                     mPaint.setColor(Color.RED);
                     break;
                 case 1:
-                    //parseColor("#FFC6C077")
                     mPaint.setColor(Color.parseColor("#FFCDBE3F"));
                     break;
                 case 2:
-                    //parseColor("FF32D034")
                     mPaint.setColor(Color.GREEN);
                     break;
             }
@@ -160,19 +156,21 @@ public class StarView extends View {
                     break;
                 case 2://glonass三角形
                     Path path = new Path();
-                    path.moveTo(x, y - 5);// 此点为多边形的起点
-                    path.lineTo(x - 2, y + 2);
-                    path.lineTo(x + 2, y + 2);
+                    path.moveTo(x, y);// 此点为多边形的起点
+                    path.lineTo(x - 15, y + 15);
+                    path.lineTo(x + 15, y + 15);
                     path.close(); // 使这些点构成封闭的多边形
                     canvas.drawPath(path, mPaint);
                     break;
                 case 3://bd矩形
-                    canvas.drawRect(x - 2, y - 2, x + 2, y + 2, mPaint);
+                    canvas.drawRect(x - 14, y - 14, x + 14, y + 14, mPaint);
                     break;
                 case 4://SBAS画红圈
-                    mPaint.setColor(Color.RED);
-                    mPaint.setStyle(Paint.Style.STROKE);
-                    canvas.drawCircle(x, y, msRadius, mPaint);
+                    Paint paint=new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStyle(Paint.Style.STROKE);
+                    canvas.drawCircle(x, y, msRadius + 4, paint);
+                    canvas.drawCircle(x,y,msRadius,mPaint);
                     break;
             }
 
@@ -216,7 +214,6 @@ public class StarView extends View {
         int divideAngel = 360 / divideNum;
         //计算坐标点的值，通过极坐标求得
         //根据坐标角获得x,y的值，但需要考虑到不同象限的加减值,经过考虑只有y轴为相反值
-        //mX
         double x = 0;
         double y = 0;
         for (int i = 0; i < divideNum; i++) {
@@ -259,7 +256,7 @@ public class StarView extends View {
         int HspeSize = MeasureSpec.getSize(heightMeasureSpec);
         if (HspeMode == MeasureSpec.EXACTLY) {
             return HspeSize;
-        } else if (HspeMode == MeasureSpec.AT_MOST) {//根据获取的屏幕宽高来设置其大小
+        } else if (HspeMode == MeasureSpec.AT_MOST) {
             return mRadius * 2;
         } else {
             return HspeSize;

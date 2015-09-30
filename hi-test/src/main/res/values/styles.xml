@@ -6,8 +6,10 @@
     </style>
     <style name="BluetoothText">
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">#ff000000</item>
-        <item name="android:background">#ffc4c4c4</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:background">#882aa5b5</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:radius">5dp</item>
     </style>
     <style name="SurveyText">
         <item name="android:textSize">14sp</item>
@@ -17,6 +19,60 @@
     <style name="AddPointText">
         <item name="android:gravity">center</item>
         <item name="android:textColor">#ff000000</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    <!-- 项目中的内容-->
+    <style name="ProjectTitle">
+        <item name="android:background">#FF2A9AAA</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="ProjectInfo">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:padding">5dp</item>
+    </style>
+    <style name="ProjectLayout">
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+    </style>
+    <!-- 项目创建的对话框的格式-->
+    <style name="EditType">
+        <item name="android:textSize">18sp</item>
+        <item name="android:layout_marginLeft">4dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginRight">4dp</item>
+    </style>
+    <style name="SpinnerType">
+        <item name="android:textColor">#ff000000</item>
+        <item name="android:padding">20dp</item>
+    </style>
+    <!-- GPS地图显示-->
+    <style name="GPSinfo">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:padding">5dp</item>
+    </style>
+    <!-- 点位信息显示-->
+    <style name="ManageTitle">
+        <item name="android:gravity">center</item>
+        <item name="android:background">#ff2aa5b5</item>
+        <item name="android:textColor">#000</item>
+    </style>
+    <style name="ManageInfo">
+        <item name="android:textColor">#FFF</item>
+        <item name="android:background">@drawable/manage_title_item</item>
+    </style>
+    <!-- 点位添加的信息-->
+    <style name="AddPointTitle">
+        <item name="android:background">@drawable/point_selector</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textcolor</item>
+    </style>
+    <style name="AddPointInfo">
+        <item name="android:textSize">15sp</item>
     </style>
 </resources>

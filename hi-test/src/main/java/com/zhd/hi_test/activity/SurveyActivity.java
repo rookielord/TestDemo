@@ -75,9 +75,9 @@ public class SurveyActivity extends Activity {
             }
         });
         Data d = (Data) getApplication();
-        if (d.getConnectType()== Constant.BlueToothConncet){
+        if (d.getmConnectType()== Constant.BlueToothConncet){
             Infomation.setHandler(mHandler);
-        }else if (d.getConnectType()==Constant.InnerGPSConnect){
+        }else if (d.getmConnectType()==Constant.InnerGPSConnect){
 
         }
 

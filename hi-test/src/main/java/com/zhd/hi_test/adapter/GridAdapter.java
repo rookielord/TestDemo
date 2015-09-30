@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.IiconCallback;
+import com.zhd.hi_test.callback.OnIconChangeListener;
 import com.zhd.hi_test.module.Icon;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ public class GridAdapter extends BaseAdapter {
     //设置所有的显示数据
     private ArrayList<Icon> mSource = new ArrayList<>();
     private Context mContext;
-    private IiconCallback mIicon;
+    private OnIconChangeListener mIicon;
 
-    public void setmIicon(IiconCallback mIicon) {
+    public void setmIicon(OnIconChangeListener mIicon) {
         this.mIicon = mIicon;
     }
 

@@ -6,6 +6,8 @@ import android.app.WallpaperManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -26,6 +28,12 @@ import com.zhd.hi_test.adapter.MyPagerAdapter;
 import com.zhd.hi_test.module.Project;
 import com.zhd.hi_test.util.Method;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +41,9 @@ import static android.support.v4.view.ViewPager.*;
 
 /**
  * Created by 2015032501 on 2015/9/18.
+ * 这里是主界面，包含下面的滑动窗口和ViewTable。
+ * ViewTable里面存放的是4个activity
+ * 最先创建的就是这个页面。
  */
 public class MainActivity extends Activity {
 
@@ -43,26 +54,29 @@ public class MainActivity extends Activity {
     ViewPager pager = null;
     TabHost tabHost = null;
     TextView t1, t2, t3, t4;
-    private long mFirsttime=0;
-    private static final int INTERVAL=2000;
+    private List<TextView> tv_list;
+    //两次跳转的时差
+    private long mFirsttime = 0;
+    private static final int INTERVAL = 2000;
 
+    //动画跳转
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
     private int bmpW;// 动画图片宽度
     private ImageView cursor;// 动画图片
-    private List<TextView> tv_list;
     private Data d;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //获取屏幕的参数和项目文件夹路径,并传给全局变量
-        Method.getWindowValue(this);
-        d = (Data) getApplication();
-        d.setmPath(Method.createDirectory(this));
-
+        d= (Data) getApplication();
+        //设置全局变量，创建project文件夹，并且创建项目
+        Method.createDirectory(this);
+        //创建默认文件夹并选中
+        Method.createDefaultProject(this);
+        //获取上一次打开的项目
+        Method.getLastProject(this);
         context = MainActivity.this;
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
@@ -81,7 +95,6 @@ public class MainActivity extends Activity {
         t2 = (TextView) findViewById(R.id.text2);
         t3 = (TextView) findViewById(R.id.text3);
         t4 = (TextView) findViewById(R.id.text4);
-        t1.setBackgroundColor(Color.BLUE);
         tv_list = new ArrayList<>();
         tv_list.add(t1);
         tv_list.add(t2);
@@ -162,7 +175,6 @@ public class MainActivity extends Activity {
         public void onPageSelected(int arg0) {
             setTextBackgroundColor();
             Animation animation = null;
-
             switch (arg0) {
                 case 0://选择了第一页
                     if (currIndex == 1) {//跳转到第二页
@@ -203,7 +215,8 @@ public class MainActivity extends Activity {
             }
             //设置当前页面选中编号，在选中编号中进行
             currIndex = arg0;
-            tv_list.get(arg0).setBackgroundColor(Color.BLUE);
+            tv_list.get(currIndex).setBackgroundColor(Color.parseColor("#FF35E6F6"));
+            tv_list.get(currIndex).setTextColor(Color.BLACK);
             animation.setFillAfter(true);// True:图片停在动画结束位置
             animation.setDuration(300);
             cursor.startAnimation(animation);
@@ -224,35 +237,37 @@ public class MainActivity extends Activity {
      */
     public class MyOnClickListener implements OnClickListener {
         private int index = 0;
-
         public MyOnClickListener(int i) {
             index = i;
         }
-
         @Override
         public void onClick(View v) {
             setTextBackgroundColor();
-            v.setBackgroundColor(Color.BLUE);
             pager.setCurrentItem(index);
         }
     }
+
+    /**
+     * 先全部设置一次默认颜色
+     */
     private void setTextBackgroundColor() {
         for (TextView tv : tv_list) {
-            tv.setBackgroundColor(Color.parseColor("#ffa6a8f8"));
+            tv.setBackgroundColor(Color.parseColor("#ff2aa5b5"));
+            tv.setTextColor(Color.parseColor("#ffffffff"));
         }
     }
+
     /**
      * 点两次退出，计算两次的点击的时间
      */
     @Override
     public void onBackPressed() {
-        if (System.currentTimeMillis()-mFirsttime>INTERVAL)
-        {
-            mFirsttime=System.currentTimeMillis();
+        if (System.currentTimeMillis() - mFirsttime > INTERVAL) {
+            mFirsttime = System.currentTimeMillis();
             Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             //关闭蓝牙
-            BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
             if (adapter.isEnabled())
                 adapter.disable();
             finish();
@@ -261,13 +276,15 @@ public class MainActivity extends Activity {
 
     /**
      * 当程序退出时，将当前项目的打开时间进行跟新
+     * 将当前项目对象写入一个文件中，表示上次打开的内容
      * 重新写入程序
      */
     @Override
     protected void onDestroy() {
-        Project p=d.getmProject();
-        if(p!=null){
+        Project p = d.getmProject();
+        if (p != null) {
             Method.updateProject(p);
+            Method.savelastProject(p,this);
         }
         //将全局变量project清空
         d.setmProject(null);
