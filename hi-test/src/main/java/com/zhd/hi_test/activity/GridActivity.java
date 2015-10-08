@@ -25,7 +25,7 @@ public class GridActivity extends Activity {
         AllSource.add(new Icon("项目管理", R.drawable.ic_root_file_proj, 0, new Intent("com.zhd.project.START")));
         AllSource.add(new Icon("星图展示", R.drawable.ic_root_file_param, 1, new Intent("com.zhd.starmap.START")));
         AllSource.add(new Icon("数据管理", R.drawable.ic_root_file_data, 2, new Intent("com.zhd.manage.START")));
-        AllSource.add(new Icon("仪器连接", R.drawable.ic_root_device_mag, 3, new Intent("com.zhd.bluetooth.START")));
+        AllSource.add(new Icon("仪器连接", R.drawable.ic_root_device_mag, 3, new Intent("com.zhd.connect.START")));
         AllSource.add(new Icon("数据采集", R.drawable.ic_root_survey_point, 4, new Intent("com.zhd.survey.START")));
     }
 

@@ -1,24 +1,31 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
+
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.ui.MyScrollView;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +43,14 @@ public class ManageActivity extends Activity {
     public HorizontalScrollView mTouchView;
     //装入所有的自定义控件的集合
     protected List<MyScrollView> mHScrollViews = new ArrayList<MyScrollView>();
-    //项目的对应表名
+    //进行数据填充时的内容
     private String mTableName;
+    private ScrollAdapter adapter;
+    private String id;
+    private Curd curd;
+    private List<Map<String, String>> points;
+    //将数据修改后返回刷新页面
+    private static final int REQUEST_UPDATE_INFO=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +59,56 @@ public class ManageActivity extends Activity {
         Data d = (Data) getApplication();
         mTableName = d.getmProject().getmTableName();
         initViews();
+        registerForContextMenu(mListView);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case 0://删除
+                AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                        .setTitle("确定删除吗")
+                        .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                curd.deleteData(id);
+                                refreshData();
+                            }
+                        })
+                        .setNegativeButton("取消", null);
+                builder.show();
+                break;
+            case 1://修改
+                //通过intent来传送过去
+                Intent intent = new Intent("com.zhd.addPoint.START");
+                intent.putExtra("ID", id);
+                //修改成功返回后一样刷新页面
+                startActivityForResult(intent, REQUEST_UPDATE_INFO);
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    /**
+     * 因为listview会使用当前的数据集合，引用类型指向的是原来的数据，需要对原来的引用类型的数据进行修改
+     */
+    private void refreshData() {
+        points.clear();
+        Cursor cursor = curd.queryData(new String[]{"*"}, null, null, null, null, null);
+        //创建Data来填充数据
+        while (cursor.moveToNext()) {
+            Map<String, String> point = new HashMap<>();
+            point.put("name", "pt" + cursor.getString(cursor.getColumnIndex("id")));//通过pt+id来得到name,其实只是id
+            point.put("B", cursor.getString(cursor.getColumnIndex("B")));
+            point.put("L", cursor.getString(cursor.getColumnIndex("L")));
+            point.put("H", cursor.getString(cursor.getColumnIndex("H")));
+            point.put("height", cursor.getString(cursor.getColumnIndex("height")));
+            point.put("DES", cursor.getString(cursor.getColumnIndex("DES")));
+            points.add(point);
+        }
+        cursor.close();
+        //添加进的数据
+        adapter.notifyDataSetChanged();
     }
 
     private void initViews() {
@@ -56,29 +119,32 @@ public class ManageActivity extends Activity {
         //找到listview,并向里面填充数据
         //准备数据
         //数据库中
-        Curd curd = new Curd(mTableName, this);
+        curd = new Curd(mTableName, this);
         Cursor cursor = curd.queryData(new String[]{"*"}, null, null, null, null, null);
         //创建Data来填充数据
-        List<Map<String, String>> points = new ArrayList<>();
+        points = new ArrayList<>();
         while (cursor.moveToNext()) {
             Map<String, String> point = new HashMap<>();
             point.put("name", "pt" + cursor.getString(cursor.getColumnIndex("id")));//通过pt+id来得到name,其实只是id
             point.put("B", cursor.getString(cursor.getColumnIndex("B")));
             point.put("L", cursor.getString(cursor.getColumnIndex("L")));
             point.put("H", cursor.getString(cursor.getColumnIndex("H")));
+            point.put("height", cursor.getString(cursor.getColumnIndex("height")));
             point.put("DES", cursor.getString(cursor.getColumnIndex("DES")));
             points.add(point);
         }
-        //找到显示的listview
+        cursor.close();
+        //用来显示数据的listview
         mListView = (ListView) findViewById(R.id.scroll_list);
         //注意：这里是调用的自定义的Adapter，但是为什么继承的是SimpleAdapter,没有继承BaseAdapter
-        SimpleAdapter adapter = new ScrollAdapter(this, points, R.layout.point_item
-                , new String[]{"name", "B", "L", "H", "DES"}
+        adapter = new ScrollAdapter(this, points, R.layout.point_item
+                , new String[]{"name", "B", "L", "H", "height", "DES"}
                 , new int[]{
                 R.id.item_name
                 , R.id.item_B
                 , R.id.item_L
                 , R.id.item_H
+                , R.id.item_height
                 , R.id.item_DES
         });
         mListView.setAdapter(adapter);
@@ -130,6 +196,19 @@ public class ManageActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case REQUEST_UPDATE_INFO:
+                if (resultCode==RESULT_OK){
+                    refreshData();
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
     class ScrollAdapter extends SimpleAdapter {
 
         private List<? extends Map<String, ?>> datas;
@@ -152,8 +231,6 @@ public class ManageActivity extends Activity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            //如果当前没有对象被销毁
-//            View v = convertView;
             if (convertView == null) {
                 //根据xml来创建view对象
                 convertView = LayoutInflater.from(context).inflate(res, null);
@@ -163,37 +240,42 @@ public class ManageActivity extends Activity {
                 View[] views = new View[to.length];
                 //找到views上面的对象，创建点击事件
                 for (int i = 0; i < to.length; i++) {
-                    //这里是找到textview
+                    //这里是用来存放数据的textview,但是现在都用view来表示
                     View tv = convertView.findViewById(to[i]);
-//                    tv.setOnClickListener(clickListener);
                     views[i] = tv;
                 }
+                //将所有的views存入converView的Tag中
                 convertView.setTag(views);
             }
             //如果没有里面缓存数据没有被销毁，就获得其中的textview
             View[] holders = (View[]) convertView.getTag();
             int len = holders.length;
-            //向里面填充数据
+            //将view转化为textview并条女冲数据
             for (int i = 0; i < len; i++) {
                 ((TextView) holders[i]).setText(datas.get(position).get(from[i]).toString());
             }
             convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                 @Override
                 public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                    menu.setHeaderTitle("点信息操作");
-                    menu.add(0, 0, 0, "修改");
-                    menu.add(0, 1, 0, "删除");
+                    menu.add(0, 0, 0, "删除信息");
+                    menu.add(0, 1, 1, "修改信息");
+                }
+            });
+
+            /**
+             * 通过长按，然后将id传送过去。因为是内部类，就直接使用类全局变量
+             */
+            convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    //找到上面的id的textview
+                    TextView tv = (TextView) v.findViewById(R.id.item_name);
+                    id = (tv.getText().toString().substring(2));
+                    return false;
                 }
             });
             return convertView;
         }
     }
 
-//    //测试点击的事件
-//    protected View.OnClickListener clickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            Toast.makeText(ManageActivity.this, ((TextView) v).getText(), Toast.LENGTH_SHORT).show();
-//        }
-//    };
 }

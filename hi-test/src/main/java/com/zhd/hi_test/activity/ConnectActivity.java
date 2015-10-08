@@ -6,8 +6,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.location.GpsSatellite;
+import android.location.GpsStatus;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +29,7 @@ import android.widget.Toast;
 import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
@@ -30,13 +37,19 @@ import com.zhd.hi_test.util.TrimbleOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 
 /**
  * Created by 2015032501 on 2015/9/16.
- * 这里进行设备的连接和数据的读取，因为是测试用，所以就使用固定的命令
+ * 这里连接后，就开始发送数据。
+ * 主要有两种连接方式：1.内置GPS,2.中海达蓝牙连接
+ * 以上两种方式都是通过Handler来进行传输：其中蓝牙，是传给Information类来进行解析；内置GPS则是传输给GPSActivity和SurveyActivity来解析
+ * 主要是保证：1.一种连接方式连接2.断开连接后可以重连
+ * 如果单论这个页面的话取消监听是没有问题的，但是涉及到其他页面
  */
 public class ConnectActivity extends Activity {
     //控件
@@ -67,41 +80,60 @@ public class ConnectActivity extends Activity {
     private int mConnectWay;
     //获得全局变量的Data
     private Data d;
-    //判断是否开启连接
+    //使用内置GPS进行连接
     private LocationManager mManager;
     private List<String> mProviders;
+    private String mProvider;
+    private int minTime = 1000;
+    private int minDistance = 0;
+    private static Handler mHandler;
+    //判断是否连接上，用来断开连接。清空发送的数据用
 
+    public static void setmHandler(Handler mHandler) {
+        ConnectActivity.mHandler = mHandler;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
-        //获取内容
-        d = (Data) getApplication();
         sp_device = (Spinner) findViewById(R.id.sp_device);
         sp_way = (Spinner) findViewById(R.id.sp_way);
         btn_connect = (Button) findViewById(R.id.btn_connect);
+        btn_clear = (Button) findViewById(R.id.btn_clear);
+        btn_request = (Button) findViewById(R.id.btn_request);
+        tv_content = (TextView) findViewById(R.id.tv_device_info);
+        mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //获取连接状态和连接内容。然后对其内容进行赋值，如何保证单个连接
+        d = (Data) getApplication();
         btn_connect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                startConnect();
+                boolean IsConnected = d.isConnected();
+                if (!IsConnected) {
+                    startConnect();
+                } else {
+                    btn_connect.setText("连接");
+                    disconnect();
+                    d.setIsConnected(false);
+                }
+
             }
         });
-        btn_clear = (Button) findViewById(R.id.btn_clear);
+
         btn_clear.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 clearMessage();
             }
         });
-        btn_request = (Button) findViewById(R.id.btn_request);
+
         btn_request.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendMessage();
             }
         });
-        tv_content = (TextView) findViewById(R.id.tv_device_info);
         //获取设备的内容
         String[] device_items = getResources().getStringArray(R.array.devices);
         //创建对应的内容适配器
@@ -121,11 +153,13 @@ public class ConnectActivity extends Activity {
                         //创建Adapter来填充内容
                         way_items = getResources().getStringArray(R.array.zhd_way);
                         wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_way.setAdapter(wayAdapter);
                         break;
                     case 1://安卓设备
                         way_items = getResources().getStringArray(R.array.phone_way);
                         wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_way.setAdapter(wayAdapter);
                         break;
                 }
@@ -151,6 +185,49 @@ public class ConnectActivity extends Activity {
 
             }
         });
+        setDefaultInfo();
+    }
+
+    private void setDefaultInfo() {
+        int ConnectType = d.getmConnectType();
+        boolean IsConnected = d.isConnected();
+        if (IsConnected) {
+            btn_connect.setText("断开");
+        } else {
+            btn_connect.setText("连接");
+        }
+        switch (ConnectType) {
+            //蓝牙
+            case 1:
+                sp_device.setSelection(0);//中海达
+                sp_way.setSelection(0);//蓝牙
+                break;
+            //内置GPS
+            case 2:
+                sp_device.setSelection(1);//安卓设备
+                sp_way.setSelection(0);//内置GPS
+                break;
+        }
+    }
+
+    private void disconnect() {
+        //取消内置GPS定位
+        if (mManager != null) {
+            mManager.removeUpdates(mLocListener);
+            mManager.removeGpsStatusListener(mListener);
+            d.setmConnectType(0);
+        }
+
+        if (mSocket != null) {
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } //取消蓝牙的数据接收
+        if (mAdapter != null) {
+            mAdapter.disable();
+        }
     }
 
     /**
@@ -164,7 +241,7 @@ public class ConnectActivity extends Activity {
         if (mConnectWay == Constant.BlueToothConncet) {
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
                 StartDeviceList();
-            } else {
+            } else {//打开蓝牙
                 OpenBluetooth();
             }
         } else if (mConnectWay == Constant.InnerGPSConnect) {
@@ -193,14 +270,28 @@ public class ConnectActivity extends Activity {
                     //这里的device只有一个地址
                     //开始连接前关闭蓝牙搜索
                     connect(mDevice);
+                    btn_connect.setText("断开");
+                    d.setIsConnected(true);
                 }
                 break;
             case DISCOVERED:
                 StartDeviceList();
                 break;
             case GPS_REQUEST:
-                if (resultCode == RESULT_OK)
+                //判断是否打开，没有打开则提示打开，
+                // 判断的话只能用当前是否包含GPS服务,只有在打开为true的情况下才行
+                if (resultCode == RESULT_OK) {
+                    mProviders = mManager.getProviders(true);
+                    if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
+                        mManager.addGpsStatusListener(mListener);
+                        mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+                    } else {
+                        Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
+                    }
+                    btn_connect.setText("断开");
+                    d.setIsConnected(true);
                     d.setmConnectType(Constant.InnerGPSConnect);
+                }
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -223,7 +314,7 @@ public class ConnectActivity extends Activity {
         }
         try {
             //进行判断蓝牙搜索是否打开，打开就先关闭
-            if (mSocket!=null)
+            if (mSocket != null)
                 BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             //这里进行配对,主要是这一步
             mSocket.connect();
@@ -279,7 +370,6 @@ public class ConnectActivity extends Activity {
             }
         }).start();
     }
-
 
     /**
      * 获得不完整的数据，如果没有找到$符号的话，则返回整个读到的byte[] buffer，其长度为num
@@ -427,17 +517,106 @@ public class ConnectActivity extends Activity {
         }
     }
 
+    /**
+     * 在打开GPS的情况下可以直接的进行位置和GPS的监听
+     */
     private void GPSinit() {
-        mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mProviders = mManager.getProviders(true);
         if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
+            mProvider = LocationManager.GPS_PROVIDER;
+            mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+            mManager.addGpsStatusListener(mListener);
+            //这里才能算上GPS连上了
             d.setmConnectType(Constant.InnerGPSConnect);
+            btn_connect.setText("断开");
+            d.setIsConnected(true);
         } else {
             Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(intent, GPS_REQUEST);
         }
     }
+
+    private GpsStatus.Listener mListener = new GpsStatus.Listener() {
+        @Override
+        public void onGpsStatusChanged(int event) {
+            //获取卫星对象
+            switch (event) {
+                //第一次定位
+                case GpsStatus.GPS_EVENT_FIRST_FIX:
+                    Log.d(Constant.GPS_TAG, "卫星第一次锁定");
+                    break;
+                //卫星状态改变,当定位信息启动一次，那么它就会调用一次
+                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                    Log.d(Constant.GPS_TAG, "卫星的状态");
+                    //获取当前接收到的卫星情况
+                    GpsStatus status = mManager.getGpsStatus(null);
+                    //迭代接口，只有实现了这个接口才能实现其迭代器对象,可以对数据进行修改
+                    Iterable<GpsSatellite> satellites = status.getSatellites();
+                    //获得迭代对象，然后进行遍历
+                    Iterator<GpsSatellite> it = satellites.iterator();
+                    //获得最大的卫星数量，对接收的数量进行限制
+                    int maxSatellite = status.getMaxSatellites();
+                    int SatelliteNum = 0;
+                    //这里创建需要进行传递的对象
+                    ArrayList<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();
+                    while (it.hasNext() && SatelliteNum <= maxSatellite) {//判断条件1.有卫星数据2.小于最大卫星接收数
+                        GpsSatellite s = it.next();
+                        satelliteList.add(s);
+                        SatelliteNum++;
+                    }
+                    //只有在有handler的情况下才进行数据传输
+                    if (mHandler != null) {
+                        Object satellitesInfo = satelliteList.clone();
+                        Message message = Message.obtain();
+                        message.what = 2;
+                        message.obj = satellitesInfo;
+                        mHandler.sendMessage(message);
+                    }
+                    break;
+                //GPS定位启动
+                case GpsStatus.GPS_EVENT_STARTED:
+                    Log.d(Constant.GPS_TAG, "定位启动");
+                    break;
+                case GpsStatus.GPS_EVENT_STOPPED:
+                    Log.d(Constant.GPS_TAG, "定位结束");
+                    break;
+            }
+        }
+    };
+
+    private LocationListener mLocListener = new LocationListener() {
+        //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
+        @Override
+        public void onLocationChanged(Location location) {
+            String longitude = String.valueOf(location.getLongitude());
+            String altitude = String.valueOf(location.getAltitude());
+            String latitude = String.valueOf(location.getLatitude());
+            //在有handler的情况下才进行数据传输
+            if (mHandler != null) {
+                MyLocation loc = new MyLocation(latitude, longitude, altitude);
+                Message message = Message.obtain();
+                message.what = 1;
+                message.obj = loc;
+                mHandler.sendMessage(message);
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
 
 }

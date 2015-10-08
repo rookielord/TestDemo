@@ -25,7 +25,7 @@ public class Curd {
     //创建项目对应的表
     public void createTable(String Tablename) {
         String create_table = "CREATE TABLE " + Tablename + "( " +
-                "id integer primary key autoincrement," +
+                "id integer primary key ," +
                 "name varchar(10) ," +
                 "B varchar(32) ," +
                 "L varchar(32) ," +
@@ -90,9 +90,20 @@ public class Curd {
                 groupBy, having, orderBy);
         return cursor;
     }
-    public Cursor queryData(String[] columns,String group) {
+
+    public Cursor queryData(String[] columns, String group) {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.query(mTablename,columns,null,null,null,null,group);
+        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, group);
         return cursor;
+    }
+
+    //获得所有的id的最大的值
+    public int getLastID() {
+        SQLiteDatabase sd = mSQoh.getReadableDatabase();
+        Cursor cursor = sd.rawQuery("select max(id) from " + mTablename, null);
+        int strid = 0;
+        if (cursor.moveToFirst())
+            strid = cursor.getInt(0);
+        return strid;
     }
 }

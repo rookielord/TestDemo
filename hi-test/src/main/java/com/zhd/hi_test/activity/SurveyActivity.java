@@ -45,9 +45,9 @@ public class SurveyActivity extends Activity {
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
                     break;
-                case 2:
-                    GetSattelites((ArrayList<Satellite>) msg.obj);
-                    break;
+//                case 2:
+//                    GetSattelites((ArrayList<Satellite>) msg.obj);
+//                    break;
             }
         }
     };
@@ -78,7 +78,7 @@ public class SurveyActivity extends Activity {
         if (d.getmConnectType()== Constant.BlueToothConncet){
             Infomation.setHandler(mHandler);
         }else if (d.getmConnectType()==Constant.InnerGPSConnect){
-
+            ConnectActivity.setmHandler(mHandler);
         }
 
     }

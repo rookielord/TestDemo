@@ -118,6 +118,7 @@ public class ProjectListActivity extends Activity {
         //对应路径下的config.txt文件进行读取，并创建project对象
         String[] proPaths = new File(path).list();//这个只会得到对应的文件夹名，没有路径
         for (String proName : proPaths) {
+
             //拼接config.txt路径
             File config = new File(path + "/" + proName, "config.txt");
             //读取内容，拼接字符串

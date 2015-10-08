@@ -8,17 +8,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ff13bfef"
-        android:padding="10dp"
-        >
+        android:padding="10dp">
+
         <TextView
             android:id="@+id/tv_back"
             style="@style/AddPointTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="返回"
             android:clickable="true"
-            />
+            android:text="返回" />
 
         <TextView
             android:id="@+id/tv_add"
@@ -28,12 +27,11 @@
             android:layout_alignParentRight="true"
             android:text="添加" />
     </RelativeLayout>
-<!--第二部分-->
+    <!--第二部分-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,9 +46,11 @@
                 android:text="点名" />
 
             <EditText
+                android:id="@+id/et_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:editable="false"/>
         </LinearLayout>
 
         <LinearLayout
@@ -69,8 +69,7 @@
                 android:id="@+id/et_height"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                />
+                android:layout_weight="1" />
         </LinearLayout>
 
         <LinearLayout
@@ -115,36 +114,74 @@
         style="@style/AddPointText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="描述"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        android:text="描述" />
 
     <!-- 第三部分-->
     <LinearLayout
-        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
 
         android:background="@drawable/textshape1"
         android:orientation="vertical"
         android:singleLine="true">
 
-        <TextView
-            android:id="@+id/tv_B"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="B"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/tv_B"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_L"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="L"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/tv_L"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_H"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="H"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/tv_H"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
 </LinearLayout>

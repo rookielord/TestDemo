@@ -12,6 +12,7 @@ public class MyLocation {
     private String mTime;
     private String mDES;
     private int mType;
+    private String mheight;
 
     //点的类型
     public static final int COOR_POINT = 1;
@@ -30,6 +31,14 @@ public class MyLocation {
         this.mB = mB;
         this.mL = mL;
         this.mH = mH;
+    }
+
+    public MyLocation(String mB, String mL, String mH, String mDES, String mheight) {
+        this.mB = mB;
+        this.mL = mL;
+        this.mH = mH;
+        this.mDES = mDES;
+        this.mheight = mheight;
     }
 
     public String getmB() {

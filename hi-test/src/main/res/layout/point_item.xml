@@ -43,7 +43,7 @@
                 android:layout_height="fill_parent" />
 
             <TextView
-                android:id="@+id/item_Height"
+                android:id="@+id/item_height"
                 style="@style/ManagePointItem"
                 android:layout_width="80dip"
                 android:layout_height="fill_parent" />

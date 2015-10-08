@@ -8,29 +8,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:maxHeight="103dp"
+        android:maxWidth="174dp"
         android:src="@drawable/img_gps" />
 
     <TextView
         android:id="@+id/tv_device_info"
         android:layout_width="match_parent"
-        android:layout_height="100dp" />
+        android:layout_height="100dp"
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff9a9a9a"
-        android:paddingLeft="10dp"
+        style="@style/BluetoothText"
         android:text="配置"
-        android:textColor="#000"
-        android:textSize="16sp" />
+       />
 
     <LinearLayout
-        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp">
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,18 +48,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusable="false"
+            android:prompt="@string/device_title"
             android:spinnerMode="dialog"
-            android:textColor="#000"
-            android:prompt="@string/device_title"/>
+            android:textColor="#000" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp">
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -75,39 +76,37 @@
             android:id="@+id/sp_way"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:spinnerMode="dialog"
-            android:textColor="#000"
+            android:duplicateParentState="false"
             android:prompt="@string/way_title"
-            android:duplicateParentState="false"/>
+            android:spinnerMode="dialog"
+            android:textColor="#000" />
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_gravity="bottom"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
         <Button
             android:id="@+id/btn_connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="连接" />
-        <Button
-            android:id="@+id/btn_register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="注册" />
+            android:layout_weight="1"
+            android:text="连接"
+            style="@style/ConnectButton"/>
+
         <Button
             android:id="@+id/btn_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="清空发送"
-            android:layout_toRightOf="@id/btn_connect"/>
+            android:layout_toRightOf="@id/btn_connect"
+            android:text="清空发送" />
+
         <Button
             android:id="@+id/btn_request"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="获取GAA"
-            android:layout_toLeftOf="@id/btn_register"/>
-    </RelativeLayout>
+            android:layout_toRightOf="@id/btn_clear"
+            android:text="获取GAA" />
+    </LinearLayout>
 </LinearLayout>

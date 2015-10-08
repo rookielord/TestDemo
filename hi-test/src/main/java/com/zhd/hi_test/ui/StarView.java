@@ -157,13 +157,13 @@ public class StarView extends View {
                 case 2://glonass三角形
                     Path path = new Path();
                     path.moveTo(x, y);// 此点为多边形的起点
-                    path.lineTo(x - 15, y + 15);
-                    path.lineTo(x + 15, y + 15);
+                    path.lineTo(x - msRadius, y + msRadius);
+                    path.lineTo(x + msRadius, y + msRadius);
                     path.close(); // 使这些点构成封闭的多边形
                     canvas.drawPath(path, mPaint);
                     break;
                 case 3://bd矩形
-                    canvas.drawRect(x - 14, y - 14, x + 14, y + 14, mPaint);
+                    canvas.drawRect(x - msRadius, y - msRadius, x + msRadius, y + msRadius, mPaint);
                     break;
                 case 4://SBAS画红圈
                     Paint paint=new Paint();

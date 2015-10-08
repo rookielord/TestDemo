@@ -15,8 +15,17 @@ import com.zhd.hi_test.module.Project;
 public class Data extends Application {
     private Project mProject;
     private String mPath;
-    //1为蓝牙连接;2为内置GPS
+    //0为未连接;1为蓝牙连接;2为内置GPS
     private int mConnectType=0;
+    private boolean IsConnected=false;
+
+    public boolean isConnected() {
+        return IsConnected;
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        IsConnected = isConnected;
+    }
 
     public int getmConnectType() {
         return mConnectType;
