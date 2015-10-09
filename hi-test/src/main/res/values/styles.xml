@@ -15,7 +15,7 @@
 
     <style name="SurveyText">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">#ff666666</item>
+        <item name="android:textColor">#ff000000</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -94,4 +94,10 @@
         <item name="android:background">@drawable/connect_selector</item>
         <item name="android:textColor">@color/textcolor</item>
     </style>
+    <!-- 采集数据时的样式-->
+    <style name="SurveyInfo">
+        <item name="android:background">@drawable/surveybackgroud</item>
+        <item name="android:padding">5dp</item>
+    </style>
+
 </resources>

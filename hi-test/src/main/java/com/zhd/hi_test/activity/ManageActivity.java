@@ -35,6 +35,7 @@ import java.util.Map;
 /**
  * Created by 2015032501 on 2015/9/19.
  * 进行点位数据的查询和显示，并且可以对数据进行增删改查
+ * 并没有将查询出来的内容生成对象管理，而只是将查出来的数据放进对应的地点
  */
 public class ManageActivity extends Activity {
     //用来填充的数据的
@@ -250,7 +251,7 @@ public class ManageActivity extends Activity {
             //如果没有里面缓存数据没有被销毁，就获得其中的textview
             View[] holders = (View[]) convertView.getTag();
             int len = holders.length;
-            //将view转化为textview并条女冲数据
+            //将view转化为textview,没有添加过数据则查询出来为null,就会报错
             for (int i = 0; i < len; i++) {
                 ((TextView) holders[i]).setText(datas.get(position).get(from[i]).toString());
             }

@@ -1,44 +1,44 @@
 package com.zhd.hi_test.module;
 
+import com.zhd.hi_test.util.Coordinate;
+
 /**
  * Created by 2015032501 on 2015/9/23.
- * 获得位置信息，这个是直接从iRTK中开始获得数据
+ *
  * 需要显示到屏幕上的数据，其中包括有位置信息和时间信息
+ * 最好是全部的数据都存满，不要留下空隙
  */
 public class MyLocation {
     private String mB;
     private String mL;
     private String mH;
     private String mTime;
-    private String mDES;
-    private int mType;
-    private String mheight;
+    private String mDireB;
+    private String mDireL;
 
-    //点的类型
-    public static final int COOR_POINT = 1;
-    public static final int LAYOUT_POINT = 2;
-    public static final int CONTROL_POINT = 3;
-
-    public MyLocation(String mB, String mL, String mH, String mDES, int mType) {
+    /**
+     *
+     * @param mB
+     * @param mL
+     * @param mH
+     * @param mTime
+     * @param mDireB
+     * @param mDireL
+     */
+    public MyLocation(String mB, String mL, String mH, String mTime, String mDireB, String mDireL) {
         this.mB = mB;
         this.mL = mL;
         this.mH = mH;
-        this.mDES = mDES;
-        this.mType = mType;
+        this.mTime = mTime;
+        this.mDireB = mDireB;
+        this.mDireL = mDireL;
     }
 
-    public MyLocation(String mB, String mL, String mH) {
+    public MyLocation(String mB, String mL, String mH, String mTime) {
         this.mB = mB;
         this.mL = mL;
         this.mH = mH;
-    }
-
-    public MyLocation(String mB, String mL, String mH, String mDES, String mheight) {
-        this.mB = mB;
-        this.mL = mL;
-        this.mH = mH;
-        this.mDES = mDES;
-        this.mheight = mheight;
+        this.mTime = mTime;
     }
 
     public String getmB() {
@@ -73,19 +73,4 @@ public class MyLocation {
         this.mTime = mTime;
     }
 
-    public String getmDES() {
-        return mDES;
-    }
-
-    public void setmDES(String mDES) {
-        this.mDES = mDES;
-    }
-
-    public int getmType() {
-        return mType;
-    }
-
-    public void setmType(int mType) {
-        this.mType = mType;
-    }
 }

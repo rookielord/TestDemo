@@ -54,13 +54,13 @@ public class Infomation {
         String[] info = group.split(",");
         String time = info[0];
         String B = info[1];
-        String BSide = info[2];
+        String BDire = info[2];
         String L = info[3];
-        String LSide = info[4];
+        String LDire = info[4];
         String HDPO = info[7];
         String H = info[8];
-        //形成对象
-        location = new MyLocation(B, L, H, null, MyLocation.COOR_POINT);
+        //坐标点
+        location = new MyLocation(B, L, H, time, BDire, LDire);
         Message m = Message.obtain();
         m.obj = location;
         m.what = 1;
@@ -101,11 +101,10 @@ public class Infomation {
             s = new Satellite(info[loc], info[loc + 1], info[loc + 2], info[loc + 3], type);
             mSatellites.add(s);
         }
-
         //1.5传输出去
         //1.5.1这里进行判断，如果currentnum<allnum的话，就不会发送而继续添加，只有当currentnum==allnum才发送
         //赋值集合，如果使用的是同一个集合的话会出现同步错误，因为线程一边在加，然后一边在取,就会造成这个错误
-        if (curerntnum==allnum){
+        if (curerntnum == allnum) {
             mTemps = mSatellites.clone();
             Message m = Message.obtain();
             m.obj = mTemps;

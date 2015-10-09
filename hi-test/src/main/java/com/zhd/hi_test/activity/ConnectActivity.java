@@ -103,9 +103,9 @@ public class ConnectActivity extends Activity {
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_request = (Button) findViewById(R.id.btn_request);
         tv_content = (TextView) findViewById(R.id.tv_device_info);
-        mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //因为重新打开后，mManager都为空值，所以要取消的话，必须得到同一个mManger,同一个listener。
         //获取连接状态和连接内容。然后对其内容进行赋值，如何保证单个连接
-        d = (Data) getApplication();
+        getSingleInfo();
         btn_connect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,6 +188,27 @@ public class ConnectActivity extends Activity {
         setDefaultInfo();
     }
 
+    private void getSingleInfo() {
+        d = (Data) getApplication();
+        LocationManager manager = d.getmManager();
+        LocationListener locListener = d.getmLocListener();
+        GpsStatus.Listener listener = d.getmListener();
+        if (manager == null) {
+            mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            d.setmManager(mManager);
+        } else {
+            mManager = manager;
+        }
+        if (locListener == null)
+            d.setmLocListener(mLocListener);
+        else
+            mLocListener = locListener;
+        if (listener == null)
+            d.setmListener(mListener);
+        else
+            mListener = listener;
+    }
+
     private void setDefaultInfo() {
         int ConnectType = d.getmConnectType();
         boolean IsConnected = d.isConnected();
@@ -210,6 +231,9 @@ public class ConnectActivity extends Activity {
         }
     }
 
+    /**
+     * 取消时，定位操作仍然在继续
+     */
     private void disconnect() {
         //取消内置GPS定位
         if (mManager != null) {
@@ -538,6 +562,9 @@ public class ConnectActivity extends Activity {
         }
     }
 
+    /**
+     * 位置和卫星状态的监听字段也必须保证是同一个对象
+     */
     private GpsStatus.Listener mListener = new GpsStatus.Listener() {
         @Override
         public void onGpsStatusChanged(int event) {
@@ -593,9 +620,10 @@ public class ConnectActivity extends Activity {
             String longitude = String.valueOf(location.getLongitude());
             String altitude = String.valueOf(location.getAltitude());
             String latitude = String.valueOf(location.getLatitude());
+            String time = String.valueOf(location.getTime());
             //在有handler的情况下才进行数据传输
             if (mHandler != null) {
-                MyLocation loc = new MyLocation(latitude, longitude, altitude);
+                MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
                 Message message = Message.obtain();
                 message.what = 1;
                 message.obj = loc;

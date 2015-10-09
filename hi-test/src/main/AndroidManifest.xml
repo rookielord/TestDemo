@@ -14,13 +14,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ManageActivity">
+        <activity android:name=".activity.ManageActivity" >
             <intent-filter>
                 <action android:name="com.zhd.manage.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ProjectListActivity">
+        <activity android:name=".activity.ProjectActivity">
             <intent-filter>
                 <action android:name="com.zhd.project.START" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -3,6 +3,9 @@ package com.zhd.hi_test;
 import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.location.GpsStatus;
+import android.location.LocationListener;
+import android.location.LocationManager;
 
 import com.zhd.hi_test.module.Project;
 
@@ -16,8 +19,44 @@ public class Data extends Application {
     private Project mProject;
     private String mPath;
     //0为未连接;1为蓝牙连接;2为内置GPS
-    private int mConnectType=0;
-    private boolean IsConnected=false;
+    private int mConnectType = 0;
+    private boolean IsConnected = false;
+    private LocationManager mManager;
+    private LocationListener mLocListener;
+    private GpsStatus.Listener mListener;
+    private double mheight = 0;
+
+    public double getMheight() {
+        return mheight;
+    }
+
+    public void setMheight(double mheight) {
+        this.mheight = mheight;
+    }
+
+    public LocationListener getmLocListener() {
+        return mLocListener;
+    }
+
+    public void setmLocListener(LocationListener mLocListener) {
+        this.mLocListener = mLocListener;
+    }
+
+    public GpsStatus.Listener getmListener() {
+        return mListener;
+    }
+
+    public void setmListener(GpsStatus.Listener mListener) {
+        this.mListener = mListener;
+    }
+
+    public LocationManager getmManager() {
+        return mManager;
+    }
+
+    public void setmManager(LocationManager mManager) {
+        this.mManager = mManager;
+    }
 
     public boolean isConnected() {
         return IsConnected;

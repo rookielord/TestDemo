@@ -35,6 +35,8 @@ public class Curd {
                 "Z varchar(32) ," +
                 "time varchar(32)," +
                 "type tinyint(1)," +
+                "DireB char(1)," +
+                "DireL char(1)," +
                 "height char(5)," +
                 "NRMS varchar(32)," +
                 "ERMS varchar(32)," +
@@ -91,9 +93,9 @@ public class Curd {
         return cursor;
     }
 
-    public Cursor queryData(String[] columns, String group) {
+    public Cursor queryData(String[] columns, String orderby,String limit) {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, group);
+        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, orderby,limit);
         return cursor;
     }
 

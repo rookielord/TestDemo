@@ -55,7 +55,10 @@ public class MainActivity extends FragmentActivity {
                 startActivity(intent);
             }
         });
-        tv_content.setText("$".getBytes().toString());
+        String msg="0123.456";
+        String[] loc=msg.split("\\.");
+        tv_content.setText(loc[0]);
+//        tv_content.setText("$".getBytes().toString());
     }
 
     //可以了

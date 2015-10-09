@@ -37,7 +37,7 @@ import java.util.List;
  * Created by 2015032501 on 2015/9/7.
  * 对项目文件进行操作，通过全局变量获得路径和当前选中项目
  */
-public class ProjectListActivity extends Activity {
+public class ProjectActivity extends Activity {
     //控件
     ListView lv;
     TextView tv_name, tv_coordinate, tv_time,tv_lasttime;
@@ -84,7 +84,7 @@ public class ProjectListActivity extends Activity {
             //第三步通过适配器，将项目显示到ListView上
             lv.setAdapter(mpa);
         } else {
-            Toast.makeText(ProjectListActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
+            Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -182,7 +182,7 @@ public class ProjectListActivity extends Activity {
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称
                                 } else {
-                                    Toast.makeText(ProjectListActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 EditText et2 = (EditText) finalView.findViewById(R.id.et_pro_back);
@@ -193,14 +193,14 @@ public class ProjectListActivity extends Activity {
                                 mConfigs[3] = add_time;//第一次创建的时间就是最近的打开时间
                                 //获得其中的坐标系统
                                 mConfigs[4] = String.valueOf(sp.getSelectedItem().toString());
-                                boolean res = Method.createProject(mPath, mConfigs, ProjectListActivity.this);
+                                boolean res = Method.createProject(mPath, mConfigs, ProjectActivity.this);
                                 if (res) {
-                                    Toast.makeText(ProjectListActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
                                     //刷新
                                     refresh();
                                     //创建的时候会赋给全局变量
                                 } else
-                                    Toast.makeText(ProjectListActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -215,7 +215,7 @@ public class ProjectListActivity extends Activity {
                 if (mProject != null) {
                     deleteProject();
                 } else {
-                    Toast.makeText(ProjectListActivity.this, "请选择项目", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectActivity.this, "请选择项目", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -251,7 +251,7 @@ public class ProjectListActivity extends Activity {
         File file = new File(mPath + "/" + mProject.getmName());
         Method.deleteDirectory(file);
         //提示
-        Toast.makeText(ProjectListActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(ProjectActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
         //这里刷新只会重读ProjectAdapter，但Adapter中projects对象的数量没有变化，可以在这里对
         //删除Adapter里面的mProjects数据
         refresh();

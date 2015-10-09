@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.StarPoint;
+import com.zhd.hi_test.util.Method;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class StarView extends View {
             double r2 = mRadius * ((90.0f - elevation) / 90.0f);
             //以(mRadius,mRadius)为参考点，然后根据方位角位置进行判断所在象限，然后对X,Y进行修改
             //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
-            double radian = degreeToRadian(360 - azimuth + 90);
+            double radian = Method.degreeToRadian(360 - azimuth + 90);
             //这个就是转换坐标,就以第一象限作为参考
             double x = mX + Math.cos(radian) * r2;//x方向上的增量
             double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
@@ -166,11 +167,11 @@ public class StarView extends View {
                     canvas.drawRect(x - msRadius, y - msRadius, x + msRadius, y + msRadius, mPaint);
                     break;
                 case 4://SBAS画红圈
-                    Paint paint=new Paint();
+                    Paint paint = new Paint();
                     paint.setColor(Color.RED);
                     paint.setStyle(Paint.Style.STROKE);
                     canvas.drawCircle(x, y, msRadius + 4, paint);
-                    canvas.drawCircle(x,y,msRadius,mPaint);
+                    canvas.drawCircle(x, y, msRadius, mPaint);
                     break;
             }
 
@@ -191,7 +192,7 @@ public class StarView extends View {
         //画圆圈和分割线
         int r = 0;//画圆的半径，根据高度角来获得对应的边长
         for (int i = 0; i <= 3; i++) {
-            r = (int) (mRadius * Math.cos(degreeToRadian(i * 30)));//高度角分别是0,30,60,90值分别是r,1/2r……
+            r = (int) (mRadius * Math.cos(Method.degreeToRadian(i * 30)));//高度角分别是0,30,60,90值分别是r,1/2r……
             mPaint.setColor(Color.WHITE);
             mPaint.setStyle(Paint.Style.STROKE);
             canvas.drawCircle(mX, mY, r, mPaint);
@@ -227,7 +228,10 @@ public class StarView extends View {
             mPaint.setColor(Color.WHITE);
             mPaint.setTextSize(20);
             mPaint.setTextAlign(Paint.Align.CENTER);
-            canvas.drawText(String.valueOf(divideAngel * i), (float) x, (float) y, mPaint);
+            if (i < 4)//0-3
+                canvas.drawText(String.valueOf(90 - divideAngel * i), (float) x, (float) y, mPaint);
+            else
+                canvas.drawText(String.valueOf(360 - divideAngel * (i-3)), (float) x, (float) y, mPaint);
         }
         mPaint.setColor(Color.WHITE);
         canvas.drawLines(ptr, mPaint);
@@ -291,13 +295,4 @@ public class StarView extends View {
         msRadius = (float) 0.06d * mRadius;
     }
 
-    /**
-     * 弧度转换公式
-     *
-     * @param degree
-     * @return
-     */
-    private double degreeToRadian(double degree) {
-        return (degree * Math.PI) / 180.0d;
-    }
 }

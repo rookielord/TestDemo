@@ -82,7 +82,7 @@ public class GPSActivity extends Activity {
         if (connect==Constant.InnerGPSConnect) {
             GPSinit();
             tv_connect.setText("内置GPS");
-            //这里将handler传递给ConnetActivity,来接受数据
+            //这里将handler传递给ConnetActivity,来接受数据。主要是这一句话，将handler传过去后就会一直运行。如果没有传递过去则没有问题
             ConnectActivity.setmHandler(mHandler);
         } else if(connect==Constant.BlueToothConncet){
             tv_connect.setText("蓝牙");
@@ -93,7 +93,7 @@ public class GPSActivity extends Activity {
         }
     }
 
-    //不接收数据
+    //
     @Override
     protected void onStop() {
         Log.d(Constant.GPS_TAG,"设置为空");

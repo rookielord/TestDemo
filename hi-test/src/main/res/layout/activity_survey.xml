@@ -3,89 +3,74 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <TextView
+    <!--这里用来显示图形的界面-->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="这是测量页" />
-
-    <Button
-        android:id="@+id/btn_add_point"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="添加点" />
-
+        android:layout_height="match_parent"
+        android:layout_weight="2">
+        <com.zhd.hi_test.ui.SurveyView
+            android:id="@+id/survey_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/image_add"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_manual"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="20dp"/>
+    </RelativeLayout>
+    <!-- 显示信息用的滑动效果-->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
         android:orientation="vertical">
 
-        <LinearLayout
+        <android.support.v4.view.ViewPager
+            android:id="@+id/first_vp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/point_layout"
+            android:layout_width="match_parent"
+            android:layout_height="20dip"
+            android:background="#a5e80b12"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <TextView
-                style="@style/SurveyText"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="B" />
+                android:layout_gravity="center"
+                android:background="@drawable/dian" />
 
-            <TextView
-                android:id="@+id/tv_B"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dip"
+                android:background="@drawable/dian" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                style="@style/SurveyText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="L" />
-
-            <TextView
-                android:id="@+id/tv_L"
-                style="@style/SurveyText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                style="@style/SurveyText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="H" />
-
-            <TextView
-                android:id="@+id/tv_H"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
     </LinearLayout>
+    <!--用来显示信息-->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ScrollView
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
+        <!--B,L,H的信息页面-->
+        <Button
+            android:id="@+id/btn_add_point"
+            style="@style/ConnectButton"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <TextView
-                android:id="@+id/tv_info"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </ScrollView>
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="添加点" />
+        <!--卫星信息的页面，不需要显示-->
     </LinearLayout>
 </LinearLayout>
