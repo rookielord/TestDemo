@@ -1,10 +1,7 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -28,12 +25,10 @@ import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyPoint;
 import com.zhd.hi_test.module.Project;
-import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.ui.SurveyView;
 import com.zhd.hi_test.util.Coordinate;
 import com.zhd.hi_test.util.Infomation;
 
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +43,7 @@ public class SurveyActivity extends Activity {
 
     private Data d;
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z,tv_time;
     Button btn_add;
     ImageView image_add;
     //自定义控件更新点的集合
@@ -73,20 +68,24 @@ public class SurveyActivity extends Activity {
                     tv_B.setText(location.getmB());
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
+                    tv_time.setText(location.getmTime());
                     double b = Double.valueOf(location.getmB());
                     double l = Double.valueOf(location.getmL());
                     HashMap<String, Double> info = Coordinate.getCoordinateXY(b, l);
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
                     tv_Z.setText(location.getmH());
-                    //需要将当前点的数据传过去
-                    MyPoint point=new MyPoint(info.get("n"),info.get("e"),Double.valueOf(location.getmH()));
+                    //需要将当前点的数据传过去,当前点没有名称
+                    MyPoint point=new MyPoint("", info.get("n"),info.get("e"),Double.valueOf(location.getmH()));
                     surveyView.setLocation(point);
+                    //重绘
+                    surveyView.invalidate();
                     break;
             }
         }
     };
     private Curd curd;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +95,11 @@ public class SurveyActivity extends Activity {
         d = (Data) getApplication();
         Project project = d.getmProject();
         curd = new Curd(project.getmTableName(), this);
+        //获得最后一个id的名称
+        id = curd.getLastID();
         //初始化滑动界面的内容
         init();
-        //对自定义控件中的数据进行初始化
+        //对自定义控件中的数据进行初始化，注意:这会将数据在
         iniSurveyView();
         //初始化下面的点
         initDoc();
@@ -123,6 +124,7 @@ public class SurveyActivity extends Activity {
                 addPoint();
                 //添加之后将新的点集合赋值过去
                 surveyView.setPoints(points);
+                surveyView.invalidate();
             }
         });
 
@@ -135,7 +137,6 @@ public class SurveyActivity extends Activity {
     }
 
     private void addPoint() {
-        int id = curd.getLastID();
         //获取所有的数据添加
         List<ContentValues> values = new ArrayList<ContentValues>();
         ContentValues cv = new ContentValues();
@@ -157,6 +158,9 @@ public class SurveyActivity extends Activity {
         }
     }
 
+    /**
+     * 这个方法会在控件尚未初始化的时候将其传过去，即传过去的时候还没有能获得自定义控件的宽和高
+     */
     private void iniSurveyView() {
         //找到自定义控件
         surveyView = (SurveyView) findViewById(R.id.survey_view);
@@ -168,7 +172,8 @@ public class SurveyActivity extends Activity {
                 double N = Double.valueOf(cursor.getString(cursor.getColumnIndex("N")));
                 double E = Double.valueOf(cursor.getString(cursor.getColumnIndex("E")));
                 double Z = Double.valueOf(cursor.getString(cursor.getColumnIndex("Z")));
-                MyPoint p = new MyPoint(N, E, Z);
+                String name = cursor.getString(cursor.getColumnIndex("id"));
+                MyPoint p = new MyPoint(name, N, E, Z);
                 points.add(p);
             }
             surveyView.setPoints(points);
@@ -187,6 +192,7 @@ public class SurveyActivity extends Activity {
         tv_B = (TextView) view1.findViewById(R.id.tv_B);
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
+        tv_time= (TextView) view1.findViewById(R.id.tv_time);
         tv_N = (TextView) view2.findViewById(R.id.tv_N);
         tv_E = (TextView) view2.findViewById(R.id.tv_E);
         tv_Z = (TextView) view2.findViewById(R.id.tv_Z);

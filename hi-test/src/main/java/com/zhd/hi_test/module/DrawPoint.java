@@ -10,9 +10,27 @@ package com.zhd.hi_test.module;
  */
 public class DrawPoint {
     //这是画图的时候用的
-    private double mX;
-    private double mY;
-    //这是点的N,E,Z坐标
+    private float mX;
+    private float mY;
 
+    public DrawPoint(float mX, float mY) {
+        this.mX = mX;
+        this.mY = mY;
+    }
 
+    public float getmX() {
+        return mX;
+    }
+
+    public void setmX(float mX) {
+        this.mX = mX;
+    }
+
+    public float getmY() {
+        return mY;
+    }
+
+    public void setmY(float mY) {
+        this.mY = mY;
+    }
 }

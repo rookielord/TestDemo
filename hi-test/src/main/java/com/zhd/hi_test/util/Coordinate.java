@@ -20,6 +20,7 @@ public class Coordinate {
      * 这个是iRTK的数据类型
      * 把NMEA格式ddmm.mmm表示的角度值转成以度为
      * 弧度值
+     *
      * @param ddmm 传过来的数据
      * @return
      */
@@ -53,33 +54,18 @@ public class Coordinate {
 
     /**
      * 将一个double型的数保留n位小数
-     * 即将小数点后面的位数结局
+     * 即将小数点后面的位数结局,使用四舍五入来计算
      *
      * @param value 要保留的double型数
      * @param n     要保留的小数位数
      * @return 保留数值过后的double
      */
     public static double saveAfterPoint(double value, int n) {
-        String str = String.valueOf(value);
-        String[] info = str.split("\\.");
-        String front;
-        String later;
-        //判断n的合理范围
-        if (n < 0) {
-            return 0;
-        }
-        //如果小数位不足的话，补足0
-        if (n > info[1].length()) {
-            while (n > info[1].length()) {
-                info[1] += "0";
-            }
-        }
-        //分别获取小数点前后的值
-        front = info[0];
-        later = info[1].substring(0, n);
-        //拼接整个数字,并转化为double型
-        double num = Double.valueOf(front + "." + later);
-        return num;
+        //使用math.round()只会保留整数位
+        //保留位数需要乘以10^n移动小数点
+        //最后再把小数位移动过来
+        double num = Math.pow(10, n);
+        return (Math.round(value * num) / num);
     }
 
     /**
@@ -163,7 +149,7 @@ public class Coordinate {
         double Radianlatitude = Method.degreeToRadian(latitude);
         double Radianlongtitude = Method.degreeToRadian(longtitude);
         //2.将弧度重新转化为度
-        int deglon = Integer.valueOf((int) (Radianlongtitude * 180 / PI));
+        int deglon = (int) (Radianlongtitude * 180 / PI);
         //3.默认为3度带num为带号，midlong为中央经度
         int num;
         double midlong;
@@ -203,7 +189,7 @@ public class Coordinate {
 
         X = a0 * B - a2 / 2.0 * s2b + a4 * s4b / 4.0 - a6 / 6.0 * s6b;                 //X为子午线弧长
 
-        //获得转化后的X和Y的值
+        //获得转化后的N和E的值
         n = Nscnb * lp * lp / 2.0 + Nscnb * cosb * cosb * Math.pow(lp, 4) * (5 - t * t + 9 * ita * ita +
                 4 * Math.pow(ita, 4)) / 24.0 + Nscnb * Math.pow(cosb, 4) * Math.pow(lp, 6) * (61 - 58 * t * t +
                 Math.pow(t, 4)) / 720.0 + X;
@@ -214,8 +200,8 @@ public class Coordinate {
         if (e < 0)
             e += 500000;
         //将其值进行处理，不是四舍五入而是单纯的保存
-        n=saveAfterPoint(n,5);
-        e=saveAfterPoint(e,5);
+        n = saveAfterPoint(n, 5);
+        e = saveAfterPoint(e, 5);
         info.put("n", n);
         info.put("e", e);
         return info;

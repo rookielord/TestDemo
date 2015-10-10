@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class AddPointActivity extends Activity {
     //控件
-    TextView tv_B, tv_L, tv_H,tv_N, tv_E, tv_Z;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z;
     EditText et_des, et_height, et_name;
     TextView tv_add, tv_back;
 
@@ -61,20 +61,18 @@ public class AddPointActivity extends Activity {
         //判断是添加还是修改
         final String id = intent.getStringExtra("ID");
         if (id == null) {//添加
-            //在添加栏目中获得目标高
-            if (d.getMheight()!=0){
-                mheight=d.getMheight();
-                et_height.setText(String.valueOf(mheight));
-            }
+            //在添加栏目中获得目标高,无论有否，都将仪高赋给editview
+            mheight = d.getMheight();
+            et_height.setText(String.valueOf(mheight));
             //获得最后的插入id，然后拼接成点号
             final int lastID = curd.getLastID();
             et_name.setText("pt" + (lastID + 1));
             tv_B.setText(intent.getStringExtra("B"));
             tv_L.setText(intent.getStringExtra("L"));
             tv_H.setText(intent.getStringExtra("H"));
-            tv_B.setText(intent.getStringExtra("N"));
-            tv_L.setText(intent.getStringExtra("E"));
-            tv_H.setText(intent.getStringExtra("Z"));
+            tv_N.setText(intent.getStringExtra("N"));
+            tv_E.setText(intent.getStringExtra("E"));
+            tv_Z.setText(intent.getStringExtra("Z"));
             tv_add.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

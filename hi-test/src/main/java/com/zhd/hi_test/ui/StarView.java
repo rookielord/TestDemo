@@ -28,7 +28,7 @@ public class StarView extends View {
 
     //卫星点的类别，这个没有用，现在将卫星全部接收到再说
     //设置画笔对象
-    private Paint mPaint;
+    private Paint mPaint=new Paint();
     //设置需要画的点的集合,用一个listView就可以了，每次画完后清空
     List<StarPoint> mPoints = new ArrayList<StarPoint>();
     //画背景的圆的大小,这里是写死的需要重新弄
@@ -44,7 +44,7 @@ public class StarView extends View {
 
     /**
      * 这里是实现将卫星对象转化成我要在图像上显示的卫星对象
-     *
+     * 这里是没有执行
      * @param gpsSatellites 传输过来的卫星对象
      */
     public void SetSatetllite(List<GpsSatellite> gpsSatellites) {
@@ -71,7 +71,6 @@ public class StarView extends View {
             int type = getSatelliteType(prn);
             StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, prn, level, type);
             mPoints.add(p);
-
         }
     }
 
@@ -93,7 +92,6 @@ public class StarView extends View {
         super(context);
     }
 
-    //性噪比判断
     private int snrToSignalLevel(float snr) {
         int level = 0;
         if (snr >= 0 && snr < 16) {
@@ -117,8 +115,7 @@ public class StarView extends View {
     }
 
     /**
-     * 绘制地图控件，在这里将传过来的卫星数据解析，然后在外面调用到invadate()来重绘
-     *
+     * 绘制地图控件，在这里将传过来的卫星数据解析，然后在外面调用到invadate()来重
      * @param canvas
      */
     @Override
@@ -184,7 +181,6 @@ public class StarView extends View {
     }
 
     private void drawStarbackground(Canvas canvas) {
-        mPaint = new Paint();
         mPaint.setColor(Color.BLACK);
         mPaint.setAntiAlias(true);
         //这里绘制星空的圆形

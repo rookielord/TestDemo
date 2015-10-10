@@ -2,6 +2,8 @@ package com.zhd.hi_test.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -22,56 +24,70 @@ public class SurveyView extends View {
     private int mHeight;
     private int mWidth;
     private Context mContext;
+    //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高
+    List<MyPoint> temp;
     //需要画的点集合
-    List<DrawPoint> drawPoints = new ArrayList<DrawPoint>();
-    //作为基准的点的N,E坐标
-    private static double mN;
-    private static double mE;
+    //我的位置
+    DrawPoint Mypoint;
+    //作为基准的点的N,E坐标和控件中心位置的坐标
+    private static double mReferenceN;
+    private static double mReferenceE;
+    private static float mCenterX;
+    private static float mCenterY;
+    //画笔
+    private Paint mPaint;
 
 
     public SurveyView(Context context) {
         super(context);
-        mContext = context;
     }
 
     public SurveyView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
     }
 
     public SurveyView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext = context;
     }
 
     /**
      * 将点集合传过来
      * 点击添加的时候传入
-     * 如果当前点击，
+     * 如果点击则调用该方法，并刷新自定义控件
+     * 这个会先执行，这个会先将数据传过来,但我还没有获取宽和高
+     * 所以当前只能将中心点的mN和mE设置成功
+     *
      * @param points
      */
     public void setPoints(List<MyPoint> points) {
-        if (points!=null){//获得参考点
-            MyPoint point=points.get(0);
-            setCenterValue(point.getmN(),point.getmE());
+        if (points != null) {//获得参考点
+            MyPoint point = points.get(0);
+            setCenterValue(point.getmN(), point.getmE());
+            temp = points;
         }
-        //将
-
     }
 
-    public void setLocation(MyPoint point){
-
+    /**
+     * 传入当前点的位置
+     *
+     * @param point
+     */
+    public void setLocation(MyPoint point) {
+        Mypoint = new DrawPoint((float) (mCenterX + (point.getmN() - mReferenceN)),
+                (float) (mCenterY + (point.getmE() - mReferenceE)));
     }
 
     /**
      * 设置参考点的坐标
+     *
      * @param N
      * @param E
      */
     private void setCenterValue(double N, double E) {
-        mN = N;
-        mE = E;
+        mReferenceN = N;
+        mReferenceE = E;
     }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -79,6 +95,8 @@ public class SurveyView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = measureWidth(widthMeasureSpec);
         mHeight = measureHeight(heightMeasureSpec);
+        mCenterX = mWidth / 2;
+        mCenterY = mHeight / 2;
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -109,10 +127,48 @@ public class SurveyView extends View {
     /**
      * 1.没有已知点：显示用户的当前位置
      * 2.有已知点：显示用户当前位置和已知点
+     *
      * @param canvas
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        mPaint = new Paint();
+        //1.画我的位置
+        DrawMypoint(canvas);
+        //2.画其它点
+        DrawPoints(canvas);
+    }
+
+    private void DrawMypoint(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.RED);
+        if (Mypoint != null) {
+            canvas.drawCircle(Mypoint.getmX(), Mypoint.getmY(), 5, mPaint);
+        }
+
+    }
+
+    /**
+     * 遍历DrawPoints中的元素，然后将其画在图片上
+     * 以当前点为中心画两条线交叉
+     * 这里需要对传输过来的点集合进行处理，并绘制在地图上
+     *
+     * @param canvas
+     */
+    private void DrawPoints(Canvas canvas) {
+        float x = 0;
+        float y = 0;
+        for (MyPoint point : temp) {
+            mPaint.setColor(Color.BLACK);
+            //画图的点的集合
+            x = (float) (mCenterX + point.getmN() - mReferenceN);
+            y = (float) (mCenterY + point.getmE() - mReferenceE);
+            float[] points = new float[]{x, y - 10, x, y + 10, x - 10, y, x + 10, y};
+            canvas.drawLines(points, mPaint);
+            //字体居中
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            mPaint.setTextSize(14);
+            canvas.drawText(point.getName(), x, y, mPaint);
+        }
     }
 }

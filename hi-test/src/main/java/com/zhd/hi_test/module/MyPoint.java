@@ -5,11 +5,22 @@ package com.zhd.hi_test.module;
  * 用来存放坐标点的N,E,Z数据
  */
 public class MyPoint {
+    private String name;
     private double mN;
     private double mE;
     private double mZ;
 
-    public MyPoint(double mN, double mE, double mZ) {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
+
+    public MyPoint(String name, double mN, double mE, double mZ) {
+        this.name = name;
         this.mN = mN;
         this.mE = mE;
         this.mZ = mZ;

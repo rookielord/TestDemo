@@ -31,6 +31,7 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/10.
+ * 在OnCreate中并没有传输数据进StarView里面
  */
 public class GPSActivity extends Activity {
 
