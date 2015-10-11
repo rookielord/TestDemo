@@ -1,10 +1,8 @@
 package com.zhd.hi_test.util;
 
 import java.util.HashMap;
-import java.util.Map;
-
 /**
- * 坐标转化类
+ * 坐标转化相关的类。需要进行BLH到NEZ的转化。主要是涉及到
  */
 public class Coordinate {
 
@@ -12,6 +10,7 @@ public class Coordinate {
      * 将WGS84转化为高斯投影的内容
      * a和e^2
      */
+
     private static final double A = 6378137.00;
     private static final double EE = Math.sqrt(0.00669437999013);
     private static final double PI = Math.PI;
@@ -138,6 +137,12 @@ public class Coordinate {
         return num - getIntegerPart(num);
     }
 
+    /**
+     * 应该对应相对的坐标系统来进行转化坐标，所采用的坐标系统从
+     * @param latitude
+     * @param longtitude
+     * @return
+     */
     public static HashMap<String, Double> getCoordinateXY(double latitude, double longtitude) {
         HashMap<String, Double> info = new HashMap<String, Double>();
         //经过转化后x和y的坐标

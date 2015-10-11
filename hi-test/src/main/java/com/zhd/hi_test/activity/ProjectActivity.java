@@ -40,12 +40,14 @@ import java.util.List;
 public class ProjectActivity extends Activity {
     //控件
     ListView lv;
-    TextView tv_name, tv_coordinate, tv_time,tv_lasttime;
+    TextView tv_name, tv_coordinate, tv_time, tv_lasttime;
 
+    //加载过来的项目，判断是否有项目
     private String mPath;
     private List<Project> mProjects;
     private boolean mHasProject;
 
+    //当前选中的项目，是用来显示当前选中的project的
     private Project mProject;
     private ProjectAdapter mpa;
     private Data d;
@@ -54,8 +56,9 @@ public class ProjectActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project);
-        //获取当前项目信息
+        //首先查看是否当前项目已经打开
         d = (Data) getApplication();
+        //全局路径
         mPath = d.getmPath();
         mProject = d.getmProject();
         //找控件
@@ -63,7 +66,7 @@ public class ProjectActivity extends Activity {
         tv_name = (TextView) findViewById(R.id.tv_name);
         tv_coordinate = (TextView) findViewById(R.id.tv_coordinate);
         tv_time = (TextView) findViewById(R.id.tv_time);
-        tv_lasttime= (TextView) findViewById(R.id.tv_lasttime);
+        tv_lasttime = (TextView) findViewById(R.id.tv_lasttime);
         //获得Project目录下所有的Project文件对象
         mHasProject = HasProject(mPath);
         //如果已经打开项目则获取并显示
@@ -71,9 +74,10 @@ public class ProjectActivity extends Activity {
             showProjectInfo(mProject);
         //判断是否有项目内容
         if (mHasProject) {
+            //获得当前的Project目录下所有的project对象
             mProjects = getProjectInstance(mPath);
             //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示
-            mpa = new ProjectAdapter(mProjects, getApplicationContext());
+            mpa = new ProjectAdapter(mProjects, this);
             mpa.setmP(new OnProjectListener() {
                 @Override
                 public void getItemPosition(int position) {
@@ -87,7 +91,6 @@ public class ProjectActivity extends Activity {
             Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
         }
     }
-
 
     private void showProjectInfo(Project project) {
         tv_name.setText(project.getmName());
@@ -110,6 +113,7 @@ public class ProjectActivity extends Activity {
 
     /**
      * 第二步根据路径来获取对应的配置文件来创建Project对象，并填充进集合
+     *
      * @param path
      * @return
      */
@@ -118,10 +122,9 @@ public class ProjectActivity extends Activity {
         //对应路径下的config.txt文件进行读取，并创建project对象
         String[] proPaths = new File(path).list();//这个只会得到对应的文件夹名，没有路径
         for (String proName : proPaths) {
-
             //拼接config.txt路径
             File config = new File(path + "/" + proName, "config.txt");
-            //读取内容，拼接字符串
+            //读取存入的project对象
             ObjectInputStream in = null;
             try {
                 //设置文件读取流
@@ -203,12 +206,7 @@ public class ProjectActivity extends Activity {
                                     Toast.makeText(ProjectActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
                             }
                         })
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        }).create();
+                        .setNegativeButton("取消", null).create();
                 dialog.show();
                 break;
             case R.id.item_delte:
@@ -219,10 +217,7 @@ public class ProjectActivity extends Activity {
                 }
                 break;
         }
-
-        return super.
-
-                onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
 
     }
 
@@ -244,8 +239,12 @@ public class ProjectActivity extends Activity {
     }
 
     private void deleteProject() {
+        //删除前相对比全局变量的project是否是删除的project
+        if (mProject.equals(d.getmProject())){
+            d.setmProject(null);
+        }
         //删除表
-        Curd curd = new Curd(mProject.getmTableName(), getApplicationContext());
+        Curd curd = new Curd(mProject.getmTableName(), this);
         curd.dropTable(mProject.getmTableName());
         //删除项目文件
         File file = new File(mPath + "/" + mProject.getmName());

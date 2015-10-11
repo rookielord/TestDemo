@@ -112,9 +112,7 @@ public class ProjectAdapter extends BaseAdapter {
                 ProjectAdapter.this.notifyDataSetChanged();
             }
         };
-
         holder.radio.setOnClickListener(mClick);
-
         //第一次将所有的states状态都设为false，以后则会将选中的和未被选中的一起拿进去
         boolean res = false;
         if (states.get(String.valueOf(position)) == null
