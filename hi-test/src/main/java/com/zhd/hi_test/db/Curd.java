@@ -93,19 +93,27 @@ public class Curd {
         return cursor;
     }
 
-    public Cursor queryData(String[] columns, String orderby,String limit) {
+    public Cursor queryData(String[] columns, String orderby, String limit) {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, orderby,limit);
+        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, orderby, limit);
         return cursor;
     }
 
-    //获得所有的id的最大的值
+    //获得所有的id的最大的值,考虑其中没有值的起那个框
     public int getLastID() {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.rawQuery("select max(id) from " + mTablename, null);
         int strid = 0;
-        if (cursor.moveToFirst())
-            strid = cursor.getInt(0);
+        int row=0;
+        Cursor id_cursor = sd.rawQuery("select count(*) as num from " + mTablename, null);
+        row=id_cursor.getInt(id_cursor.getColumnIndex("num"));
+        id_cursor.close();
+        if (row != 0) {
+            Cursor cursor = sd.rawQuery("select max(id) from " + mTablename, null);
+            if (cursor.moveToFirst()) {
+                strid = cursor.getInt(0);
+            }
+            cursor.close();
+        }
         return strid;
     }
 }
