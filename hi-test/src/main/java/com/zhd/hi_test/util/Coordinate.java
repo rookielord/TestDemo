@@ -31,12 +31,13 @@ public class Coordinate {
             double value = Double.valueOf(ddmm);
             int degree = getIntegerPart(value / 100);
             double m = (value - degree * 100) / 60;
-            return degree + m;
+            return Method.degreeToRadian(degree + m);
         }
     }
 
     /**
      * 获得经度的度数
+     * 转化为弧度数，
      *
      * @param dddmm
      * @return
@@ -48,7 +49,7 @@ public class Coordinate {
             double value = Double.valueOf(dddmm);
             int degree = getIntegerPart(value / 100);
             double m = (value - degree * 100) / 60;
-            return degree + m;
+            return Method.degreeToRadian(degree + m);
         }
     }
 

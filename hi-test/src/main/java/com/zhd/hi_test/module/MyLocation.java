@@ -4,9 +4,10 @@ import com.zhd.hi_test.util.Coordinate;
 
 /**
  * Created by 2015032501 on 2015/9/23.
- *
+ * <p>
  * 需要显示到屏幕上的数据，其中包括有位置信息和时间信息
  * 最好是全部的数据都存满，不要留下空隙
+ * 注意内置GPS和IRTK的数据格式是不一样的
  */
 public class MyLocation {
     private String mB;
@@ -17,7 +18,6 @@ public class MyLocation {
     private String mDireL;
 
     /**
-     *
      * @param mB
      * @param mL
      * @param mH
@@ -26,8 +26,8 @@ public class MyLocation {
      * @param mDireL
      */
     public MyLocation(String mB, String mL, String mH, String mTime, String mDireB, String mDireL) {
-        this.mB = mB;
-        this.mL = mL;
+        this.mB = String.valueOf(Coordinate.getLatitudeDegree(mB));
+        this.mL = String.valueOf(Coordinate.getLongtitudeDegree(mL));
         this.mH = mH;
         this.mTime = mTime;
         this.mDireB = mDireB;
