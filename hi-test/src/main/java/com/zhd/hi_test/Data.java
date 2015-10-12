@@ -15,7 +15,7 @@ import com.zhd.hi_test.module.Project;
  * 包含项目对象Project
  * 包含ZHD_TEST路径
  */
-public class Data extends Application {
+public class Data extends Application{
     private Project mProject;
     private String mPath;
     //0为未连接;1为蓝牙连接;2为内置GPS

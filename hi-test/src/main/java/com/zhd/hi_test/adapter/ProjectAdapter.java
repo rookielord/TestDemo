@@ -46,7 +46,7 @@ public class ProjectAdapter extends BaseAdapter {
 
     //定义一个Viewholder,用来存放layout上面的控件对象
     class ViewHolder {
-        TextView pro_name, pro_back, pro_time;
+        TextView pro_name, pro_back, pro_guass;
         RadioButton radio;
     }
 
@@ -83,7 +83,7 @@ public class ProjectAdapter extends BaseAdapter {
             //将layout上面的控件给holder中的控件属性，需要赋值的属性
             holder.pro_name = (TextView) convertView.findViewById(R.id.tv_proname);
             holder.pro_back = (TextView) convertView.findViewById(R.id.tv_proback);
-            holder.pro_time = (TextView) convertView.findViewById(R.id.tv_protime);
+            holder.pro_guass = (TextView) convertView.findViewById(R.id.tv_guass);
             //设置给Tag属性
             convertView.setTag(holder);
         } else {
@@ -93,7 +93,7 @@ public class ProjectAdapter extends BaseAdapter {
         //设置Holder里面的内容,因为没有被销毁，所以控件内容都还在
         holder.pro_name.setText(p.getmName());
         holder.pro_back.setText(p.getmBackup());
-        holder.pro_time.setText(p.getmTime());
+        holder.pro_guass.setText(p.getmGuass());
         //获取RadioButton对象,在外面获取
         final RadioButton radio = (RadioButton) convertView.findViewById(R.id.rb);
         //给Holder中的radio附上对象

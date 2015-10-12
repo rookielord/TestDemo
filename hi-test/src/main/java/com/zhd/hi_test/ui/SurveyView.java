@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.DrawPoint;
 import com.zhd.hi_test.module.MyPoint;
 
@@ -17,25 +16,36 @@ import java.util.List;
 /**
  * Created by 2015032501 on 2015/9/22.
  * 这是位置数据显示到自定义View的图上
+ * 有些变量需要进行存储，在第二次加载的时候获得
  */
 public class SurveyView extends View {
 
     //控件的属性
     private int mHeight;
     private int mWidth;
-    private Context mContext;
     //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高
     List<MyPoint> temp;
     //需要画的点集合
+    List<DrawPoint> drawPoints;
     //我的位置
     DrawPoint Mypoint;
     //作为基准的点的N,E坐标和控件中心位置的坐标
     private static double mReferenceN;
     private static double mReferenceE;
+    //屏幕中心
     private static float mCenterX;
     private static float mCenterY;
+    //画布中心
+    private static float mCanvasCenterX;
+    private static float mCanvasCenterY;
     //画笔
     private Paint mPaint;
+    //本次缩放的比例和本次的平移量
+    private static float mScale = 1.0f;
+    private static float mOffsetX = 0;
+    private static float mOffsety = 0;
+    //最新打点的位置
+    private DrawPoint mLastPont;
 
 
     public SurveyView(Context context) {
@@ -64,17 +74,60 @@ public class SurveyView extends View {
             MyPoint point = points.get(0);
             setCenterValue(point.getmN(), point.getmE());
             temp = points;
+            updatePoints();
         }
     }
 
     /**
+     * 传入比例尺后，会对当前的点的集合和我的位置进行重绘的位置进行重绘
+     * 对绘制点集合的坐标进行处理
+     *
+     * @param Scale
+     */
+    public void setmScale(float Scale) {
+        mScale *= Scale;
+        updatePoints();
+    }
+
+    /**
+     * 再次对当前点的进行更新
+     *
+     * @param
+     */
+    public void setOffset(float offsetX, float offsetY) {
+        mOffsetX = offsetX;
+        mOffsety = offsetY;
+        updatePoints();
+    }
+
+    private void updatePoints() {
+        drawPoints = new ArrayList<>();
+        float x = 0;
+        float y = 0;
+        for (MyPoint point : temp) {
+            //要在自定义控件上画图的集合
+            x = (float) (mCenterX + (point.getmN() - mReferenceN) * mScale)+mOffsetX;
+            y = (float) (mCenterY + (point.getmE() - mReferenceE) * mScale)+mOffsety;
+            DrawPoint p = new DrawPoint(x, y, point.getName());
+            drawPoints.add(p);
+        }
+        mLastPont = drawPoints.get(drawPoints.size() - 1);//获得最后一个点的位置
+    }
+
+    /**
      * 传入当前点的位置
+     * 并根据参考点来画其位置
+     * 如果不存在参考点，则当前点的位置为中心点的位置
      *
      * @param point
      */
     public void setLocation(MyPoint point) {
-        Mypoint = new DrawPoint((float) (mCenterX + (point.getmN() - mReferenceN)),
-                (float) (mCenterY + (point.getmE() - mReferenceE)));
+        if (mReferenceN == 0.0d || mReferenceE == 0.0d)
+            Mypoint = new DrawPoint(mCenterX, mCenterY);
+        else
+            Mypoint = new DrawPoint((float)
+                    (mCenterX + (point.getmN() - mReferenceN) * mScale)+mOffsetX,
+                    (float) (mCenterY + (point.getmE() - mReferenceE) * mScale)+mOffsety);
     }
 
     /**
@@ -144,8 +197,10 @@ public class SurveyView extends View {
         mPaint.setColor(Color.RED);
         if (Mypoint != null) {
             canvas.drawCircle(Mypoint.getmX(), Mypoint.getmY(), 5, mPaint);
+            mPaint.setColor(Color.BLACK);
+            if (mLastPont!=null)
+            canvas.drawLine(Mypoint.getmX(), Mypoint.getmY(), mLastPont.getmX(), mLastPont.getmY(), mPaint);
         }
-
     }
 
     /**
@@ -158,17 +213,19 @@ public class SurveyView extends View {
     private void DrawPoints(Canvas canvas) {
         float x = 0;
         float y = 0;
-        for (MyPoint point : temp) {
+        if (temp == null)
+            return;
+        for (DrawPoint point : drawPoints) {
             mPaint.setColor(Color.BLACK);
             //画图的点的集合
-            x = (float) (mCenterX + point.getmN() - mReferenceN);
-            y = (float) (mCenterY + point.getmE() - mReferenceE);
+            x = point.getmX();
+            y = point.getmY();
             float[] points = new float[]{x, y - 10, x, y + 10, x - 10, y, x + 10, y};
             canvas.drawLines(points, mPaint);
             //字体居中
             mPaint.setTextAlign(Paint.Align.CENTER);
             mPaint.setTextSize(14);
-            canvas.drawText(point.getName(), x, y, mPaint);
+            canvas.drawText(point.getmName(), x, y - 10, mPaint);
         }
     }
 }

@@ -1,24 +1,34 @@
 package com.zhd.hi_test.util;
 
+import com.zhd.hi_test.Data;
+import com.zhd.hi_test.module.Project;
+
 import java.util.HashMap;
+
 /**
  * 坐标转化相关的类。需要进行BLH到NEZ的转化。主要是涉及到
+ * 再进行坐标转化的时候更具对应的坐标系统转化根据全局变量project来获得
  */
 public class Coordinate {
 
     /**
      * 将WGS84转化为高斯投影的内容
      * a和e^2
+     * a:长半轴
+     * e^2:第一偏心率平方
+     * num:带号数
+     * midlong:中央经度
      */
 
-    private static final double A = 6378137.00;
-    private static final double EE = Math.sqrt(0.00669437999013);
-    private static final double PI = Math.PI;
+    private static double A;
+    private static double EE;
+    private static double PI = Math.PI;
+    private static int num;
+    private static double midlong;
 
     /**
      * 这个是iRTK的数据类型
      * 把NMEA格式ddmm.mmm表示的角度值转成以度为
-     * 弧度值
      *
      * @param ddmm 传过来的数据
      * @return
@@ -30,7 +40,7 @@ public class Coordinate {
             double value = Double.valueOf(ddmm);
             int degree = getIntegerPart(value / 100);
             double m = (value - degree * 100) / 60;
-            return Method.degreeToRadian(degree + m);
+            return degree + m;
         }
     }
 
@@ -48,7 +58,51 @@ public class Coordinate {
             double value = Double.valueOf(dddmm);
             int degree = getIntegerPart(value / 100);
             double m = (value - degree * 100) / 60;
-            return Method.degreeToRadian(degree + m);
+            return degree + m;
+        }
+    }
+
+    /**
+     * 将内置GPS的经度，转化为IRTK的样式的纬度
+     * 将度=ddd.dddddd=》dddmm.mmmm
+     * 123.556666=>12355.6666
+     *
+     * @param longtitude
+     * @return
+     */
+    public static String getLongtitudeIRTK(String longtitude) {
+        if (longtitude.equals("0"))
+            return "0";
+        else {
+            double value = Double.valueOf(longtitude);
+            //将小数点前的转化为整数
+            int degree = getIntegerPart(value);
+            //将小数点后转化为mm
+            double mm = saveAfterPoint((value - degree) * 60, 4);
+            //两者进行字符串拼接
+            return String.valueOf(degree) + String.valueOf(mm);
+        }
+    }
+
+    /**
+     * 将内置GPS的纬度，转化为IRTK样式的经度，用于存储
+     * dd.dddd……转化为ddmm.mmmm的格式
+     *
+     * @param latitude
+     * @return
+     */
+    public static String getLatitudeIRTK(String latitude) {
+        if (latitude.equals("0")) {
+            return "0";
+        } else {
+            //转化为double类型
+            double value = Double.valueOf(latitude);
+            //将小数点前的转化为整数
+            int degree = getIntegerPart(value);
+            //将小数点后转化为mm
+            double mm = saveAfterPoint((value - degree) * 60, 4);
+            //两者进行字符串拼接
+            return String.valueOf(degree) + String.valueOf(mm);
         }
     }
 
@@ -139,12 +193,16 @@ public class Coordinate {
 
     /**
      * 应该对应相对的坐标系统来进行转化坐标，所采用的坐标系统从
-     * @param latitude
-     * @param longtitude
-     * @return
+     *
+     * @param latitude   纬度
+     * @param longtitude 经度
+     * @return 返回HASH表，转化后的B,L的度数
      */
-    public static HashMap<String, Double> getCoordinateXY(double latitude, double longtitude) {
-        HashMap<String, Double> info = new HashMap<String, Double>();
+    public static HashMap<String, Double> getCoordinateXY(double latitude, double longtitude, Project project) {
+
+        //根据传入的coordinate来判断所用的变量
+        getConvertValue(project);
+        HashMap<String, Double> info = new HashMap<>();
         //经过转化后x和y的坐标
         double n;
         double e;
@@ -154,14 +212,16 @@ public class Coordinate {
         //1.获得弧度
         double Radianlatitude = Method.degreeToRadian(latitude);
         double Radianlongtitude = Method.degreeToRadian(longtitude);
-        //2.将弧度重新转化为度
+        //2.将当前经度的弧度转化为经度数
         int deglon = (int) (Radianlongtitude * 180 / PI);
         //3.默认为3度带num为带号，midlong为中央经度
-        int num;
-        double midlong;
-        num = (deglon / 3);
-        midlong = num * 3 * PI / 180;
-
+        if (project.getmGuass().equals("3度带")) {
+            num = (deglon / 3);
+            midlong = num * 3 * PI / 180;
+        } else {
+            num = (deglon / 6 + 1);
+            midlong = (6 * num - 3) / 180.0 * PI;
+        }
         double lp = Radianlongtitude - midlong;
         double N = c / Math.sqrt(1 + epp * epp * Math.cos(Radianlatitude) * Math.cos(Radianlatitude));
         double M = c / Math.pow(1 + epp * epp * Math.cos(Radianlatitude) * Math.cos(Radianlatitude), 1.5);
@@ -211,6 +271,27 @@ public class Coordinate {
         info.put("n", n);
         info.put("e", e);
         return info;
+    }
+
+    private static void getConvertValue(Project project) {
+        switch (project.getmCoordinate()) {
+            case "国家2000坐标系":
+                A = 6378137.0;
+                EE = Math.sqrt(0.0066943802290);
+                break;
+            case "WGS84坐标系":
+                A = 6378137.00;
+                EE = Math.sqrt(0.00669437999013);
+                break;
+            case "北京54坐标系":
+                A = 6378245.0;
+                EE = Math.sqrt(0.006693421622966);
+                break;
+            case "西安80坐标系":
+                A = 6378140;
+                EE = Math.sqrt(0.00669438499959);
+                break;
+        }
     }
 
 }

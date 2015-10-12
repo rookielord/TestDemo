@@ -2,13 +2,12 @@ package com.zhd.hi_test.module;
 
 /**
  * Created by 2015032501 on 2015/10/9.
- * 用来存放坐标点的N,E,Z数据
+ * 用来存放坐标点的N,E和名称的数据，主要用于绘图
  */
 public class MyPoint {
     private String name;
     private double mN;
     private double mE;
-    private double mZ;
 
     public String getName() {
         return name;
@@ -19,11 +18,11 @@ public class MyPoint {
         this.name = name;
     }
 
-    public MyPoint(String name, double mN, double mE, double mZ) {
+    public MyPoint(String name, double mN, double mE) {
         this.name = name;
         this.mN = mN;
         this.mE = mE;
-        this.mZ = mZ;
+
     }
 
     public double getmN() {
@@ -42,11 +41,4 @@ public class MyPoint {
         this.mE = mE;
     }
 
-    public double getmZ() {
-        return mZ;
-    }
-
-    public void setmZ(double mZ) {
-        this.mZ = mZ;
-    }
 }

@@ -15,20 +15,14 @@ import com.zhd.hi_test.activity.MainActivity;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.Project;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
-import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,7 +60,7 @@ public class Method {
      * 进行大改，使用objectOutputStream
      *
      * @param path
-     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间 [4]坐标系统
+     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间 [4]坐标系统  新增[5]高斯投影带的
      * @param activity
      * @return
      */
@@ -84,7 +78,7 @@ public class Method {
                 //写入内容
                 String tableName = createTableName();
                 //创建project对象,最后一个是配置文件的File路径
-                Project p = new Project(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file);
+                Project p = new Project(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file, configs[5]);
                 out.writeObject(p);
                 //将其设为全局变量
                 d.setmProject(p);
@@ -178,7 +172,6 @@ public class Method {
     public static void updateProject(Project project) {
         ObjectOutputStream out=null;
         try {
-            //这边应该可以获得的是config.txt的位置啊？,在创建的时候出错了，导致File的路径
             out=new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
             //写入内容
             project.setmLastTime(getCurrentTime());
@@ -214,7 +207,7 @@ public class Method {
         if (isFirst) {
             String path = d.getmPath();//path是指Project的位置
             String time = Method.getCurrentTime();
-            String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系"};
+            String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系","WGS84坐标系"};
             //创建默认项目
             Method.createProject(path, configs, activity);
             //然后读取config.txt来创建项目
@@ -227,6 +220,11 @@ public class Method {
         }
     }
 
+    /**
+     * 默认创建，然后默认打开
+     * @param path
+     * @return
+     */
     public static Project getDefaultProject(String path) {
 
         File config = new File(path + "/" + "default", "config.txt");

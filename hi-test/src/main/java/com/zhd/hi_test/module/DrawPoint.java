@@ -12,6 +12,21 @@ public class DrawPoint {
     //这是画图的时候用的
     private float mX;
     private float mY;
+    private String mName;
+
+    public String getmName() {
+        return mName;
+    }
+
+    public void setmName(String mName) {
+        this.mName = mName;
+    }
+
+    public DrawPoint(float mX, float mY, String mName) {
+        this.mX = mX;
+        this.mY = mY;
+        this.mName = mName;
+    }
 
     public DrawPoint(float mX, float mY) {
         this.mX = mX;

@@ -39,6 +39,8 @@ public class AddPointActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addpoint);
+        //默认设置没有进行添加
+        setResult(RESULT_CANCELED);
         //找到控件
         tv_B = (TextView) findViewById(R.id.tv_B);
         tv_L = (TextView) findViewById(R.id.tv_L);
@@ -95,6 +97,7 @@ public class AddPointActivity extends Activity {
                     if (res) {
                         Toast.makeText(AddPointActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
                         //添加成功后关闭该页面
+                        setResult(RESULT_OK);
                         finish();
                     } else {
                         Toast.makeText(AddPointActivity.this, "添加失败", Toast.LENGTH_SHORT).show();

@@ -1,8 +1,6 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -10,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -56,7 +53,7 @@ public class DeviceListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.device_list);
+        setContentView(R.layout.activity_device);
         //默认设置是没有找到的
         isSearch=false;
         //找到控件
@@ -69,8 +66,8 @@ public class DeviceListActivity extends Activity {
         //默认设置结果为cancel，防止意外返回没有数据
         setResult(RESULT_CANCELED);
         //实例化两个Adapter
-        mPairedAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
-        mNewsAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+        mPairedAdapter = new ArrayAdapter<String>(this, R.layout.device_item);
+        mNewsAdapter = new ArrayAdapter<String>(this, R.layout.device_item);
         //获得已配对的蓝牙进行显示
         getPairedAdaper();
         //注册广播接受者，监听设备添加

@@ -16,4 +16,8 @@
         <item>北京54坐标系</item>
         <item>西安80坐标系</item>
     </string-array>
+    <string-array name="guass">
+        <item>3度带</item>
+        <item>6度带</item>
+    </string-array>
 </resources>

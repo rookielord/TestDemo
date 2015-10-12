@@ -14,6 +14,7 @@ public class Curd {
     private String mTablename;
     private MySqliteOpenHelper mSQoh;
     private SQLiteDatabase mDb;
+    private Cursor mCursor;
 
     public Curd(String tablename, Context context) {
         mTablename = tablename;
@@ -88,31 +89,33 @@ public class Curd {
                             String[] selectionArgs, String groupBy, String having,
                             String orderBy) {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.query(mTablename, columns, selection, selectionArgs,
+        mCursor = sd.query(mTablename, columns, selection, selectionArgs,
                 groupBy, having, orderBy);
-        return cursor;
+        return mCursor;
     }
 
     public Cursor queryData(String[] columns, String orderby, String limit) {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        Cursor cursor = sd.query(mTablename, columns, null, null, null, null, orderby, limit);
-        return cursor;
+        mCursor = sd.query(mTablename, columns, null, null, null, null, orderby, limit);
+        return mCursor;
     }
 
-    //获得所有的id的最大的值,考虑其中没有值的起那个框
+    //获得所有的id的最大的值,考虑其中没有值的情况
     public int getLastID() {
         SQLiteDatabase sd = mSQoh.getReadableDatabase();
         int strid = 0;
-        int row=0;
-        Cursor id_cursor = sd.rawQuery("select count(*) as num from " + mTablename, null);
-        row=id_cursor.getInt(id_cursor.getColumnIndex("num"));
-        id_cursor.close();
+        int row = 0;
+        //查询其中的数量
+        Cursor mCursor = sd.rawQuery("select count(*) as num from " + mTablename, null);
+        if (mCursor.moveToFirst())
+            row = mCursor.getInt(0);
+        mCursor.close();
         if (row != 0) {
-            Cursor cursor = sd.rawQuery("select max(id) from " + mTablename, null);
-            if (cursor.moveToFirst()) {
-                strid = cursor.getInt(0);
+            mCursor = sd.rawQuery("select max(id) from " + mTablename, null);
+            if (mCursor.moveToFirst()) {
+                strid = mCursor.getInt(0);
             }
-            cursor.close();
+            mCursor.close();
         }
         return strid;
     }

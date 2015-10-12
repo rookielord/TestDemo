@@ -23,6 +23,16 @@ public class Project implements Serializable {
     private String mLastTime;
     private String mCoordinate;
 
+    public String getmGuass() {
+        return mGuass;
+    }
+
+    public void setmGuass(String mGuass) {
+        this.mGuass = mGuass;
+    }
+
+    private String mGuass;
+
     /**
      * 创建顺序
      * @param mName 名称0
@@ -32,8 +42,9 @@ public class Project implements Serializable {
      * @param mCoordinate 坐标系统 4
      * @param mTableName 创建的表名5
      * @param mConfig config.txt文件位置6
+     * @param mGuass 所采用的高斯投影带数
      */
-    public Project(String mName, String mBackup, String mTime, String mLastTime, String mCoordinate, String mTableName, File mConfig) {
+    public Project(String mName, String mBackup, String mTime, String mLastTime, String mCoordinate, String mTableName, File mConfig, String mGuass) {
         this.mName = mName;
         this.mTime = mTime;
         this.mBackup = mBackup;
@@ -41,6 +52,7 @@ public class Project implements Serializable {
         this.mTableName = mTableName;
         this.mLastTime = mLastTime;
         this.mCoordinate = mCoordinate;
+        this.mGuass = mGuass;
     }
 
     public String getmCoordinate() {

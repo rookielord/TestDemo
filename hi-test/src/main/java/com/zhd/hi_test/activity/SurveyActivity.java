@@ -26,6 +26,7 @@ import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyPoint;
 import com.zhd.hi_test.module.Project;
 import com.zhd.hi_test.ui.SurveyView;
+import com.zhd.hi_test.ui.ZoomListener;
 import com.zhd.hi_test.util.Coordinate;
 import com.zhd.hi_test.util.Infomation;
 
@@ -43,7 +44,7 @@ public class SurveyActivity extends Activity {
 
     private Data d;
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z,tv_time;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time;
     Button btn_add;
     ImageView image_add;
     //自定义控件更新点的集合
@@ -58,6 +59,12 @@ public class SurveyActivity extends Activity {
     private ImageView[] dots;
     //对应的布局文件
     private List<View> mViews = new ArrayList<View>();
+    //数据库操作
+    private Curd mCurd;
+    private int mid;
+    private Cursor mCursor;
+    //从AddActivity中返回，判断是否添加后更新点集合
+    private static final int ADD_RESULT = 0;
     //线程通信
     private Handler mHandler = new Handler() {
         @Override
@@ -69,14 +76,14 @@ public class SurveyActivity extends Activity {
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
                     tv_time.setText(location.getmTime());
-                    double b = Double.valueOf(location.getmB());
-                    double l = Double.valueOf(location.getmL());
-                    HashMap<String, Double> info = Coordinate.getCoordinateXY(b, l);
+                    double b = Double.valueOf(location.getmProgressB());
+                    double l = Double.valueOf(location.getmProgressL());
+                    HashMap<String, Double> info = Coordinate.getCoordinateXY(b, l, d.getmProject());
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
                     tv_Z.setText(location.getmH());
-                    //需要将当前点的数据传过去,当前点没有名称
-                    MyPoint point=new MyPoint("", info.get("n"),info.get("e"),Double.valueOf(location.getmH()));
+                    //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
+                    MyPoint point = new MyPoint("", info.get("n"), info.get("e"));
                     surveyView.setLocation(point);
                     //重绘
                     surveyView.invalidate();
@@ -84,8 +91,6 @@ public class SurveyActivity extends Activity {
             }
         }
     };
-    private Curd curd;
-    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +99,8 @@ public class SurveyActivity extends Activity {
         //获得表名来进行数据的操作
         d = (Data) getApplication();
         Project project = d.getmProject();
-        curd = new Curd(project.getmTableName(), this);
+        mCurd = new Curd(project.getmTableName(), this);
         //获得最后一个id的名称
-        id = curd.getLastID();
         //初始化滑动界面的内容
         init();
         //对自定义控件中的数据进行初始化，注意:这会将数据在
@@ -108,23 +112,26 @@ public class SurveyActivity extends Activity {
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent("com.zhd.addPoint.START");
-                intent.putExtra("B", tv_B.getText().toString());
-                intent.putExtra("L", tv_L.getText().toString());
-                intent.putExtra("H", tv_H.getText().toString());
-                intent.putExtra("N", tv_N.getText().toString());
-                intent.putExtra("E", tv_E.getText().toString());
-                intent.putExtra("Z", tv_Z.getText().toString());
-                startActivity(intent);
+                if (d.isConnected()) {
+                    Intent intent = new Intent("com.zhd.addPoint.START");
+                    intent.putExtra("B", tv_B.getText().toString());
+                    intent.putExtra("L", tv_L.getText().toString());
+                    intent.putExtra("H", tv_H.getText().toString());
+                    intent.putExtra("N", tv_N.getText().toString());
+                    intent.putExtra("E", tv_E.getText().toString());
+                    intent.putExtra("Z", tv_Z.getText().toString());
+                    startActivityForResult(intent, ADD_RESULT);
+                }
             }
         });
         image_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addPoint();
-                //添加之后将新的点集合赋值过去
-                surveyView.setPoints(points);
-                surveyView.invalidate();
+                //只有在连接情况下才能进行操作
+                if (d.isConnected()) {
+                    addPoint();
+                    refreshPoints();
+                }
             }
         });
 
@@ -137,10 +144,11 @@ public class SurveyActivity extends Activity {
     }
 
     private void addPoint() {
-        //获取所有的数据添加
+        //每次添加前先获得当前末尾的id
+        mid = mCurd.getLastID();
         List<ContentValues> values = new ArrayList<ContentValues>();
         ContentValues cv = new ContentValues();
-        cv.put("id", id + 1);
+        cv.put("id", mid + 1);
         cv.put("B", tv_B.getText().toString());
         cv.put("L", tv_L.getText().toString());
         cv.put("H", tv_H.getText().toString());
@@ -150,9 +158,9 @@ public class SurveyActivity extends Activity {
         cv.put("DES", "");
         cv.put("height", String.valueOf(d.getMheight()));
         values.add(cv);
-        boolean res = curd.insertData(values);
+        boolean res = mCurd.insertData(values);
         if (res) {
-            Toast.makeText(SurveyActivity.this, "pt" + (id + 1) + "添加成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SurveyActivity.this, "pt" + (mid + 1) + "添加成功", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(SurveyActivity.this, "添加失败", Toast.LENGTH_SHORT).show();
         }
@@ -164,19 +172,31 @@ public class SurveyActivity extends Activity {
     private void iniSurveyView() {
         //找到自定义控件
         surveyView = (SurveyView) findViewById(R.id.survey_view);
-        //判断数据库中是否有点
-        Cursor cursor = curd.queryData(new String[]{"*"}, "id desc", null);
-        if (cursor.getCount() != 0) {
-            while (cursor.moveToNext()) {
+        surveyView.setOnTouchListener(new ZoomListener());
+        //判断数据库中是否有点和传输数据
+        refreshPoints();
+    }
+
+    /**
+     * 1.对数据库中是否有点进行判断
+     * 2.进行points点集合的更新，获取添加进数据库的新的点的集合
+     */
+    private void refreshPoints() {
+        mCursor = mCurd.queryData(new String[]{"*"}, "id desc", null);
+        int id=mCursor.getCount();
+        if (mCursor.getCount()!=0) {
+            while (mCursor.moveToNext()) {
                 //获取数据存入其中
-                double N = Double.valueOf(cursor.getString(cursor.getColumnIndex("N")));
-                double E = Double.valueOf(cursor.getString(cursor.getColumnIndex("E")));
-                double Z = Double.valueOf(cursor.getString(cursor.getColumnIndex("Z")));
-                String name = cursor.getString(cursor.getColumnIndex("id"));
-                MyPoint p = new MyPoint(name, N, E, Z);
+                double N = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("N")));
+                double E = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("E")));
+                String name = "pt" + mCursor.getString(mCursor.getColumnIndex("id"));
+                MyPoint p = new MyPoint(name, N, E);
                 points.add(p);
             }
+            mCursor.close();
+            //这里传入的是为了方便绘制的，只包含有N,E,Z的值，其实也只需要N,E和id
             surveyView.setPoints(points);
+            surveyView.invalidate();
         }
     }
 
@@ -192,7 +212,7 @@ public class SurveyActivity extends Activity {
         tv_B = (TextView) view1.findViewById(R.id.tv_B);
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
-        tv_time= (TextView) view1.findViewById(R.id.tv_time);
+        tv_time = (TextView) view1.findViewById(R.id.tv_time);
         tv_N = (TextView) view2.findViewById(R.id.tv_N);
         tv_E = (TextView) view2.findViewById(R.id.tv_E);
         tv_Z = (TextView) view2.findViewById(R.id.tv_Z);
@@ -272,6 +292,19 @@ public class SurveyActivity extends Activity {
             container.removeView(mViews.get(position));
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case ADD_RESULT:
+                //如果添加成功，则进行数据的刷新
+                if (resultCode == RESULT_OK) {
+                    refreshPoints();
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     @Override
     protected void onDestroy() {

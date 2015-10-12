@@ -150,14 +150,12 @@ public class ProjectActivity extends Activity {
         return projectList;
     }
 
-    //这里使用menu来进行新建,创建Menu菜单项目
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
-    //点击创建后出现的menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -168,10 +166,17 @@ public class ProjectActivity extends Activity {
                 //这里实现创建项目,使用dialog来创建
                 View view = null;
                 view = inflater.inflate(R.layout.project_dialog, null);
-                //填充Spinner的数据
-                final Spinner sp = (Spinner) view.findViewById(R.id.sp_coordinate);
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.coordinate));
-                sp.setAdapter(adapter);
+                //填充坐标系和高斯投影带数据
+                final Spinner sp_coordinate = (Spinner) view.findViewById(R.id.sp_coordinate);
+                final Spinner sp_guass = (Spinner) view.findViewById(R.id.sp_guass);
+                ArrayAdapter<String> coordinate_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                        getResources().getStringArray(R.array.coordinate));
+                ArrayAdapter<String> guass_adpter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                        getResources().getStringArray(R.array.guass));
+                coordinate_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                guass_adpter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                sp_coordinate.setAdapter(coordinate_adapter);
+                sp_guass.setAdapter(guass_adpter);
                 final View finalView = view;
                 AlertDialog dialog = new AlertDialog.Builder(this)
                         .setView(view)
@@ -181,7 +186,7 @@ public class ProjectActivity extends Activity {
                                 EditText et1 = (EditText) finalView.findViewById(R.id.et_pro_name);
                                 String pro_name = et1.getText().toString();
                                 boolean isRight = Method.checkMsg(pro_name);
-                                String[] mConfigs = new String[5];
+                                String[] mConfigs = new String[6];
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称
                                 } else {
@@ -195,7 +200,9 @@ public class ProjectActivity extends Activity {
                                 mConfigs[2] = add_time;//添加时间
                                 mConfigs[3] = add_time;//第一次创建的时间就是最近的打开时间
                                 //获得其中的坐标系统
-                                mConfigs[4] = String.valueOf(sp.getSelectedItem().toString());
+                                mConfigs[4] = String.valueOf(sp_coordinate.getSelectedItem().toString());
+                                //获取其中的高斯带数
+                                mConfigs[5] = String.valueOf(sp_guass.getSelectedItem().toString());
                                 boolean res = Method.createProject(mPath, mConfigs, ProjectActivity.this);
                                 if (res) {
                                     Toast.makeText(ProjectActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
@@ -240,7 +247,7 @@ public class ProjectActivity extends Activity {
 
     private void deleteProject() {
         //删除前相对比全局变量的project是否是删除的project
-        if (mProject.equals(d.getmProject())){
+        if (mProject.equals(d.getmProject())) {
             d.setmProject(null);
         }
         //删除表

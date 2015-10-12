@@ -1,7 +1,6 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -88,7 +87,6 @@ public class ConnectActivity extends Activity {
     private int minDistance = 0;
     private static Handler mHandler;
     //判断是否连接上，用来断开连接。清空发送的数据用
-
     public static void setmHandler(Handler mHandler) {
         ConnectActivity.mHandler = mHandler;
     }
@@ -137,7 +135,7 @@ public class ConnectActivity extends Activity {
         //获取设备的内容
         String[] device_items = getResources().getStringArray(R.array.devices);
         //创建对应的内容适配器
-        ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, device_items);
+        ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, device_items);
         //设置下拉菜单的样式
         deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //进行数据填充,只对厂商Device进行填充，由它来决定接下来的方式中的内容
@@ -152,13 +150,13 @@ public class ConnectActivity extends Activity {
                     case 0://中海达
                         //创建Adapter来填充内容
                         way_items = getResources().getStringArray(R.array.zhd_way);
-                        wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter = new ArrayAdapter<>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
                         wayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_way.setAdapter(wayAdapter);
                         break;
                     case 1://安卓设备
                         way_items = getResources().getStringArray(R.array.phone_way);
-                        wayAdapter = new ArrayAdapter<String>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
+                        wayAdapter = new ArrayAdapter<>(ConnectActivity.this, android.R.layout.simple_list_item_1, way_items);
                         wayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_way.setAdapter(wayAdapter);
                         break;
@@ -188,6 +186,9 @@ public class ConnectActivity extends Activity {
         setDefaultInfo();
     }
 
+    /**
+     * 获得监听器
+     */
     private void getSingleInfo() {
         d = (Data) getApplication();
         LocationManager manager = d.getmManager();
@@ -294,8 +295,6 @@ public class ConnectActivity extends Activity {
                     //这里的device只有一个地址
                     //开始连接前关闭蓝牙搜索
                     connect(mDevice);
-                    btn_connect.setText("断开");
-                    d.setIsConnected(true);
                 }
                 break;
             case DISCOVERED:
@@ -331,24 +330,24 @@ public class ConnectActivity extends Activity {
     private void connect(BluetoothDevice mDevice) {
 
         try {
-            //这里打开socket连接
+            //这里打开socket连接，并将其
             mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            //进行判断蓝牙搜索是否打开，打开就先关闭
-            if (mSocket != null)
-                BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             //这里进行配对,主要是这一步
-            mSocket.connect();
+            if (mSocket != null) {
+                mSocket.connect();
+            }
             //这里执行的太快
             //在这里进行适配，如果连接成功，正确执行
             Toast.makeText(ConnectActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
             //连接成功设置
             sendMessage();
+            btn_connect.setText("断开");
+            d.setIsConnected(true);
             d.setmConnectType(Constant.BlueToothConncet);
-
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(ConnectActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
