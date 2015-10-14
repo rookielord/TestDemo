@@ -1,6 +1,7 @@
 package com.zhd.hi_test.module;
 
 /**
+ * 当前类主要是按照系统自带的GPSSatellite类进行封装，以便处理相同的数据
  * Created by 2015032501 on 2015/9/23.
  *  <4> 卫星编号，01至32。
  *　<5> 卫星仰角，00至90度。
@@ -46,7 +47,7 @@ public class Satellite {
     public static final int BD=3;
     public static final int SBAS=4;
 
-    public Satellite(String mPrn,String mElevation, String mAzimuth, String mSnr,  int mType) {
+    public Satellite(String mPrn, String mElevation, String mAzimuth, String mSnr, int mType) {
         this.mElevation = mElevation;
         this.mAzimuth = mAzimuth;
         this.mSnr = mSnr;

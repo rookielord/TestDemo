@@ -11,6 +11,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,7 +25,6 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyPoint;
-import com.zhd.hi_test.module.Project;
 import com.zhd.hi_test.ui.SurveyView;
 import com.zhd.hi_test.ui.ZoomListener;
 import com.zhd.hi_test.util.Coordinate;
@@ -40,15 +40,18 @@ import java.util.List;
  * 包括：1.与RTK的蓝牙连接 2.与内部GPS的连接方式：
  * 以上两种方式通过设备连接=》全局变量=》这里获取的方式来获得
  */
-public class SurveyActivity extends Activity {
+public class SurveyActivity extends Activity implements OnClickListener{
 
     private Data d;
     //控件
     TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time;
     Button btn_add;
-    ImageView image_add;
+    ImageView image_add,image_zoom_in,image_zoom_out,image_zoom_center;
+    //用来存放当前位置的东西半球和南北半球数据
+    private static String mDireB;
+    private static String mDireL;
     //自定义控件更新点的集合
-    List<MyPoint> points = new ArrayList<MyPoint>();
+    List<MyPoint> points = new ArrayList<>();
     SurveyView surveyView;
     //滑动需要的控件和数值
     LinearLayout pointLayout;
@@ -58,7 +61,7 @@ public class SurveyActivity extends Activity {
     //存放图像点的集合
     private ImageView[] dots;
     //对应的布局文件
-    private List<View> mViews = new ArrayList<View>();
+    private List<View> mViews = new ArrayList<>();
     //数据库操作
     private Curd mCurd;
     private int mid;
@@ -76,6 +79,8 @@ public class SurveyActivity extends Activity {
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
                     tv_time.setText(location.getmTime());
+                    mDireB=location.getmDireB();
+                    mDireL=location.getmDireL();
                     double b = Double.valueOf(location.getmProgressB());
                     double l = Double.valueOf(location.getmProgressL());
                     HashMap<String, Double> info = Coordinate.getCoordinateXY(b, l, d.getmProject());
@@ -98,8 +103,11 @@ public class SurveyActivity extends Activity {
         setContentView(R.layout.activity_survey);
         //获得表名来进行数据的操作
         d = (Data) getApplication();
-        Project project = d.getmProject();
-        mCurd = new Curd(project.getmTableName(), this);
+        if (d.getmProject()==null){
+            Toast.makeText(this,"请打开项目",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mCurd = new Curd(d.getmProject().getmTableName(), this);
         //获得最后一个id的名称
         //初始化滑动界面的内容
         init();
@@ -107,34 +115,6 @@ public class SurveyActivity extends Activity {
         iniSurveyView();
         //初始化下面的点
         initDoc();
-        //将信息获取到，然后跳转到另外一个界面来,采集数据
-        btn_add = (Button) findViewById(R.id.btn_add_point);
-        btn_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (d.isConnected()) {
-                    Intent intent = new Intent("com.zhd.addPoint.START");
-                    intent.putExtra("B", tv_B.getText().toString());
-                    intent.putExtra("L", tv_L.getText().toString());
-                    intent.putExtra("H", tv_H.getText().toString());
-                    intent.putExtra("N", tv_N.getText().toString());
-                    intent.putExtra("E", tv_E.getText().toString());
-                    intent.putExtra("Z", tv_Z.getText().toString());
-                    startActivityForResult(intent, ADD_RESULT);
-                }
-            }
-        });
-        image_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //只有在连接情况下才能进行操作
-                if (d.isConnected()) {
-                    addPoint();
-                    refreshPoints();
-                }
-            }
-        });
-
         if (d.getmConnectType() == Constant.BlueToothConncet) {
             Infomation.setHandler(mHandler);
         } else if (d.getmConnectType() == Constant.InnerGPSConnect) {
@@ -155,6 +135,9 @@ public class SurveyActivity extends Activity {
         cv.put("N", tv_N.getText().toString());
         cv.put("E", tv_E.getText().toString());
         cv.put("Z", tv_Z.getText().toString());
+        cv.put("time",tv_time.getText().toString());
+        cv.put("DireB", mDireB);
+        cv.put("DireL", mDireL);
         cv.put("DES", "");
         cv.put("height", String.valueOf(d.getMheight()));
         values.add(cv);
@@ -180,10 +163,11 @@ public class SurveyActivity extends Activity {
     /**
      * 1.对数据库中是否有点进行判断
      * 2.进行points点集合的更新，获取添加进数据库的新的点的集合
+     * 3.每次进行更新前，需要清空点的集合
      */
     private void refreshPoints() {
+        points.clear();
         mCursor = mCurd.queryData(new String[]{"*"}, "id desc", null);
-        int id=mCursor.getCount();
         if (mCursor.getCount()!=0) {
             while (mCursor.moveToNext()) {
                 //获取数据存入其中
@@ -205,6 +189,15 @@ public class SurveyActivity extends Activity {
      */
     private void init() {
         image_add = (ImageView) findViewById(R.id.image_add);
+        image_zoom_center= (ImageView) findViewById(R.id.image_center);
+        image_zoom_in= (ImageView) findViewById(R.id.image_zoom_in);
+        image_zoom_out= (ImageView) findViewById(R.id.image_zoom_out);
+        btn_add = (Button) findViewById(R.id.btn_add_point);
+        image_add.setOnClickListener(this);
+        image_zoom_in.setOnClickListener(this);
+        image_zoom_out.setOnClickListener(this);
+        image_zoom_center.setOnClickListener(this);
+        btn_add.setOnClickListener(this);
         viewPager = (ViewPager) findViewById(R.id.first_vp);
         LayoutInflater inflater = LayoutInflater.from(this);
         View view1 = inflater.inflate(R.layout.survey_layout1, null);
@@ -310,5 +303,45 @@ public class SurveyActivity extends Activity {
     protected void onDestroy() {
         Infomation.setHandler(null);
         super.onDestroy();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.image_add://直接进行数据采集
+                if (d.isConnected()) {
+                    addPoint();
+                    refreshPoints();
+                }
+                break;
+            case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
+                if (d.isConnected()) {
+                    Intent intent = new Intent("com.zhd.addPoint.START");
+                    intent.putExtra("B", tv_B.getText().toString());
+                    intent.putExtra("L", tv_L.getText().toString());
+                    intent.putExtra("H", tv_H.getText().toString());
+                    intent.putExtra("N", tv_N.getText().toString());
+                    intent.putExtra("E", tv_E.getText().toString());
+                    intent.putExtra("Z", tv_Z.getText().toString());
+                    intent.putExtra("time", tv_time.getText().toString());
+                    intent.putExtra("DireB", mDireB);
+                    intent.putExtra("DireL", mDireL);
+                    startActivityForResult(intent, ADD_RESULT);
+                }
+                break;
+            case R.id.image_zoom_in://传入放大比例
+                surveyView.setmScale(1.5f);
+                surveyView.invalidate();
+                break;
+            case R.id.image_zoom_out://传入缩小比例
+                surveyView.setmScale(0.5f);
+                surveyView.invalidate();
+                break;
+            case R.id.image_center://初始化使其居中
+                surveyView.mOffsetx=0;
+                surveyView.mOffsety=0;
+                surveyView.invalidate();
+                break;
+        }
     }
 }

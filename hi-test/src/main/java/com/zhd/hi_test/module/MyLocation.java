@@ -1,6 +1,10 @@
 package com.zhd.hi_test.module;
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.util.Coordinate;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by 2015032501 on 2015/9/23.
@@ -43,35 +47,51 @@ public class MyLocation {
         this.mProgressL = mProgressL;
     }
 
-    /**
-     * @param mB
-     * @param mL
-     * @param mH
-     * @param mTime
-     * @param mDireB
-     * @param mDireL
-     */
+    //RTK传过来的数据
     public MyLocation(String mB, String mL, String mH, String mTime, String mDireB, String mDireL) {
         this.mB = String.valueOf(Coordinate.saveAfterPoint(Double.valueOf(mB), 4));
         this.mL = String.valueOf(Coordinate.saveAfterPoint(Double.valueOf(mL), 4));
-        this.mProgressB = String.valueOf(Coordinate.getLatitudeDegree(this.getmB()));
-        this.mProgressL = String.valueOf(Coordinate.getLongtitudeDegree(this.getmL()));
+        this.mProgressB = String.valueOf(Coordinate.getLatitudeDegree(mB));
+        this.mProgressL = String.valueOf(Coordinate.getLongtitudeDegree(mL));
         this.mH = mH;
-        this.mTime = mTime;
+        this.mTime = getLocalTime(mTime);
         this.mDireB = mDireB;
         this.mDireL = mDireL;
     }
 
-    public MyLocation(String mB, String mL, String mH, String mTime) {
+    /**
+     * 注意String类型是引用变量
+     *
+     * @param mTime
+     * @return
+     */
+    private String getLocalTime(String mTime) {
+        //1.获取时间
+        String hour = mTime.substring(0, 2);
+
+        //2.获取分秒
+        String munites = mTime.substring(2, 4);
+        //3.获取秒
+        String seconds = mTime.substring(4, 6);
+        //4.将小时数量+8
+        int currenthour = Integer.valueOf(hour) + 8;
+        if (currenthour < 9)
+            hour = "0" + currenthour;
+        else
+            hour = String.valueOf(currenthour);
+        return hour + ":" + munites + ":" + seconds;
+    }
+
+    //内置GPS传过来的数据
+    public MyLocation(String mB, String mL, String mH, long mTime) {
         this.mProgressB = mB;
         this.mProgressL = mL;
-        //1.保留小数位数，经度和纬度都保留6位,原始数据
+        //1.保留小数位数，经度和纬度都保留4位,原始数据
         //2.转化为字符串，然后转化成IRTK格式
         this.mB = Coordinate.getLatitudeIRTK(mB);
         this.mL = Coordinate.getLongtitudeIRTK(mL);
-
         this.mH = mH;
-        this.mTime = mTime;
+        this.mTime = getLocationTime(mTime);
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针
         double B = Double.valueOf(mB);
         double L = Double.valueOf(mL);
@@ -84,6 +104,12 @@ public class MyLocation {
         else
             this.mDireL = "W";
 
+    }
+
+    private String getLocationTime(long mTime) {
+        Date date = new Date(mTime);//GPSneizhi
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        return (format.format(date));
     }
 
     public String getmB() {

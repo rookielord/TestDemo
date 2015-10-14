@@ -23,7 +23,9 @@ import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.ui.StarView;
+import com.zhd.hi_test.util.Infomation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,19 +49,26 @@ public class GPSActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                //位置数据
+                //位置数据，因为都是用的同一个类型所以不转移
                 case 1:
                     MyLocation location= (MyLocation) msg.obj;
                     tv_locB.setText(String.valueOf(location.getmB()));
                     tv_locL.setText(String.valueOf(location.getmL()));
                     tv_locH.setText(String.valueOf(location.getmH()));
                     break;
-                //卫星数据
+                //卫星数据，分两种来解析
                 case 2:
-                    ArrayList<GpsSatellite> satelliteList= (ArrayList<GpsSatellite>) msg.obj;
-                    tv_satellite.setText(String.valueOf(satelliteList.size()));
-                    my_view.SetSatetllite(satelliteList);
-                    my_view.invalidate();
+                    if (msg.arg1==1){
+                        ArrayList<GpsSatellite> satelliteList= (ArrayList<GpsSatellite>) msg.obj;
+                        tv_satellite.setText(String.valueOf(satelliteList.size()));
+                        my_view.SetSatetllite(satelliteList,msg.arg1);
+                        my_view.invalidate();
+                    }else if (msg.arg1==2){
+                        ArrayList<Satellite> satellites= (ArrayList<Satellite>) msg.obj;
+                        tv_satellite.setText(String.valueOf(satellites.size()));
+                        my_view.SetSatetllite(satellites, msg.arg1);
+                        my_view.invalidate();
+                    }
                     break;
             }
             super.handleMessage(msg);
@@ -87,7 +96,7 @@ public class GPSActivity extends Activity {
             ConnectActivity.setmHandler(mHandler);
         } else if(connect==Constant.BlueToothConncet){
             tv_connect.setText("蓝牙");
-            ConnectActivity.setmHandler(mHandler);
+            Infomation.setHandler(mHandler);
             //进行从IRTK中获得数据进行处理
         }else {
             tv_connect.setText("仪器尚未连接");

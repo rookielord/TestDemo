@@ -17,6 +17,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.zhd.hi_test.Data;
@@ -50,16 +51,20 @@ public class ManageActivity extends Activity {
     private Curd curd;
     private List<Map<String, String>> points;
     //将数据修改后返回刷新页面
-    private static final int REQUEST_UPDATE_INFO=1;
+    private static final int REQUEST_UPDATE_INFO = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_point);
         Data d = (Data) getApplication();
+        //这里来进行判断是否打开项目不然就不做操作
+        if (d.getmProject() == null) {
+            Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
+            return;
+        }
         mTableName = d.getmProject().getmTableName();
         initViews();
-        registerForContextMenu(mListView);
     }
 
     @Override
@@ -126,8 +131,8 @@ public class ManageActivity extends Activity {
         while (cursor.moveToNext()) {
             Map<String, String> point = new HashMap<>();
             point.put("name", "pt" + cursor.getString(cursor.getColumnIndex("id")));//通过pt+id来得到name,其实只是id
-            point.put("B", cursor.getString(cursor.getColumnIndex("B")));
-            point.put("L", cursor.getString(cursor.getColumnIndex("L")));
+            point.put("B", (cursor.getString(cursor.getColumnIndex("B")) + ":" + (cursor.getString(cursor.getColumnIndex("DireB")))));
+            point.put("L", cursor.getString(cursor.getColumnIndex("L")) + ":" + (cursor.getString(cursor.getColumnIndex("DireL"))));
             point.put("H", cursor.getString(cursor.getColumnIndex("H")));
             point.put("height", cursor.getString(cursor.getColumnIndex("height")));
             point.put("DES", cursor.getString(cursor.getColumnIndex("DES")));
@@ -198,9 +203,9 @@ public class ManageActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_UPDATE_INFO:
-                if (resultCode==RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     refreshData();
                 }
                 break;
@@ -262,9 +267,6 @@ public class ManageActivity extends Activity {
                 }
             });
 
-            /**
-             * 通过长按，然后将id传送过去。因为是内部类，就直接使用类全局变量
-             */
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {

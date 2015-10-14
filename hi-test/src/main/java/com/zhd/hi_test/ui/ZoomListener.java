@@ -38,7 +38,7 @@ public class ZoomListener implements View.OnTouchListener {
             case MotionEvent.ACTION_POINTER_UP://第二根手指松开
                 mPointNum -= 1;
                 break;
-            case MotionEvent.ACTION_POINTER_DOWN://第二根手指按上去
+            case MotionEvent.ACTION_POINTER_DOWN://第一个之后的手指放上去时，包括第二个，第三个……等都会调用该事件
                 moldDist = spacing(event);
                 mPointNum += 1;
                 break;
@@ -54,10 +54,8 @@ public class ZoomListener implements View.OnTouchListener {
                         moldDist = newDist;
                     }
                 }
-
                 if (mPointNum == 1) {
                     offsetspacing(event);
-                    mView.setOffset(mOffsetX,mOffsetY);
                 }
                 break;
         }
@@ -65,10 +63,13 @@ public class ZoomListener implements View.OnTouchListener {
     }
 
     private void offsetspacing(MotionEvent event) {
-        mOffsetX = event.getX()-mStartX ;
-        mOffsetY = event.getY()-mStartY;
+        mOffsetX= event.getX()-mStartX;
+        mOffsetY= event.getY()-mStartY;
+        mView.setOffset(mOffsetX,mOffsetY);
+        mStartX=event.getX();
+        mStartY=event.getY();
+        mView.invalidate();
     }
-
     /**
      * 将其比例缩放效果的大小传过去
      *
@@ -76,6 +77,7 @@ public class ZoomListener implements View.OnTouchListener {
      */
     private void zoom(float f) {
         mView.setmScale(f);
+        mView.invalidate();
     }
 
     /**

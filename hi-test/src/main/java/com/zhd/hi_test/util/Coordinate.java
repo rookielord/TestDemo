@@ -1,5 +1,7 @@
 package com.zhd.hi_test.util;
 
+import android.util.Log;
+
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.module.Project;
 
@@ -222,6 +224,7 @@ public class Coordinate {
             num = (deglon / 6 + 1);
             midlong = (6 * num - 3) / 180.0 * PI;
         }
+        Log.d("LIJIAJI",String.valueOf(midlong));
         double lp = Radianlongtitude - midlong;
         double N = c / Math.sqrt(1 + epp * epp * Math.cos(Radianlatitude) * Math.cos(Radianlatitude));
         double M = c / Math.pow(1 + epp * epp * Math.cos(Radianlatitude) * Math.cos(Radianlatitude), 1.5);

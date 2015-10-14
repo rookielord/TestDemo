@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <ImageView
+        android:id="@+id/image_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -94,19 +95,5 @@
             android:layout_weight="1"
             android:text="连接"
             style="@style/ConnectButton"/>
-
-        <Button
-            android:id="@+id/btn_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/btn_connect"
-            android:text="清空发送" />
-
-        <Button
-            android:id="@+id/btn_request"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/btn_clear"
-            android:text="获取GAA" />
     </LinearLayout>
 </LinearLayout>

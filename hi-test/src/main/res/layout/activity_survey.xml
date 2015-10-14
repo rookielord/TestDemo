@@ -8,24 +8,57 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2">
+
         <com.zhd.hi_test.ui.SurveyView
             android:id="@+id/survey_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/image_zoom_out"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_zoom_out" />
+
+        <ImageView
+            android:id="@+id/image_zoom_in"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/image_zoom_out"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_zoom_in" />
+
+        <ImageView
+            android:id="@+id/image_center"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/image_zoom_in"
+            android:layout_marginLeft="20dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_zoom_center" />
+
+
         <ImageView
             android:id="@+id/image_add"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_manual"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="20dp"/>
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_manual" />
     </RelativeLayout>
     <!-- 显示信息用的滑动效果-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="3"
+        android:layout_weight="4"
         android:orientation="vertical">
 
         <android.support.v4.view.ViewPager

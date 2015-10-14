@@ -34,7 +34,7 @@ public class Project implements Serializable {
     private String mGuass;
 
     /**
-     * 创建顺序
+     * 创建顺序,更改最后的时间不用获得，而是获得配置文件config的最后更改时间。其它的使用
      * @param mName 名称0
      * @param mBackup 备注1
      * @param mTime 创建时间2

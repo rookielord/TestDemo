@@ -21,6 +21,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,9 +53,10 @@ import java.util.UUID;
  */
 public class ConnectActivity extends Activity {
     //控件
-    Button btn_connect, btn_clear, btn_request;
+    Button btn_connect;
     TextView tv_content;
     Spinner sp_device, sp_way;
+    ImageView image_title;
     //设置蓝牙的适配器
     private BluetoothAdapter mAdapter;
     //设置返回是否允许启动蓝牙
@@ -86,6 +88,7 @@ public class ConnectActivity extends Activity {
     private int minTime = 1000;
     private int minDistance = 0;
     private static Handler mHandler;
+
     //判断是否连接上，用来断开连接。清空发送的数据用
     public static void setmHandler(Handler mHandler) {
         ConnectActivity.mHandler = mHandler;
@@ -98,9 +101,9 @@ public class ConnectActivity extends Activity {
         sp_device = (Spinner) findViewById(R.id.sp_device);
         sp_way = (Spinner) findViewById(R.id.sp_way);
         btn_connect = (Button) findViewById(R.id.btn_connect);
-        btn_clear = (Button) findViewById(R.id.btn_clear);
-        btn_request = (Button) findViewById(R.id.btn_request);
         tv_content = (TextView) findViewById(R.id.tv_device_info);
+        image_title = (ImageView) findViewById(R.id.image_title);
+
         //因为重新打开后，mManager都为空值，所以要取消的话，必须得到同一个mManger,同一个listener。
         //获取连接状态和连接内容。然后对其内容进行赋值，如何保证单个连接
         getSingleInfo();
@@ -116,20 +119,6 @@ public class ConnectActivity extends Activity {
                     d.setIsConnected(false);
                 }
 
-            }
-        });
-
-        btn_clear.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearMessage();
-            }
-        });
-
-        btn_request.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMessage();
             }
         });
         //获取设备的内容
@@ -187,19 +176,19 @@ public class ConnectActivity extends Activity {
     }
 
     /**
-     * 获得监听器
+     * 分别获得存在于全局变量中的蓝牙
      */
     private void getSingleInfo() {
         d = (Data) getApplication();
         LocationManager manager = d.getmManager();
         LocationListener locListener = d.getmLocListener();
         GpsStatus.Listener listener = d.getmListener();
+        BluetoothSocket socket=d.getmSocket();
         if (manager == null) {
             mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             d.setmManager(mManager);
-        } else {
+        } else
             mManager = manager;
-        }
         if (locListener == null)
             d.setmLocListener(mLocListener);
         else
@@ -208,6 +197,8 @@ public class ConnectActivity extends Activity {
             d.setmListener(mListener);
         else
             mListener = listener;
+        if (socket!=null)
+            mSocket=socket;
     }
 
     private void setDefaultInfo() {
@@ -249,10 +240,8 @@ public class ConnectActivity extends Activity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } //取消蓝牙的数据接收
-        if (mAdapter != null) {
-            mAdapter.disable();
         }
+
     }
 
     /**
@@ -328,7 +317,6 @@ public class ConnectActivity extends Activity {
      * @param mDevice
      */
     private void connect(BluetoothDevice mDevice) {
-
         try {
             //这里打开socket连接，并将其
             mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
@@ -339,11 +327,11 @@ public class ConnectActivity extends Activity {
             //这里进行配对,主要是这一步
             if (mSocket != null) {
                 mSocket.connect();
+                d.setmSocket(mSocket);
             }
             //这里执行的太快
             //在这里进行适配，如果连接成功，正确执行
             Toast.makeText(ConnectActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-            //连接成功设置
             sendMessage();
             btn_connect.setText("断开");
             d.setIsConnected(true);
@@ -490,21 +478,7 @@ public class ConnectActivity extends Activity {
     }
 
     /**
-     * 清空接收机发过来的数据
-     */
-    private void clearMessage() {
-        try {
-            out = mSocket.getOutputStream();
-            //out.write(msg.getBytes());
-            out.write(TrimbleOrder.CLOSE_COM1);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 这里发送命令，获取卫星数据和位置信息
+     * 这里发送命令，分别清空当前发送信息，获取卫星数据和位置信息
      * 即发送两条指令，包括($GPGGA和$GPGSV)
      * 关闭流就是断开连接，然后中间间隔时间才能发送两条命令
      * 是否第一条必须获得流后就必须发送？
@@ -513,9 +487,10 @@ public class ConnectActivity extends Activity {
     private void sendMessage() {
         try {
             out = mSocket.getOutputStream();
+            out.write(TrimbleOrder.CLOSE_COM1);
+            Thread.sleep(200);
             out.write(TrimbleOrder.GPGSV);
             Thread.sleep(200);
-            //out.flush();
             out.write(TrimbleOrder.GGA);
             out.flush();
         } catch (IOException e) {
@@ -592,12 +567,13 @@ public class ConnectActivity extends Activity {
                         satelliteList.add(s);
                         SatelliteNum++;
                     }
-                    //只有在有handler的情况下才进行数据传输
+                    //只有在有handler的情况下才进行数据传输，因为卫星数据分两套解析所以，需要对mesaage携带的数据进行赋值
                     if (mHandler != null) {
                         Object satellitesInfo = satelliteList.clone();
                         Message message = Message.obtain();
                         message.what = 2;
                         message.obj = satellitesInfo;
+                        message.arg1 = 1;//确保是内置GPS的卫星数据
                         mHandler.sendMessage(message);
                     }
                     break;
@@ -619,7 +595,7 @@ public class ConnectActivity extends Activity {
             String longitude = String.valueOf(location.getLongitude());
             String altitude = String.valueOf(location.getAltitude());
             String latitude = String.valueOf(location.getLatitude());
-            String time = String.valueOf(location.getTime());
+            long time = location.getTime();
             //在有handler的情况下才进行数据传输
             if (mHandler != null) {
                 MyLocation loc = new MyLocation(latitude, longitude, altitude, time);

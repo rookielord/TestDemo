@@ -66,8 +66,8 @@ public class DeviceListActivity extends Activity {
         //默认设置结果为cancel，防止意外返回没有数据
         setResult(RESULT_CANCELED);
         //实例化两个Adapter
-        mPairedAdapter = new ArrayAdapter<String>(this, R.layout.device_item);
-        mNewsAdapter = new ArrayAdapter<String>(this, R.layout.device_item);
+        mPairedAdapter = new ArrayAdapter<>(this, R.layout.device_item);
+        mNewsAdapter = new ArrayAdapter<>(this, R.layout.device_item);
         //获得已配对的蓝牙进行显示
         getPairedAdaper();
         //注册广播接受者，监听设备添加

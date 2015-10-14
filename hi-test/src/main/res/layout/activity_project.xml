@@ -76,10 +76,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="创建时间" />
+                android:text="高斯投影带" />
 
             <TextView
-                android:id="@+id/tv_time"
+                android:id="@+id/tv_guass"
                 style="@style/ProjectInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

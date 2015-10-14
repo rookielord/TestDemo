@@ -35,15 +35,21 @@ import java.util.regex.Pattern;
  */
 public class Method {
 
-
-    public static boolean checkMsg(String msg) {
-        boolean check1, check2;
+    public static boolean checkMsg(String msg, String path) {
+        boolean check1, check2, check3=false;
         check1 = msg.trim().isEmpty();
         String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(msg);
         check2 = m.find();
-        if (check1 || check2) {
+        String[] proName = new File(path).list();
+        if (proName.length > 0) {
+            for (String name : proName) {
+                if (name.equals(msg))
+                    check3 = true;
+            }
+        }
+        if (check1 || check2||check3) {
             return false;
         } else {
             return true;
@@ -60,13 +66,13 @@ public class Method {
      * 进行大改，使用objectOutputStream
      *
      * @param path
-     * @param configs [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间 [4]坐标系统  新增[5]高斯投影带的
+     * @param configs  [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间 [4]坐标系统  新增[5]高斯投影带的
      * @param activity
      * @return
      */
     public static boolean createProject(String path, String[] configs, Activity activity) {
         File pro_file = new File(path + "/" + configs[0]);
-        Data d= (Data) activity.getApplication();
+        Data d = (Data) activity.getApplication();
         if (!pro_file.exists()) {
             pro_file.mkdir();
             //写入配置文件
@@ -170,9 +176,9 @@ public class Method {
      * @param project
      */
     public static void updateProject(Project project) {
-        ObjectOutputStream out=null;
+        ObjectOutputStream out = null;
         try {
-            out=new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
+            out = new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
             //写入内容
             project.setmLastTime(getCurrentTime());
             out.writeObject(project);
@@ -207,7 +213,7 @@ public class Method {
         if (isFirst) {
             String path = d.getmPath();//path是指Project的位置
             String time = Method.getCurrentTime();
-            String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系","WGS84坐标系"};
+            String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系", "3度带"};
             //创建默认项目
             Method.createProject(path, configs, activity);
             //然后读取config.txt来创建项目
@@ -220,11 +226,7 @@ public class Method {
         }
     }
 
-    /**
-     * 默认创建，然后默认打开
-     * @param path
-     * @return
-     */
+
     public static Project getDefaultProject(String path) {
 
         File config = new File(path + "/" + "default", "config.txt");
@@ -232,7 +234,7 @@ public class Method {
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(new FileInputStream(config));
-            p= (Project) in.readObject();
+            p = (Project) in.readObject();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -272,7 +274,7 @@ public class Method {
         }
     }
 
-    public static void getLastProject(MainActivity mainActivity) {
+    public static void setLastProject(Activity mainActivity) {
         Data d = (Data) mainActivity.getApplication();
         //先检测是否存在
         File file = new File(mainActivity.getFilesDir(), "last.txt");
@@ -312,6 +314,39 @@ public class Method {
             }
         }
     }
+
+    public static Project getLastProject(Activity mainActivity) {
+        Project p = null;
+        //先检测是否存在
+        File file = new File(mainActivity.getFilesDir(), "last.txt");
+        if (file.exists()) {
+            FileInputStream fis = null;
+            ObjectInputStream ois = null;
+            try {
+                fis = new FileInputStream(file);
+                //读取对象
+                ois = new ObjectInputStream(fis);
+                p = (Project) ois.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (fis != null)
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                if (ois != null)
+                    try {
+                        ois.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }
+        return p;
+    }
+
     public static double degreeToRadian(double degree) {
         return (degree * Math.PI) / 180.0d;
     }

@@ -34,9 +34,8 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"
             android:gravity="center"
             android:padding="4dp"
             android:text="坐标系"
@@ -48,7 +47,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="1"
             ></Spinner>
     </LinearLayout>
     <LinearLayout
@@ -57,9 +55,8 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"
             android:gravity="center"
             android:padding="4dp"
             android:text="高斯带数"
@@ -71,7 +68,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="1"
             ></Spinner>
     </LinearLayout>
 </LinearLayout>

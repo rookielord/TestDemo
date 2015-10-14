@@ -40,7 +40,7 @@ import java.util.List;
 public class ProjectActivity extends Activity {
     //控件
     ListView lv;
-    TextView tv_name, tv_coordinate, tv_time, tv_lasttime;
+    TextView tv_name, tv_coordinate, tv_guass, tv_lasttime;
 
     //加载过来的项目，判断是否有项目
     private String mPath;
@@ -61,11 +61,12 @@ public class ProjectActivity extends Activity {
         //全局路径
         mPath = d.getmPath();
         mProject = d.getmProject();
-        //找控件
+        //找控件：1.进行填充的listview
         lv = (ListView) findViewById(R.id.lv);
+        //进行项目信息显示
         tv_name = (TextView) findViewById(R.id.tv_name);
         tv_coordinate = (TextView) findViewById(R.id.tv_coordinate);
-        tv_time = (TextView) findViewById(R.id.tv_time);
+        tv_guass = (TextView) findViewById(R.id.tv_guass);
         tv_lasttime = (TextView) findViewById(R.id.tv_lasttime);
         //获得Project目录下所有的Project文件对象
         mHasProject = HasProject(mPath);
@@ -76,7 +77,7 @@ public class ProjectActivity extends Activity {
         if (mHasProject) {
             //获得当前的Project目录下所有的project对象
             mProjects = getProjectInstance(mPath);
-            //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示
+            //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示,当点击后就将当前项目显示到上面去
             mpa = new ProjectAdapter(mProjects, this);
             mpa.setmP(new OnProjectListener() {
                 @Override
@@ -88,14 +89,14 @@ public class ProjectActivity extends Activity {
             //第三步通过适配器，将项目显示到ListView上
             lv.setAdapter(mpa);
         } else {
-            Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_LONG).show();
+            Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showProjectInfo(Project project) {
         tv_name.setText(project.getmName());
         tv_coordinate.setText(project.getmCoordinate());
-        tv_time.setText(project.getmTime());
+        tv_guass.setText(project.getmGuass());
         tv_lasttime.setText(project.getmLastTime());
     }
 
@@ -114,7 +115,7 @@ public class ProjectActivity extends Activity {
     /**
      * 第二步根据路径来获取对应的配置文件来创建Project对象，并填充进集合
      *
-     * @param path
+     * @param path 配置文件的路径
      * @return
      */
     private List<Project> getProjectInstance(String path) {
@@ -164,7 +165,7 @@ public class ProjectActivity extends Activity {
             case R.id.item_create:
                 LayoutInflater inflater = getLayoutInflater();
                 //这里实现创建项目,使用dialog来创建
-                View view = null;
+                View view;
                 view = inflater.inflate(R.layout.project_dialog, null);
                 //填充坐标系和高斯投影带数据
                 final Spinner sp_coordinate = (Spinner) view.findViewById(R.id.sp_coordinate);
@@ -185,7 +186,7 @@ public class ProjectActivity extends Activity {
                             public void onClick(DialogInterface dialog, int which) {
                                 EditText et1 = (EditText) finalView.findViewById(R.id.et_pro_name);
                                 String pro_name = et1.getText().toString();
-                                boolean isRight = Method.checkMsg(pro_name);
+                                boolean isRight = Method.checkMsg(pro_name,mPath);
                                 String[] mConfigs = new String[6];
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称
@@ -218,6 +219,7 @@ public class ProjectActivity extends Activity {
                 break;
             case R.id.item_delte:
                 if (mProject != null) {
+                    //OptionItem进行删除，会删除当前radioButton选中的
                     deleteProject();
                 } else {
                     Toast.makeText(ProjectActivity.this, "请选择项目", Toast.LENGTH_SHORT).show();
@@ -232,8 +234,13 @@ public class ProjectActivity extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 0:
+                //如果当前有打开项目，则更新最后的时间
+                if (d.getmProject()!=null){
+                    Method.updateProject(d.getmProject());
+                }
                 d.setmProject(mProject);
                 Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
+                refresh();
                 break;
             case 1:
                 if (mProject != null)
@@ -246,9 +253,19 @@ public class ProjectActivity extends Activity {
     }
 
     private void deleteProject() {
-        //删除前相对比全局变量的project是否是删除的project
-        if (mProject.equals(d.getmProject())) {
-            d.setmProject(null);
+        //注意：关闭后打开得到的Application中的project对象和当前选中的mProject对象是不一样的，只能根据名称进行判断
+        //如果名称相同则当前项目为空
+        if (d.getmProject() != null) {
+            if (d.getmProject().getmName().equals(mProject.getmName())) {
+                d.setmProject(null);
+            }
+        }
+        Project p = Method.getLastProject(this);
+        if (p != null) { //如果当前删除项目是最后一个打开项目
+            if (p.getmName().equals(mProject.getmName())) {
+                File file = new File(this.getFilesDir(), "last.txt");
+                file.delete();
+            }
         }
         //删除表
         Curd curd = new Curd(mProject.getmTableName(), this);

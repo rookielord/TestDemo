@@ -9,6 +9,8 @@ public class Constant {
     public static final String TAG = "LIJIAJI";
     public static final String SURVEY_TAG = "Survey";
     public static final String GPS_TAG = "GPS";
+    public static final String STARVIEW_TAG = "StarView";
+    public static final String View_TAG = "SurveyView";
     public static final int BlueToothConncet = 1;
     public static final int InnerGPSConnect = 2;
 }

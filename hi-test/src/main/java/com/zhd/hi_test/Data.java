@@ -21,10 +21,22 @@ public class Data extends Application{
     //0为未连接;1为蓝牙连接;2为内置GPS
     private int mConnectType = 0;
     private boolean IsConnected = false;
+    private double mheight = 0;
+    //内置GPS的一些监听
     private LocationManager mManager;
     private LocationListener mLocListener;
     private GpsStatus.Listener mListener;
-    private double mheight = 0;
+
+    public BluetoothSocket getmSocket() {
+        return mSocket;
+    }
+
+    public void setmSocket(BluetoothSocket mSocket) {
+        this.mSocket = mSocket;
+    }
+
+    //IRTK的蓝牙连接对象
+    private BluetoothSocket mSocket;
 
     public double getMheight() {
         return mheight;

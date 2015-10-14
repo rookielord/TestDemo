@@ -11,6 +11,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 
+import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.callback.OnProjectListener;
 import com.zhd.hi_test.module.Project;
@@ -21,7 +22,6 @@ import java.util.Map;
 
 /**
  * Created by 2015032501 on 2015/9/7.
- *
  */
 public class ProjectAdapter extends BaseAdapter {
     //回调函数来获取选中
@@ -37,16 +37,20 @@ public class ProjectAdapter extends BaseAdapter {
     private List<Project> mProjects;
     private Context mContext;
     //用来存放所有的Radio状态
-    Map<String, Boolean> states = new HashMap<String, Boolean>();
+    Map<String, Boolean> states = new HashMap<>();
+    //让当前项目打开项目的名称和列表中项目进行比较，然后选中项目背景变色
+    private Project mProject;
 
     public ProjectAdapter(List<Project> Projects, Context context) {
         this.mProjects = Projects;
         this.mContext = context;
+        Data d= (Data) context.getApplicationContext();
+        mProject=d.getmProject();
     }
 
     //定义一个Viewholder,用来存放layout上面的控件对象
     class ViewHolder {
-        TextView pro_name, pro_back, pro_guass;
+        TextView pro_name, pro_back, pro_addtime;
         RadioButton radio;
     }
 
@@ -71,7 +75,7 @@ public class ProjectAdapter extends BaseAdapter {
         //获得填充数据
         Project p = mProjects.get(position);
         ViewHolder holder;
-        final int index=position;
+        final int index = position;
         //获得布局填充器
         LayoutInflater inflater = LayoutInflater.from(mContext);
         //就是缓存view被销毁
@@ -83,7 +87,7 @@ public class ProjectAdapter extends BaseAdapter {
             //将layout上面的控件给holder中的控件属性，需要赋值的属性
             holder.pro_name = (TextView) convertView.findViewById(R.id.tv_proname);
             holder.pro_back = (TextView) convertView.findViewById(R.id.tv_proback);
-            holder.pro_guass = (TextView) convertView.findViewById(R.id.tv_guass);
+            holder.pro_addtime = (TextView) convertView.findViewById(R.id.tv_addtime);
             //设置给Tag属性
             convertView.setTag(holder);
         } else {
@@ -93,7 +97,7 @@ public class ProjectAdapter extends BaseAdapter {
         //设置Holder里面的内容,因为没有被销毁，所以控件内容都还在
         holder.pro_name.setText(p.getmName());
         holder.pro_back.setText(p.getmBackup());
-        holder.pro_guass.setText(p.getmGuass());
+        holder.pro_addtime.setText(p.getmTime());
         //获取RadioButton对象,在外面获取
         final RadioButton radio = (RadioButton) convertView.findViewById(R.id.rb);
         //给Holder中的radio附上对象
@@ -101,13 +105,14 @@ public class ProjectAdapter extends BaseAdapter {
         //这里是将选中的view获得到
         //这里将所有radioButton的状态赋值为false,在点击事件开始之前下面已经将states赋值
         //对radio控件实施监听，点击后会点击后，全部设置为false
-        mClick=new OnClickListener() {
+        mClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
                 for (String key : states.keySet()) {//点击radioButton按钮时会将触发事件，先将所有的states设为false
-                    states.put(key,false);
+                    states.put(key, false);
                 }
                 states.put(String.valueOf(index), true);//将目前选中的radioButton赋值给states
+                //当选择了点击了后，就会得到当前的project对象
                 mP.getItemPosition(index);
                 ProjectAdapter.this.notifyDataSetChanged();
             }
@@ -123,6 +128,12 @@ public class ProjectAdapter extends BaseAdapter {
         } else
             res = true;//如果为里面有选中的则一直为true,第一次肯定是都不选中的
         holder.radio.setChecked(res);
+        //在这里进行判断当前的mProject是否等于convertview的project
+        if (mProject!=null){
+            if (p.getmName().equals(mProject.getmName())){
+                convertView.setBackgroundResource(R.drawable.project_selected);
+            }
+        }
         convertView.setOnClickListener(mClick);
         //这里是这里是根据convertView来创建的菜单
         convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
@@ -131,6 +142,7 @@ public class ProjectAdapter extends BaseAdapter {
                 menu.setHeaderTitle("项目操作");
                 menu.add(0, 0, 0, "打开项目");
                 menu.add(0, 1, 0, "删除项目");
+                menu.add(0, 2, 0, "修改项目");
             }
         });
         return convertView;

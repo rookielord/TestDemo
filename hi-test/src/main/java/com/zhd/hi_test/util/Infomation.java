@@ -52,6 +52,9 @@ public class Infomation {
     private static void getLoactionInfo(String group) {
         //1.获得位置信息和时间
         String[] info = group.split(",");
+        //注意，刚刚开机时是没有定位的，GGA数据都为空，对B是否有值进行判断,没有值则不进行穿件location对象
+        if (info[1].equals(""))
+        return;
         String time = info[0];
         String B = info[1];
         String BDire = info[2];
@@ -76,6 +79,9 @@ public class Infomation {
     private static void getSatelliteInfo(String group) {
         //1.获得类型
         String[] info = group.split(",");
+        //没有数据返回
+        if (info[1].equals(""))
+            return;
         //1.1获得该时间的总共条数（总的GSV语句电文数）
         int allnum = Integer.parseInt(info[1]);
         //1.2获得GSV是该条目的第几条
@@ -98,6 +104,9 @@ public class Infomation {
             int loc = 4 * (i + 1);
             //1.4创建卫星数据传入list集合中
             //最后一个信噪比可能为空值，如果为空值则赋值0,表示没有收到信号
+            if (info[loc + 3].equals("")) {
+                info[loc + 3] = "0";
+            }
             s = new Satellite(info[loc], info[loc + 1], info[loc + 2], info[loc + 3], type);
             mSatellites.add(s);
         }
@@ -109,6 +118,7 @@ public class Infomation {
             Message m = Message.obtain();
             m.obj = mTemps;
             m.what = 2;
+            m.arg1 = 2;//表示是IRTK的卫星数据
             mHandler.sendMessage(m);
             mSatellites.clear();
             //然后清空其中的东西

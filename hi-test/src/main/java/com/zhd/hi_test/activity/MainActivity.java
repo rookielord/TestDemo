@@ -75,8 +75,8 @@ public class MainActivity extends Activity {
         Method.createDirectory(this);
         //创建默认文件夹并选中
         Method.createDefaultProject(this);
-        //获取上一次打开的项目
-        Method.getLastProject(this);
+        //获取上一次打开的项目,将其设置为全局变量
+        Method.setLastProject(this);
         context = MainActivity.this;
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
      */
     private void initPagerViewer() {
         pager = (ViewPager) findViewById(R.id.viewpage);
-        final ArrayList<View> list = new ArrayList<View>();
+        final ArrayList<View> list = new ArrayList<>();
         Intent intent = new Intent(context, GridActivity.class);
         intent.putExtra("PageNum", 1);
         list.add(getView("A", intent));

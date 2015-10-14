@@ -10,11 +10,11 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/19.
- *
+ * 这个是主界面的滑动效果
  */
 public class MyPagerAdapter extends PagerAdapter {
 
-    List<View> list = new ArrayList<View>();
+    List<View> list = new ArrayList<>();
 
     public MyPagerAdapter(ArrayList<View> list) {
         this.list = list;
@@ -30,7 +30,7 @@ public class MyPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position,
                             Object object) {
         ViewPager pViewPager = ((ViewPager) container);//转化为ViewPaper来进行管理
-        pViewPager.removeView(list.get(position));//移除选择小鬼的View对象
+        pViewPager.removeView(list.get(position));//移除选择销毁的View对象
     }
 
     /**

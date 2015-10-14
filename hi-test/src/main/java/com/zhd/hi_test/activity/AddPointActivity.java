@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class AddPointActivity extends Activity {
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_DireB, tv_DireL,tv_time;
     EditText et_des, et_height, et_name;
     TextView tv_add, tv_back;
 
@@ -48,6 +48,9 @@ public class AddPointActivity extends Activity {
         tv_N = (TextView) findViewById(R.id.tv_N);
         tv_E = (TextView) findViewById(R.id.tv_E);
         tv_Z = (TextView) findViewById(R.id.tv_Z);
+        tv_time= (TextView) findViewById(R.id.tv_time);
+        tv_DireB= (TextView) findViewById(R.id.tv_DireB);
+        tv_DireL= (TextView) findViewById(R.id.tv_DireL);
         et_des = (EditText) findViewById(R.id.et_des);
         et_height = (EditText) findViewById(R.id.et_height);
         et_name = (EditText) findViewById(R.id.et_name);
@@ -75,6 +78,9 @@ public class AddPointActivity extends Activity {
             tv_N.setText(intent.getStringExtra("N"));
             tv_E.setText(intent.getStringExtra("E"));
             tv_Z.setText(intent.getStringExtra("Z"));
+            tv_time.setText(intent.getStringExtra("time"));
+            tv_DireB.setText(intent.getStringExtra("DireB"));
+            tv_DireL.setText(intent.getStringExtra("DireL"));
             tv_add.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -90,6 +96,9 @@ public class AddPointActivity extends Activity {
                     cv.put("Z", tv_Z.getText().toString());
                     cv.put("DES", et_des.getText().toString());
                     cv.put("height", et_height.getText().toString());
+                    cv.put("DireB", tv_DireB.getText().toString());
+                    cv.put("DireL", tv_DireL.getText().toString());
+                    cv.put("time",tv_time.getText().toString());
                     values.add(cv);
                     //这里将mheight重新赋值给全局变量
                     d.setMheight(Double.parseDouble(et_height.getText().toString()));
@@ -116,6 +125,9 @@ public class AddPointActivity extends Activity {
                 tv_N.setText(cursor.getString(cursor.getColumnIndex("N")));
                 tv_E.setText(cursor.getString(cursor.getColumnIndex("E")));
                 tv_Z.setText(cursor.getString(cursor.getColumnIndex("Z")));
+                tv_DireB.setText(cursor.getString(cursor.getColumnIndex("DireB")));
+                tv_DireL.setText(cursor.getString(cursor.getColumnIndex("DireL")));
+                tv_time.setText(cursor.getString(cursor.getColumnIndex("time")));
                 et_des.setText(cursor.getString(cursor.getColumnIndex("DES")));
                 et_height.setText(cursor.getString(cursor.getColumnIndex("height")));
             }
@@ -125,15 +137,17 @@ public class AddPointActivity extends Activity {
                 @Override
                 public void onClick(View v) {
                     ContentValues cv = new ContentValues();
-                    cv.put("id", et_name.getText().toString().substring(2));
-                    cv.put("B", tv_B.getText().toString());
-                    cv.put("L", tv_L.getText().toString());
-                    cv.put("H", tv_H.getText().toString());
-                    cv.put("N", tv_N.getText().toString());
-                    cv.put("E", tv_E.getText().toString());
-                    cv.put("Z", tv_Z.getText().toString());
+//                    cv.put("id", et_name.getText().toString().substring(2));
+//                    cv.put("B", tv_B.getText().toString());
+//                    cv.put("L", tv_L.getText().toString());
+//                    cv.put("H", tv_H.getText().toString());
+//                    cv.put("N", tv_N.getText().toString());
+//                    cv.put("E", tv_E.getText().toString());
+//                    cv.put("Z", tv_Z.getText().toString());
                     cv.put("DES", et_des.getText().toString());
                     cv.put("height", et_height.getText().toString());
+//                    cv.put("DireB", tv_DireB.getText().toString());
+//                    cv.put("DireL", tv_DireL.getText().toString());
                     boolean res = curd.UpdateData(id, cv);
                     if (res) {
                         Toast.makeText(AddPointActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
