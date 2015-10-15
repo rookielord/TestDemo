@@ -40,12 +40,20 @@ public class SurveyView extends View {
     //画笔
     private Paint mPaint = new Paint();
     //本次缩放的比例和本次的平移量
-    public float mScale = 1.0f;
-    public float mOffsetx = 0;
-    public float mOffsety = 0;
+    private float mScale = 1.0f;
+    private float mOffsetx = 0;
+    private float mOffsety = 0;
     //最新打点的位置
     private DrawPoint mLastPont;
 
+    public void setmOffsets(float Offsetx,float Offsety) {
+        this.mOffsetx = Offsetx;
+        this.mOffsety = Offsety;
+    }
+
+    public void setmScale(float Scale) {
+        this.mScale = Scale;
+    }
 
     public SurveyView(Context context) {
         super(context);
@@ -59,14 +67,13 @@ public class SurveyView extends View {
         super(context, attrs, defStyleAttr);
     }
 
+    public void SetCurrentLocation(MyPoint point){
+        setCenterValue(point.getmN(),point.getmE());
+    }
+
     /**
-     * 将点集合传过来
-     * 点击添加的时候传入
-     * 如果点击则调用该方法，并刷新自定义控件
-     * 这个会先执行，这个会先将数据传过来,但我还没有获取宽和高
-     * 所以当前只能将中心点的mN和mE设置成功
-     *
-     * @param points
+     * 将更新过后的点集合传入过来，并以集合最后一个点来画其它的点
+     * @param points 根据数据库倒序查询出来的点
      */
     public void setPoints(List<MyPoint> points) {
         if (points != null) {//获得
@@ -76,10 +83,24 @@ public class SurveyView extends View {
         }
     }
 
-    public void setmScale(float Scale) {
+    /**
+     * 从外界传入缩放的比例
+     * 并控制其大小
+     * @param Scale 传入的缩放比例
+     */
+    public void setScale(float Scale) {
         mScale *= Scale;
+        if (mScale > 30) {
+            mScale = 30;
+        } else if (mScale < 1/30)
+            mScale = 1/30;
     }
 
+    /**
+     * 从外界传入平移的量
+     * @param offsetX x方向平移量
+     * @param offsetY y方向平移量
+     */
     public void setOffset(float offsetX, float offsetY) {
         mOffsetx += offsetX;
         mOffsety += offsetY;
@@ -177,12 +198,6 @@ public class SurveyView extends View {
         }
     }
 
-    /**
-     * 1.没有已知点：显示用户的当前位置
-     * 2.有已知点：显示用户当前位置和已知点
-     *
-     * @param canvas
-     */
     @Override
     protected void onDraw(Canvas canvas) {
         mPaint.setAntiAlias(true);

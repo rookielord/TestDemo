@@ -30,6 +30,7 @@ import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.UTCTime;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
@@ -103,7 +104,6 @@ public class ConnectActivity extends Activity {
         btn_connect = (Button) findViewById(R.id.btn_connect);
         tv_content = (TextView) findViewById(R.id.tv_device_info);
         image_title = (ImageView) findViewById(R.id.image_title);
-
         //因为重新打开后，mManager都为空值，所以要取消的话，必须得到同一个mManger,同一个listener。
         //获取连接状态和连接内容。然后对其内容进行赋值，如何保证单个连接
         getSingleInfo();
@@ -117,8 +117,8 @@ public class ConnectActivity extends Activity {
                     btn_connect.setText("连接");
                     disconnect();
                     d.setIsConnected(false);
+                    d.setmConnectType(0);
                 }
-
             }
         });
         //获取设备的内容
@@ -175,9 +175,6 @@ public class ConnectActivity extends Activity {
         setDefaultInfo();
     }
 
-    /**
-     * 分别获得存在于全局变量中的蓝牙
-     */
     private void getSingleInfo() {
         d = (Data) getApplication();
         LocationManager manager = d.getmManager();
@@ -231,12 +228,13 @@ public class ConnectActivity extends Activity {
         if (mManager != null) {
             mManager.removeUpdates(mLocListener);
             mManager.removeGpsStatusListener(mListener);
-            d.setmConnectType(0);
         }
 
         if (mSocket != null) {
             try {
-                mSocket.close();
+                if (mSocket.isConnected()){
+                    mSocket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -370,7 +368,7 @@ public class ConnectActivity extends Activity {
                             if (useInfo != null) {
                                 String msg1 = new String(useInfo);
                                 //注意，显示数据是不完善的，经过调试后发现是完整拼接
-//                                Log.d(Constant.TAG, msg1);
+                                Log.d(Constant.TAG, msg1);
                                 Infomation.setmInputMsg(msg1);
                             }
                         }
@@ -407,7 +405,6 @@ public class ConnectActivity extends Activity {
                 temp[i] = buffer[i + loc];
             }
         }
-//        String msg=new String(temp);
         return temp;
     }
 
@@ -492,6 +489,8 @@ public class ConnectActivity extends Activity {
             out.write(TrimbleOrder.GPGSV);
             Thread.sleep(200);
             out.write(TrimbleOrder.GGA);
+            Thread.sleep(200);
+            out.write(TrimbleOrder.GPZDA);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -595,14 +594,20 @@ public class ConnectActivity extends Activity {
             String longitude = String.valueOf(location.getLongitude());
             String altitude = String.valueOf(location.getAltitude());
             String latitude = String.valueOf(location.getLatitude());
-            long time = location.getTime();
+            long time=location.getTime();
             //在有handler的情况下才进行数据传输
             if (mHandler != null) {
-                MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
-                Message message = Message.obtain();
-                message.what = 1;
-                message.obj = loc;
-                mHandler.sendMessage(message);
+                MyLocation loc = new MyLocation(latitude, longitude, altitude);
+                Message m1 = Message.obtain();
+                m1.what = 1;
+                m1.obj = loc;
+                mHandler.sendMessage(m1);
+
+                UTCTime t=new UTCTime(time);
+                Message m2=Message.obtain();
+                m2.what=3;
+                m2.obj=t;
+                mHandler.sendMessage(m2);
             }
         }
 

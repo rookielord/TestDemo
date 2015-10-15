@@ -76,7 +76,7 @@ public class ZoomListener implements View.OnTouchListener {
      * @param f
      */
     private void zoom(float f) {
-        mView.setmScale(f);
+        mView.setScale(f);
         mView.invalidate();
     }
 

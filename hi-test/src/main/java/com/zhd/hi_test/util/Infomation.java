@@ -6,6 +6,7 @@ import android.os.Message;
 
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.Satellite;
+import com.zhd.hi_test.module.UTCTime;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -25,16 +26,18 @@ public class Infomation {
 
     private static Pattern GGA_pattern = Pattern.compile("(?<=\\$GPGGA\\,).*?(?=\\*)");
     private static Pattern Satellite_pattern = Pattern.compile("(\\$GPGSV|\\$GLGSV|\\$BDGSV).*?(?=\\*)");
+    private static Pattern GPZDA_pattern=Pattern.compile("(?<=\\$GPZDA\\,).*?(?=\\*)");
+
     //存放对应的数据
-    private static ArrayList<Satellite> mSatellites = new ArrayList<Satellite>();
+    private static ArrayList<Satellite> mSatellites = new ArrayList<>();
     private static MyLocation location;
+    private static UTCTime curTime;
     //用来存放临时的数据然后发送过去
     private static Object mTemps;
     //用来获取对应的字段
     private static Matcher mMacher;
 
     public static void setmInputMsg(String mInputMsg) {
-
         if (mHandler == null)
             return;
         //获得卫星信息
@@ -47,15 +50,19 @@ public class Infomation {
         while (mMacher.find()) {
             getLoactionInfo(mMacher.group());
         }
+        //获得时间信息
+        mMacher=GPZDA_pattern.matcher(mInputMsg);
+        while (mMacher.find()){
+            getTimeInfo(mMacher.group());
+        }
     }
 
     private static void getLoactionInfo(String group) {
         //1.获得位置信息和时间
         String[] info = group.split(",");
         //注意，刚刚开机时是没有定位的，GGA数据都为空，对B是否有值进行判断,没有值则不进行穿件location对象
-        if (info[1].equals(""))
-        return;
-        String time = info[0];
+        if (info.length == 1 || info[1].equals(""))
+            return;
         String B = info[1];
         String BDire = info[2];
         String L = info[3];
@@ -63,24 +70,18 @@ public class Infomation {
         String HDPO = info[7];
         String H = info[8];
         //坐标点
-        location = new MyLocation(B, L, H, time, BDire, LDire);
+        location = new MyLocation(B, L, H, BDire, LDire);
         Message m = Message.obtain();
         m.obj = location;
         m.what = 1;
         mHandler.sendMessage(m);
     }
 
-    /**
-     * 根据获取的总条数和当前条数来拼凭借同一时间的卫星数据信息，遇到了一次如果只有头的数据，
-     * 是解析每一条数据例如：$GPGSV,11,4,36,50,46,122,42,40,21,257,42
-     *
-     * @param group
-     */
     private static void getSatelliteInfo(String group) {
         //1.获得类型
         String[] info = group.split(",");
         //没有数据返回
-        if (info[1].equals(""))
+        if (info.length == 1 || info[1].equals(""))
             return;
         //1.1获得该时间的总共条数（总的GSV语句电文数）
         int allnum = Integer.parseInt(info[1]);
@@ -123,6 +124,22 @@ public class Infomation {
             mSatellites.clear();
             //然后清空其中的东西
         }
+    }
+
+    private static void getTimeInfo(String group){
+        String[] info = group.split(",");
+        //没有数据返回
+        if (info.length == 1 || info[1].equals(""))
+            return;
+        String time=info[1];
+        String day=info[2];
+        String month=info[3];
+        String year=info[4];
+        curTime = new UTCTime(time,day,month,year);
+        Message m = Message.obtain();
+        m.obj = curTime;
+        m.what = 3;
+        mHandler.sendMessage(m);
     }
 
 }

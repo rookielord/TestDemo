@@ -25,6 +25,7 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyPoint;
+import com.zhd.hi_test.module.UTCTime;
 import com.zhd.hi_test.ui.SurveyView;
 import com.zhd.hi_test.ui.ZoomListener;
 import com.zhd.hi_test.util.Coordinate;
@@ -40,19 +41,20 @@ import java.util.List;
  * 包括：1.与RTK的蓝牙连接 2.与内部GPS的连接方式：
  * 以上两种方式通过设备连接=》全局变量=》这里获取的方式来获得
  */
-public class SurveyActivity extends Activity implements OnClickListener{
+public class SurveyActivity extends Activity implements OnClickListener {
 
     private Data d;
     //控件
     TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time;
     Button btn_add;
-    ImageView image_add,image_zoom_in,image_zoom_out,image_zoom_center;
+    ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
     private static String mDireL;
-    //自定义控件更新点的集合
+    //自定义控件更新点的集合,包括当前点的位置
     List<MyPoint> points = new ArrayList<>();
     SurveyView surveyView;
+    private MyPoint point;
     //滑动需要的控件和数值
     LinearLayout pointLayout;
     ViewPager viewPager;
@@ -78,20 +80,25 @@ public class SurveyActivity extends Activity implements OnClickListener{
                     tv_B.setText(location.getmB());
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
-                    tv_time.setText(location.getmTime());
-                    mDireB=location.getmDireB();
-                    mDireL=location.getmDireL();
+                    mDireB = location.getmDireB();
+                    mDireL = location.getmDireL();
                     double b = Double.valueOf(location.getmProgressB());
                     double l = Double.valueOf(location.getmProgressL());
-                    HashMap<String, Double> info = Coordinate.getCoordinateXY(b, l, d.getmProject());
+                    HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, d.getmProject());
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
                     tv_Z.setText(location.getmH());
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
-                    MyPoint point = new MyPoint("", info.get("n"), info.get("e"));
+                    point = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
                     surveyView.setLocation(point);
                     //重绘
                     surveyView.invalidate();
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    UTCTime time= (UTCTime) msg.obj;
+                    tv_time.setText(time.getmCurrentTime());
                     break;
             }
         }
@@ -103,8 +110,8 @@ public class SurveyActivity extends Activity implements OnClickListener{
         setContentView(R.layout.activity_survey);
         //获得表名来进行数据的操作
         d = (Data) getApplication();
-        if (d.getmProject()==null){
-            Toast.makeText(this,"请打开项目",Toast.LENGTH_SHORT).show();
+        if (d.getmProject() == null) {
+            Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
         mCurd = new Curd(d.getmProject().getmTableName(), this);
@@ -135,7 +142,7 @@ public class SurveyActivity extends Activity implements OnClickListener{
         cv.put("N", tv_N.getText().toString());
         cv.put("E", tv_E.getText().toString());
         cv.put("Z", tv_Z.getText().toString());
-        cv.put("time",tv_time.getText().toString());
+        cv.put("time", tv_time.getText().toString());
         cv.put("DireB", mDireB);
         cv.put("DireL", mDireL);
         cv.put("DES", "");
@@ -164,11 +171,12 @@ public class SurveyActivity extends Activity implements OnClickListener{
      * 1.对数据库中是否有点进行判断
      * 2.进行points点集合的更新，获取添加进数据库的新的点的集合
      * 3.每次进行更新前，需要清空点的集合
+     * 4.在刷新的时候，需要判断
      */
     private void refreshPoints() {
         points.clear();
         mCursor = mCurd.queryData(new String[]{"*"}, "id desc", null);
-        if (mCursor.getCount()!=0) {
+        if (mCursor.getCount() != 0) {
             while (mCursor.moveToNext()) {
                 //获取数据存入其中
                 double N = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("N")));
@@ -189,14 +197,16 @@ public class SurveyActivity extends Activity implements OnClickListener{
      */
     private void init() {
         image_add = (ImageView) findViewById(R.id.image_add);
-        image_zoom_center= (ImageView) findViewById(R.id.image_center);
-        image_zoom_in= (ImageView) findViewById(R.id.image_zoom_in);
-        image_zoom_out= (ImageView) findViewById(R.id.image_zoom_out);
+        image_zoom_center = (ImageView) findViewById(R.id.image_zoom_center);
+        image_zoom_in = (ImageView) findViewById(R.id.image_zoom_in);
+        image_zoom_out = (ImageView) findViewById(R.id.image_zoom_out);
+        image_zoom_all = (ImageView) findViewById(R.id.image_zoom_all);
         btn_add = (Button) findViewById(R.id.btn_add_point);
         image_add.setOnClickListener(this);
         image_zoom_in.setOnClickListener(this);
         image_zoom_out.setOnClickListener(this);
         image_zoom_center.setOnClickListener(this);
+        image_zoom_all.setOnClickListener(this);
         btn_add.setOnClickListener(this);
         viewPager = (ViewPager) findViewById(R.id.first_vp);
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -293,6 +303,8 @@ public class SurveyActivity extends Activity implements OnClickListener{
                 //如果添加成功，则进行数据的刷新
                 if (resultCode == RESULT_OK) {
                     refreshPoints();
+                    surveyView.setPoints(points);
+                    surveyView.invalidate();
                 }
                 break;
         }
@@ -307,7 +319,7 @@ public class SurveyActivity extends Activity implements OnClickListener{
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.image_add://直接进行数据采集
                 if (d.isConnected()) {
                     addPoint();
@@ -330,18 +342,25 @@ public class SurveyActivity extends Activity implements OnClickListener{
                 }
                 break;
             case R.id.image_zoom_in://传入放大比例
-                surveyView.setmScale(1.5f);
+                surveyView.setScale(1.5f);
                 surveyView.invalidate();
                 break;
             case R.id.image_zoom_out://传入缩小比例
-                surveyView.setmScale(0.5f);
+                surveyView.setScale(0.5f);
                 surveyView.invalidate();
                 break;
-            case R.id.image_center://初始化使其居中
-                surveyView.mOffsetx=0;
-                surveyView.mOffsety=0;
-                surveyView.invalidate();
+            case R.id.image_zoom_center://初始化使其居中
+                if (point != null) {
+                    refreshPoints();
+                    surveyView.setmOffsets(0, 0);
+                    surveyView.SetCurrentLocation(point);
+                    surveyView.invalidate();
+                }
                 break;
+            case R.id.image_zoom_all:
+                surveyView.setmOffsets(0, 0);
+                surveyView.setmScale(1);
+                surveyView.invalidate();
         }
     }
 }

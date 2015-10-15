@@ -238,7 +238,21 @@ public class ManageActivity extends Activity {
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 //根据xml来创建view对象
-                convertView = LayoutInflater.from(context).inflate(res, null);
+                convertView = LayoutInflater.from(context).inflate(res, null,false);
+                MyScrollView view= (MyScrollView) convertView.findViewById(R.id.item_scroll);
+                view.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        v.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                            @Override
+                            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                                menu.add(0, 0, 0, "删除信息");
+                                menu.add(0, 1, 1, "修改信息");
+                            }
+                        });
+                        return false;
+                    }
+                });
                 //这里找到的是自定义控件的HorizonscrollView，然后加入到集合里面，滑动时处理里面的自定义控件集合
                 addHViews((MyScrollView) convertView.findViewById(R.id.item_scroll));
                 //根据插入对应数据的长度来创建views，
