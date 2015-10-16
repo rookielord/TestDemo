@@ -3,10 +3,10 @@
     android:id="@+id/project_gridview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:numColumns="auto_fit"
-    android:verticalSpacing="20dp"
+    android:gravity="center"
     android:horizontalSpacing="20dp"
-    android:columnWidth="90dp"
+    android:numColumns="auto_fit"
+    android:padding="30dp"
+    android:scrollbars="none"
     android:stretchMode="columnWidth"
-    android:padding="15dp"
-    android:gravity="center"></GridView>
+    android:verticalSpacing="20dp"></GridView>

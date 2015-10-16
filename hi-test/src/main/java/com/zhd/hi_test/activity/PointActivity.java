@@ -37,7 +37,7 @@ import java.util.Map;
  * 进行点位数据的查询和显示，并且可以对数据进行增删改查
  * 并没有将查询出来的内容生成对象管理，而只是将查出来的数据放进对应的地点
  */
-public class ManageActivity extends Activity {
+public class PointActivity extends Activity {
     //用来填充的数据的
     private ListView mListView;
     //找到自定义控件

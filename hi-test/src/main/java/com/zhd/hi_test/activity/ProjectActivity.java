@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.ProjectAdapter;
-import com.zhd.hi_test.callback.OnProjectListener;
+import com.zhd.hi_test.interfaces.OnProjectListener;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.Project;
 import com.zhd.hi_test.util.Method;
@@ -284,6 +284,22 @@ public class ProjectActivity extends Activity {
     //重新刷新整个Activity来获取文件列表
     public void refresh() {
         onCreate(null);
+    }
+
+    /**
+     * 当程序退出时，将当前项目的打开时间进行跟新
+     * 将当前项目对象写入一个文件中，表示上次打开的内容
+     * 重新写入程序
+     */
+    @Override
+    protected void onDestroy() {
+        Project p = d.getmProject();
+        if (p != null) {
+            Method.updateProject(p);
+            Method.savelastProject(p,this);
+        }
+        //将全局变量project清空
+        super.onDestroy();
     }
 
 }

@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.OnIconChangeListener;
+import com.zhd.hi_test.interfaces.OnIconChangeListener;
 import com.zhd.hi_test.module.Icon;
 
 import java.util.ArrayList;
@@ -56,7 +56,6 @@ public class GridAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final Icon icon = mSource.get(position);
         ViewHolder holder;
-        final int index = position;
         if (convertView == null) {
             convertView = View.inflate(mContext, R.layout.grid_item, null);
             holder = new ViewHolder();

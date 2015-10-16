@@ -12,4 +12,15 @@
     <string name="search">搜索</string>
     <string name="device_title">请选择对应的设备</string>
     <string name="way_title">请选择连接方式</string>
+    <!--主界面的String资源-->
+    <string name="main_item1">管理</string>
+    <string name="main_item2">功能</string>
+    <string name="main_item3">采集</string>
+    <!--ConnectActivity的资源-->
+    <string name="unconnect">设备未连接</string>
+    <string name="factory">厂商</string>
+    <string name="way">方式</string>
+    <string name="connect">连接</string>
+    <string name="disconnect">断开</string>
+    <string name="titile_item">配置</string>
 </resources>

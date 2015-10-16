@@ -30,7 +30,7 @@ import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.module.MyLocation;
-import com.zhd.hi_test.module.UTCTime;
+import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
@@ -89,6 +89,8 @@ public class ConnectActivity extends Activity {
     private int minTime = 1000;
     private int minDistance = 0;
     private static Handler mHandler;
+    //当前连接的信息
+    private static String minfo;
 
     //判断是否连接上，用来断开连接。清空发送的数据用
     public static void setmHandler(Handler mHandler) {
@@ -98,7 +100,7 @@ public class ConnectActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth);
+        setContentView(R.layout.activity_connect);
         sp_device = (Spinner) findViewById(R.id.sp_device);
         sp_way = (Spinner) findViewById(R.id.sp_way);
         btn_connect = (Button) findViewById(R.id.btn_connect);
@@ -118,6 +120,7 @@ public class ConnectActivity extends Activity {
                     disconnect();
                     d.setIsConnected(false);
                     d.setmConnectType(0);
+                    tv_content.setText("设备未连接");
                 }
             }
         });
@@ -196,6 +199,8 @@ public class ConnectActivity extends Activity {
             mListener = listener;
         if (socket!=null)
             mSocket=socket;
+
+
     }
 
     private void setDefaultInfo() {
@@ -218,6 +223,11 @@ public class ConnectActivity extends Activity {
                 sp_way.setSelection(0);//内置GPS
                 break;
         }
+        if (minfo==null||minfo.equals("设备尚未连接")){
+            tv_content.setText("设备尚未连接");
+        }else {
+            tv_content.setText(minfo);
+        }
     }
 
     /**
@@ -239,6 +249,7 @@ public class ConnectActivity extends Activity {
                 e.printStackTrace();
             }
         }
+        minfo="设备尚未连接";
 
     }
 
@@ -277,11 +288,17 @@ public class ConnectActivity extends Activity {
                 break;
             case DEVICE_MESSAGE:
                 if (resultCode == RESULT_OK) {
-                    String adress = data.getExtras().getString(DeviceListActivity.ADRESS);
-                    mDevice = mAdapter.getRemoteDevice(adress);
+                    String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
+                    mDevice = mAdapter.getRemoteDevice(address);
                     //这里的device只有一个地址
                     //开始连接前关闭蓝牙搜索
                     connect(mDevice);
+                    if (d.isConnected()){
+                        String name=data.getExtras().getString(BluetoothDeviceActivity.NAME);
+                        tv_content.setText(name);
+                        minfo=name;
+                    }
+
                 }
                 break;
             case DISCOVERED:
@@ -299,6 +316,8 @@ public class ConnectActivity extends Activity {
                         Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
                     }
                     btn_connect.setText("断开");
+                    tv_content.setText("内置GPS");
+                    minfo="内置GPS";
                     d.setIsConnected(true);
                     d.setmConnectType(Constant.InnerGPSConnect);
                 }
@@ -343,7 +362,7 @@ public class ConnectActivity extends Activity {
             public void run() {
                 InputStream in = null;
                 //用来查看读取了多少的数据
-                int num = 0;
+                int num ;
                 //缓冲区,用来读取数据
                 byte[] buffer = new byte[1024 * 4];
                 //$符号之前的数据，用来和上一次的不完整数据进行拼接
@@ -500,7 +519,7 @@ public class ConnectActivity extends Activity {
     }
 
     private void StartDeviceList() {
-        Intent intent = new Intent(this, DeviceListActivity.class);
+        Intent intent = new Intent(this, BluetoothDeviceActivity.class);
         startActivityForResult(intent, DEVICE_MESSAGE);
     }
 
@@ -528,6 +547,8 @@ public class ConnectActivity extends Activity {
             d.setmConnectType(Constant.InnerGPSConnect);
             btn_connect.setText("断开");
             d.setIsConnected(true);
+            tv_content.setText("内置GPS");
+            minfo="内置GPS";
         } else {
             Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -597,13 +618,13 @@ public class ConnectActivity extends Activity {
             long time=location.getTime();
             //在有handler的情况下才进行数据传输
             if (mHandler != null) {
-                MyLocation loc = new MyLocation(latitude, longitude, altitude);
+                MyLocation loc = new MyLocation(latitude, longitude, altitude,time);
                 Message m1 = Message.obtain();
                 m1.what = 1;
                 m1.obj = loc;
                 mHandler.sendMessage(m1);
 
-                UTCTime t=new UTCTime(time);
+                UTCDate t=new UTCDate(time);
                 Message m2=Message.obtain();
                 m2.what=3;
                 m2.obj=t;

@@ -98,6 +98,13 @@
         <item name="android:background">@drawable/connect_selector</item>
         <item name="android:textColor">@color/textcolor</item>
     </style>
+    <style name="ConnectInfo">
+        <item name="android:padding">5dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#ff0d5ab5</item>
+    </style>
     <!-- 采集数据时的样式-->
     <style name="SurveyInfo">
         <item name="android:background">@drawable/surveybackgroud</item>

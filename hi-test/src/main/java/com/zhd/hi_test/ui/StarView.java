@@ -205,6 +205,7 @@ public class StarView extends View {
 
     private void drawStarbackground(Canvas canvas) {
         mPaint.setColor(Color.BLACK);
+        mPaint.setStyle(Paint.Style.FILL);
         mPaint.setAntiAlias(true);
         //这里绘制星空的圆形
         canvas.drawCircle(mX, mY, mRadius, mPaint);

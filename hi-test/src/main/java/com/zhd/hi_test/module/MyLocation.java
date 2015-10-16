@@ -1,5 +1,7 @@
 package com.zhd.hi_test.module;
 
+import android.print.PrinterId;
+
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.util.Coordinate;
 
@@ -23,6 +25,8 @@ public class MyLocation {
     private String mDireL;
     private String mProgressB;
     private String mProgressL;
+    private String mQuality;
+    private String mAge;
 
     public String getmDireB() {
         return mDireB;
@@ -49,7 +53,9 @@ public class MyLocation {
     }
 
     //RTK传过来的数据
-    public MyLocation(String B, String L, String H, String DireB, String DireL) {
+    public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int mQuality, String mAge) {
+        this.mQuality = String.valueOf(mQuality);
+        this.mAge = mAge;
         this.mB = String.valueOf(Coordinate.getDmsString(Coordinate.getLatitudeDegree(B)));
         this.mL = String.valueOf(Coordinate.getDmsString(Coordinate.getLongtitudeDegree(L)));
         this.mProgressB = String.valueOf(Coordinate.getLatitudeDegree(B));
@@ -57,17 +63,19 @@ public class MyLocation {
         this.mH = H;
         this.mDireB = DireB;
         this.mDireL = DireL;
+        this.mTime=getLocalTime(time);
     }
 
 
 
     //内置GPS传过来的数据
-    public MyLocation(String mB, String mL, String mH) {
+    public MyLocation(String mB, String mL, String mH,long time) {
         this.mProgressB = mB;
         this.mProgressL = mL;
         this.mB = Coordinate.getGPSdegree(mB);
         this.mL = Coordinate.getGPSdegree(mL);
         this.mH = mH;
+        this.mTime=getTime(time);
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针
         double B = Double.valueOf(mB);
         double L = Double.valueOf(mL);
@@ -111,6 +119,28 @@ public class MyLocation {
 
     public void setmTime(String mTime) {
         this.mTime = mTime;
+    }
+
+    private String getTime(long mTime) {
+        Date date = new Date(mTime);//GPSneizhi
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        return (format.format(date));
+    }
+
+    private String getLocalTime(String mTime) {
+        //1.获取时间
+        String hour = mTime.substring(0, 2);
+        //2.获取分秒
+        String munites = mTime.substring(2, 4);
+        //3.获取秒
+        String seconds = mTime.substring(4, 6);
+        //4.将小时数量+8
+        int currenthour = Integer.valueOf(hour) + 8;
+        if (currenthour < 9)
+            hour = "0" + currenthour;
+        else
+            hour = String.valueOf(currenthour);
+        return hour + ":" + munites + ":" + seconds;
     }
 
 }

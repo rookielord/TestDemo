@@ -52,18 +52,14 @@ public class MainActivity extends Activity {
     LocalActivityManager manager = null;//用于管理当前显示的Activity
     //控件
     ViewPager pager = null;
-    TabHost tabHost = null;
-    TextView t1, t2, t3, t4;
+    TextView t1, t2, t3;
     private List<TextView> tv_list;
     //两次跳转的时差
     private long mFirsttime = 0;
     private static final int INTERVAL = 2000;
 
     //动画跳转
-    private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
-    private int bmpW;// 动画图片宽度
-    private ImageView cursor;// 动画图片
     private Data d;
 
     @Override
@@ -81,7 +77,6 @@ public class MainActivity extends Activity {
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
 
-        InitImageView();
         initTextView();
         initPagerViewer();
 
@@ -94,16 +89,13 @@ public class MainActivity extends Activity {
         t1 = (TextView) findViewById(R.id.text1);
         t2 = (TextView) findViewById(R.id.text2);
         t3 = (TextView) findViewById(R.id.text3);
-        t4 = (TextView) findViewById(R.id.text4);
         tv_list = new ArrayList<>();
         tv_list.add(t1);
         tv_list.add(t2);
         tv_list.add(t3);
-        tv_list.add(t4);
         t1.setOnClickListener(new MyOnClickListener(0));
         t2.setOnClickListener(new MyOnClickListener(1));
         t3.setOnClickListener(new MyOnClickListener(2));
-        t4.setOnClickListener(new MyOnClickListener(4));
     }
 
     /**
@@ -125,30 +117,9 @@ public class MainActivity extends Activity {
         intent3.putExtra("PageNum", 3);
         list.add(getView("C", intent3));
 
-        Intent intent4 = new Intent(context, GridActivity.class);
-        intent4.putExtra("PageNum", 4);
-        list.add(getView("D", intent4));
-
         pager.setAdapter(new MyPagerAdapter(list));
         pager.setCurrentItem(0);
         pager.setOnPageChangeListener(new MyOnPageChangeListener());
-    }
-
-    /**
-     * 初始化动画
-     * 1.找到图片控件2.找到图片资源3.
-     */
-    private void InitImageView() {
-        cursor = (ImageView) findViewById(R.id.cursor);
-        bmpW = BitmapFactory.decodeResource(getResources(), R.drawable.roller)
-                .getWidth();// 获取图片宽度
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int screenW = dm.widthPixels;// 获取分辨率宽度
-        offset = (screenW / 4 - bmpW) / 2;// 计算偏移量,
-        Matrix matrix = new Matrix();
-        matrix.postTranslate(offset, 0);
-        cursor.setImageMatrix(matrix);// 设置动画初始位置
     }
 
     /**
@@ -167,59 +138,14 @@ public class MainActivity extends Activity {
      */
     public class MyOnPageChangeListener implements OnPageChangeListener {
 
-        int one = offset * 2 + bmpW;// 页卡1 -> 页卡2 偏移量
-        int two = one * 2;// 页卡1 -> 页卡3 偏移量
-        int three = one * 3;//页面1->页面4偏移量
 
         @Override
         public void onPageSelected(int arg0) {
             setTextBackgroundColor();
-            Animation animation = null;
-            switch (arg0) {
-                case 0://选择了第一页
-                    if (currIndex == 1) {//跳转到第二页
-                        animation = new TranslateAnimation(one, 0, 0, 0);
-                    } else if (currIndex == 2) {//跳转第三页
-                        animation = new TranslateAnimation(two, 0, 0, 0);
-                    } else if (currIndex == 3) {
-                        animation = new TranslateAnimation(three, 0, 0, 0);
-                    }
-                    break;
-                case 1:
-                    if (currIndex == 0) {
-                        animation = new TranslateAnimation(offset, one, 0, 0);
-                    } else if (currIndex == 2) {
-                        animation = new TranslateAnimation(two, one, 0, 0);
-                    } else if (currIndex == 3) {
-                        animation = new TranslateAnimation(three, one, 0, 0);
-                    }
-                    break;
-                case 2:
-                    if (currIndex == 0) {
-                        animation = new TranslateAnimation(offset, two, 0, 0);
-                    } else if (currIndex == 1) {
-                        animation = new TranslateAnimation(one, two, 0, 0);
-                    } else if (currIndex == 3) {
-                        animation = new TranslateAnimation(three, two, 0, 0);
-                    }
-                    break;
-                case 3:
-                    if (currIndex == 0) {
-                        animation = new TranslateAnimation(offset, three, 0, 0);
-                    } else if (currIndex == 1) {
-                        animation = new TranslateAnimation(one, three, 0, 0);
-                    } else if (currIndex == 2) {
-                        animation = new TranslateAnimation(two, three, 0, 0);
-                    }
-                    break;
-            }
             //设置当前页面选中编号，在选中编号中进行
             currIndex = arg0;
             tv_list.get(currIndex).setBackgroundColor(Color.parseColor("#FF35E6F6"));
             tv_list.get(currIndex).setTextColor(Color.BLACK);
-            animation.setFillAfter(true);// True:图片停在动画结束位置
-            animation.setDuration(300);
-            cursor.startAnimation(animation);
         }
 
         @Override

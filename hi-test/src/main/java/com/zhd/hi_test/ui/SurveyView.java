@@ -16,8 +16,7 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/22.
- * 这是位置数据显示到自定义View的图上
- * 有些变量需要进行存储，在第二次加载的时候获得
+ * 1.传入偏移量
  */
 public class SurveyView extends View {
 
@@ -32,8 +31,8 @@ public class SurveyView extends View {
     DrawPoint Mypoint;
     MyPoint point;
     //作为基准的点的N,E坐标和控件中心位置的坐标
-    private static double mReferenceN;
-    private static double mReferenceE;
+
+    private MyPoint mREFpoint;
     //屏幕中心
     private static float mCenterX;
     private static float mCenterY;
@@ -46,7 +45,7 @@ public class SurveyView extends View {
     //最新打点的位置
     private DrawPoint mLastPont;
 
-    public void setmOffsets(float Offsetx,float Offsety) {
+    public void setmOffsets(float Offsetx, float Offsety) {
         this.mOffsetx = Offsetx;
         this.mOffsety = Offsety;
     }
@@ -67,18 +66,25 @@ public class SurveyView extends View {
         super(context, attrs, defStyleAttr);
     }
 
-    public void SetCurrentLocation(MyPoint point){
-        setCenterValue(point.getmN(),point.getmE());
+
+    /**
+     * 主要用于当前点的居中
+     *
+     * @param point
+     */
+    public void SetCurrentLocation(MyPoint point) {
+        mOffsetx = (float) (mREFpoint.getmN() - point.getmN()) * mScale;
+        mOffsety = (float) (mREFpoint.getmE() - point.getmE()) * mScale;
     }
 
     /**
-     * 将更新过后的点集合传入过来，并以集合最后一个点来画其它的点
+     * 以最开始的点进行画图
+     *
      * @param points 根据数据库倒序查询出来的点
      */
     public void setPoints(List<MyPoint> points) {
-        if (points != null) {//获得
-            MyPoint point = points.get(points.size() - 1);
-            setCenterValue(point.getmN(), point.getmE());
+        if (points != null) {
+            setCenterValue(points.get(points.size() - 1));
             temp = points;
         }
     }
@@ -86,18 +92,20 @@ public class SurveyView extends View {
     /**
      * 从外界传入缩放的比例
      * 并控制其大小
+     *
      * @param Scale 传入的缩放比例
      */
     public void setScale(float Scale) {
         mScale *= Scale;
         if (mScale > 30) {
             mScale = 30;
-        } else if (mScale < 1/30)
-            mScale = 1/30;
+        } else if (mScale < 1 / 30)
+            mScale = 1 / 30;
     }
 
     /**
      * 从外界传入平移的量
+     *
      * @param offsetX x方向平移量
      * @param offsetY y方向平移量
      */
@@ -114,26 +122,27 @@ public class SurveyView extends View {
      * 2.在更新的时候会牵扯到上一次的平移，我在进行放大的时候会重新加载这个
      */
     private void updatePoints() {
-        //1.更新当前位置,这个只要传入了位置点point才会去执行，更新我的位置在屏幕上的坐标
+        //1.当前有位置才会绘制当前点
         if (point != null) {
-            if (mReferenceN == 0.0d || mReferenceE == 0.0d) {//如果没有参考点的情况，即没有已知点的情况
+            if (temp == null) {//如果没有参考点的情况，即没有已知点的情况
                 Mypoint = new DrawPoint(mCenterX, mCenterY);
             } else {//根据根据传进来的当前位置，获得在屏幕上的对应坐标
-                float myX = (float) (mCenterX + (point.getmN() - mReferenceN) * mScale) + mOffsetx;
-                float myY = (float) (mCenterY + (point.getmE() - mReferenceE) * mScale) + mOffsety;
+                float myX = (float) (mCenterX + (point.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
+                float myY = (float) (mCenterY + (point.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
                 Mypoint = new DrawPoint(myX, myY);
             }
         }
         //2.更新传入的在数据库中已有的点，如果没有则不进行下面的操作
-        if (temp == null)
-            return;
         //3.更新数据库中点在屏幕上的坐标
         //3.1清除所有的画在图上的点
+        //2.更新已有点的位置
+        if (temp == null)
+            return;
         drawPoints.clear();
         for (MyPoint point : temp) {
             //要在自定义控件上画图的集合
-            float x = (float) (mCenterX + (point.getmN() - mReferenceN) * mScale) + mOffsetx;
-            float y = (float) (mCenterY + (point.getmE() - mReferenceE) * mScale) + mOffsety;
+            float x = (float) (mCenterX + (point.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
+            float y = (float) (mCenterY + (point.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
             DrawPoint p = new DrawPoint(x, y, point.getName());
             drawPoints.add(p);
         }
@@ -146,20 +155,12 @@ public class SurveyView extends View {
      * 并根据参考点来画其位置
      * 如果不存在参考点，则当前点的位置为中心点的位置
      */
-    public void setLocation(MyPoint p) {
+    public void setMyLocation(MyPoint p) {
         point = p;
     }
 
-    /**
-     * 设置参考点的坐标
-     * 但在平移后，参考点的坐标也要进行相应转化，不然会一直以最后一点为中心
-     *
-     * @param N
-     * @param E
-     */
-    private void setCenterValue(double N, double E) {
-        mReferenceN = N;
-        mReferenceE = E;
+    private void setCenterValue(MyPoint point) {
+        mREFpoint = point;
     }
 
 
@@ -201,7 +202,6 @@ public class SurveyView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         mPaint.setAntiAlias(true);
-        //0.中心点的位置也会更新
         //1.在这里更新点
         updatePoints();
         //1.画我的位置
@@ -220,7 +220,6 @@ public class SurveyView extends View {
                 canvas.drawLine(Mypoint.getmX(), Mypoint.getmY(), mLastPont.getmX(), mLastPont.getmY(), mPaint);
         }
     }
-
     /**
      * 遍历DrawPoints中的元素，然后将其画在图片上
      * 以当前点为中心画两条线交叉

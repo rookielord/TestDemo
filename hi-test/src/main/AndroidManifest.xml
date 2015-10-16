@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ManageActivity" >
+        <activity android:name=".activity.PointActivity" >
             <intent-filter>
                 <action android:name="com.zhd.manage.START" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.DeviceListActivity">
+        <activity android:name=".activity.BluetoothDeviceActivity">
             <intent-filter>
                 <action android:name="com.zhd.bluetoothDevice.START" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -49,6 +49,12 @@
         <activity android:name=".activity.GridActivity">
             <intent-filter>
                 <action android:name="com.zhd.grid.START" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.DeviceActivity">
+            <intent-filter>
+                <action android:name="com.zhd.device.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

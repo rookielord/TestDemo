@@ -25,7 +25,7 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyPoint;
-import com.zhd.hi_test.module.UTCTime;
+import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.ui.SurveyView;
 import com.zhd.hi_test.ui.ZoomListener;
 import com.zhd.hi_test.util.Coordinate;
@@ -37,15 +37,22 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/22.
- * 通过根据连接方式，来获得对应的数据信息
- * 包括：1.与RTK的蓝牙连接 2.与内部GPS的连接方式：
- * 以上两种方式通过设备连接=》全局变量=》这里获取的方式来获得
+ * 一、开始画图的时候
+ * 1.开始画图时的点位：以数据点库为中心，然后绘制其它的点
+ * 2.点击整体居中：以数据库点为中心，将平移量和缩放量都设为初始值
+ * 3.点当前点居中：以当前点为数据库点为中心，
+ * 然后求出当前点距离数据库点的距离，平移量设置平移量.缩放量不变
+ * 注意：BUG:在以当前点居中后，再点击添加点后，会跳到初始点的位置。因为在更新点库的时候又是以数据库第一点为中心来画图了
+ * 二、没有开始画图
+ * 1.开始画图时的点位：以数据库点为中心
+ * 2.点击整体居中：以数据库第一个点，平移量缩放量都设为初始值
+ * 3.点当前点居中：没有反应
  */
 public class SurveyActivity extends Activity implements OnClickListener {
 
     private Data d;
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time,tv_date;
     Button btn_add;
     ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all;
     //用来存放当前位置的东西半球和南北半球数据
@@ -80,6 +87,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_B.setText(location.getmB());
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
+                    tv_time.setText(location.getmTime());
                     mDireB = location.getmDireB();
                     mDireL = location.getmDireL();
                     double b = Double.valueOf(location.getmProgressB());
@@ -90,15 +98,15 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_Z.setText(location.getmH());
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
                     point = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
-                    surveyView.setLocation(point);
+                    surveyView.setMyLocation(point);
                     //重绘
                     surveyView.invalidate();
                     break;
                 case 2:
                     break;
                 case 3:
-                    UTCTime time= (UTCTime) msg.obj;
-                    tv_time.setText(time.getmCurrentTime());
+                    UTCDate time= (UTCDate) msg.obj;
+                    tv_date.setText(time.getmCurrentDate());
                     break;
             }
         }
@@ -133,7 +141,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
     private void addPoint() {
         //每次添加前先获得当前末尾的id
         mid = mCurd.getLastID();
-        List<ContentValues> values = new ArrayList<ContentValues>();
+        List<ContentValues> values = new ArrayList<>();
         ContentValues cv = new ContentValues();
         cv.put("id", mid + 1);
         cv.put("B", tv_B.getText().toString());
@@ -186,7 +194,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 points.add(p);
             }
             mCursor.close();
-            //这里传入的是为了方便绘制的，只包含有N,E,Z的值，其实也只需要N,E和id
             surveyView.setPoints(points);
             surveyView.invalidate();
         }
@@ -216,6 +223,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
         tv_time = (TextView) view1.findViewById(R.id.tv_time);
+        tv_date= (TextView) view1.findViewById(R.id.tv_date);
         tv_N = (TextView) view2.findViewById(R.id.tv_N);
         tv_E = (TextView) view2.findViewById(R.id.tv_E);
         tv_Z = (TextView) view2.findViewById(R.id.tv_Z);
@@ -311,9 +319,15 @@ public class SurveyActivity extends Activity implements OnClickListener {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * 在关闭的时候需要进行的操作：
+     * 1.不再解析数据
+     * 2.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
+     */
     @Override
     protected void onDestroy() {
         Infomation.setHandler(null);
+        surveyView.setMyLocation(null);
         super.onDestroy();
     }
 
@@ -324,6 +338,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 if (d.isConnected()) {
                     addPoint();
                     refreshPoints();
+                    surveyView.invalidate();
                 }
                 break;
             case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
@@ -349,10 +364,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 surveyView.setScale(0.5f);
                 surveyView.invalidate();
                 break;
-            case R.id.image_zoom_center://初始化使其居中
+            case R.id.image_zoom_center://当前点居中
                 if (point != null) {
                     refreshPoints();
-                    surveyView.setmOffsets(0, 0);
                     surveyView.SetCurrentLocation(point);
                     surveyView.invalidate();
                 }

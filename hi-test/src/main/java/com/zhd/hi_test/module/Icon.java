@@ -10,13 +10,11 @@ import android.content.Intent;
 public class Icon {
     private String icon_name;
     private int icon_image_soure;
-    private int icon_id;
     private Intent icon_intent;
 
-    public Icon(String icon_name, int icon_image_soure, int icon_id, Intent icon_intent) {
+    public Icon(String icon_name, int icon_image_soure, Intent icon_intent) {
         this.icon_name = icon_name;
         this.icon_image_soure = icon_image_soure;
-        this.icon_id = icon_id;
         this.icon_intent = icon_intent;
     }
 
@@ -32,7 +30,4 @@ public class Icon {
         return icon_image_soure;
     }
 
-    public int getIcon_id() {
-        return icon_id;
-    }
 }

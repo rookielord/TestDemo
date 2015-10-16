@@ -3,18 +3,11 @@ package com.zhd.hi_test.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.GpsSatellite;
-import android.location.GpsStatus;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +21,6 @@ import com.zhd.hi_test.ui.StarView;
 import com.zhd.hi_test.util.Infomation;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -78,7 +70,7 @@ public class GPSActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gpstest);
+        setContentView(R.layout.activity_gps);
         //找控件
         my_view = (StarView) findViewById(R.id.my_view);
         tv_satellite = (TextView) findViewById(R.id.tv_satellite);

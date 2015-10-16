@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.callback.OnProjectListener;
+import com.zhd.hi_test.interfaces.OnProjectListener;
 import com.zhd.hi_test.module.Project;
 
 import java.util.HashMap;
@@ -142,7 +142,6 @@ public class ProjectAdapter extends BaseAdapter {
                 menu.setHeaderTitle("项目操作");
                 menu.add(0, 0, 0, "打开项目");
                 menu.add(0, 1, 0, "删除项目");
-                menu.add(0, 2, 0, "修改项目");
             }
         });
         return convertView;

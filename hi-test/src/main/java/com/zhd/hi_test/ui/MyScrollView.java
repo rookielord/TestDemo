@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.HorizontalScrollView;
 
-import com.zhd.hi_test.activity.ManageActivity;
+import com.zhd.hi_test.activity.PointActivity;
 
 
 
@@ -18,22 +18,22 @@ import com.zhd.hi_test.activity.ManageActivity;
 public class MyScrollView extends HorizontalScrollView {
 
     //创建一个这个控件相关联的Activity
-    private ManageActivity activity;
+    private PointActivity activity;
 
     //将当前Context,转化为ManageActivity,
     public MyScrollView(Context context) {
         super(context);
-        activity = (ManageActivity) context;
+        activity = (PointActivity) context;
     }
 
     public MyScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        activity = (ManageActivity) context;
+        activity = (PointActivity) context;
     }
 
     public MyScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        activity = (ManageActivity) context;
+        activity = (PointActivity) context;
     }
 
     /**

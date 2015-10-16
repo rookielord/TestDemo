@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.zhd.hi_test.R;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static android.view.View.*;
@@ -30,19 +32,22 @@ import static android.view.View.*;
  * 这里的蓝牙已经在上一个页面被打开了，所以不再考虑蓝牙没有打开的情况
  * 用一个scrolview来包含两个listview
  */
-public class DeviceListActivity extends Activity {
+public class BluetoothDeviceActivity extends Activity {
     //device上面的控件
     Button btn_search, btn_close;
     ListView lv_pairedlist, lv_newlist;
-    //存放数据的两个Adapter
-    ArrayAdapter<String> mPairedAdapter, mNewsAdapter;
+    //存放蓝牙名称的两个ArrayAdapter
+    ArrayAdapter<String> mPairedAdapter, mNewAdapter;
+    //存放两个蓝牙地址的
+    List<String> mPairedDevices = new ArrayList<>();
+    List<String> mNewDevices = new ArrayList<>();
     //蓝牙适配器
     BluetoothAdapter mAdapter;
     //意图筛选器，设置监听的Action
     IntentFilter filter = new IntentFilter();
     //在上个Activity中获取设备地址的名称
-    public static final String ADRESS = "ADRESS";
-    private static final String TAG = "DEVICE";
+    public static final String ADDRESS = "ADDRESS";
+    public static final String NAME = "NAME";
     //设置蓝牙开启返回的对应code
     private static final int BLUETOOTH_REQUEST = 0x1;
     //设置判断是否开启过蓝牙搜索，只有开启过蓝牙搜索后搜索到为0才能添加没有数据
@@ -53,9 +58,9 @@ public class DeviceListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.activity_device);
+        setContentView(R.layout.activity_bluetooth_device);
         //默认设置是没有找到的
-        isSearch=false;
+        isSearch = false;
         //找到控件
         btn_search = (Button) findViewById(R.id.btn_search);
         btn_close = (Button) findViewById(R.id.btn_close);
@@ -67,7 +72,7 @@ public class DeviceListActivity extends Activity {
         setResult(RESULT_CANCELED);
         //实例化两个Adapter
         mPairedAdapter = new ArrayAdapter<>(this, R.layout.device_item);
-        mNewsAdapter = new ArrayAdapter<>(this, R.layout.device_item);
+        mNewAdapter = new ArrayAdapter<>(this, R.layout.device_item);
         //获得已配对的蓝牙进行显示
         getPairedAdaper();
         //注册广播接受者，监听设备添加
@@ -75,7 +80,7 @@ public class DeviceListActivity extends Activity {
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
         //设置对每个item的监听并填充内容
-        lv_newlist.setAdapter(mNewsAdapter);
+        lv_newlist.setAdapter(mNewAdapter);
         lv_pairedlist.setAdapter(mPairedAdapter);
         lv_newlist.setOnItemClickListener(mItemlistener);
         lv_pairedlist.setOnItemClickListener(mItemlistener);
@@ -86,7 +91,7 @@ public class DeviceListActivity extends Activity {
                 startDiscovery();
                 //搜索完毕后按钮消失
                 v.setVisibility(GONE);
-                mNewsAdapter.clear();
+                mNewAdapter.clear();
                 btn_close.setVisibility(VISIBLE);
             }
         });
@@ -125,7 +130,8 @@ public class DeviceListActivity extends Activity {
         if (devices.size() > 0) {
             findViewById(R.id.tv_pairedlist_title).setVisibility(VISIBLE);
             for (BluetoothDevice device : devices) {
-                mPairedAdapter.add(device.getName() + ";" + device.getAddress());
+                mPairedAdapter.add(device.getName());
+                mPairedDevices.add(device.getAddress());
             }
             //在接下来添加没有适配过的仪器
         } else {
@@ -160,7 +166,6 @@ public class DeviceListActivity extends Activity {
         super.onDestroy();
     }
 
-    //listview的item监听器
     /**
      * 点击Item后关闭当前Activity,然后返回蓝牙的地址给前一个Activity
      */
@@ -169,10 +174,20 @@ public class DeviceListActivity extends Activity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //点击时停止查找
             mAdapter.cancelDiscovery();
-            String info = ((TextView) view).getText().toString();
-            String adress = info.substring(info.length() - 17);//固定的长度
+            String name=((TextView)view).getText().toString();
+            //如果是没有项目的话，则不会进行下去
+            if (name.equals("当前没有配对的数据")||name.equals("当前没有设备")){
+                return;
+            }
             Intent intent = new Intent();//创建一个空intent来存放数据
-            intent.putExtra(ADRESS, adress);
+            String address;
+            //通过adapter的类型来返回对应List中的蓝牙的地址
+            if (parent.getAdapter().equals(mPairedAdapter))
+                address=mPairedDevices.get(position);
+            else
+                address=mNewDevices.get(position);
+            intent.putExtra(ADDRESS, address);
+            intent.putExtra(NAME,name);
             setResult(RESULT_OK, intent);
             finish();
         }
@@ -189,15 +204,16 @@ public class DeviceListActivity extends Activity {
             String action = intent.getAction();//监听两个Action
             switch (action) {//当搜索结束时
                 case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                    if (mNewsAdapter.getCount() == 0 && isSearch) {
-                        mNewsAdapter.add("当前没有设备");
+                    if (mNewAdapter.getCount() == 0 && isSearch) {
+                        mNewAdapter.add("当前没有设备");
                     }
                     break;
                 case BluetoothDevice.ACTION_FOUND:
                     //找到一个新的蓝牙设备
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (device.getBondState() != BluetoothDevice.BOND_BONDED) {//如果已经绑定就不用添加进列表了
-                        mNewsAdapter.add(device.getName() + ";" + device.getAddress());
+                        mNewAdapter.add(device.getName()+"");
+                        mNewDevices.add(device.getAddress());
                     }
                     break;
             }

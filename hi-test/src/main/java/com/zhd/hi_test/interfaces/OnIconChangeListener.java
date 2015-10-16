@@ -1,4 +1,4 @@
-package com.zhd.hi_test.callback;
+package com.zhd.hi_test.interfaces;
 
 import com.zhd.hi_test.module.Icon;
 

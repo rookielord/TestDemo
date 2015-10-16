@@ -3,11 +3,13 @@ package com.zhd.hi_test.util;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.Satellite;
-import com.zhd.hi_test.module.UTCTime;
+import com.zhd.hi_test.module.UTCDate;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,14 +26,14 @@ public class Infomation {
         mHandler = handler;
     }
 
-    private static Pattern GGA_pattern = Pattern.compile("(?<=\\$GPGGA\\,).*?(?=\\*)");
+    private static Pattern GGA_pattern = Pattern.compile("\\$GPGGA.*?(?=\\*)");
     private static Pattern Satellite_pattern = Pattern.compile("(\\$GPGSV|\\$GLGSV|\\$BDGSV).*?(?=\\*)");
-    private static Pattern GPZDA_pattern=Pattern.compile("(?<=\\$GPZDA\\,).*?(?=\\*)");
+    private static Pattern GPZDA_pattern = Pattern.compile("\\$GPZDA.*?(?=\\*)");
 
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();
     private static MyLocation location;
-    private static UTCTime curTime;
+    private static UTCDate curTime;
     //用来存放临时的数据然后发送过去
     private static Object mTemps;
     //用来获取对应的字段
@@ -51,26 +53,36 @@ public class Infomation {
             getLoactionInfo(mMacher.group());
         }
         //获得时间信息
-        mMacher=GPZDA_pattern.matcher(mInputMsg);
-        while (mMacher.find()){
+        mMacher = GPZDA_pattern.matcher(mInputMsg);
+        while (mMacher.find()) {
             getTimeInfo(mMacher.group());
         }
     }
 
     private static void getLoactionInfo(String group) {
         //1.获得位置信息和时间
+        Log.d("GGA", group);
         String[] info = group.split(",");
         //注意，刚刚开机时是没有定位的，GGA数据都为空，对B是否有值进行判断,没有值则不进行穿件location对象
         if (info.length == 1 || info[1].equals(""))
             return;
-        String B = info[1];
-        String BDire = info[2];
-        String L = info[3];
-        String LDire = info[4];
-        String HDPO = info[7];
-        String H = info[8];
+        String time = info[1];
+        String B = info[2];
+        String BDire = info[3];
+        String L = info[4];
+        String LDire = info[5];
+        //定位质量
+        int quality = Integer.valueOf(info[6]);
+        String H = info[9];
+        String HDPO = info[8];
+        //差分龄期,必须是完整的GGA数据才会有，即开始是没有的
+        String age;
+        if (info.length < 15)
+            age = "0";
+        else
+            age = info[13];
         //坐标点
-        location = new MyLocation(B, L, H, BDire, LDire);
+        location = new MyLocation(B, L, H, BDire, LDire, time, quality, age);
         Message m = Message.obtain();
         m.obj = location;
         m.what = 1;
@@ -126,16 +138,16 @@ public class Infomation {
         }
     }
 
-    private static void getTimeInfo(String group){
+    private static void getTimeInfo(String group) {
         String[] info = group.split(",");
         //没有数据返回
-        if (info.length == 1 || info[1].equals(""))
+        Log.d("GDP",group);
+        if (info.length == 7 || info[1].equals(""))
             return;
-        String time=info[1];
-        String day=info[2];
-        String month=info[3];
-        String year=info[4];
-        curTime = new UTCTime(time,day,month,year);
+        String day = info[2];
+        String month = info[3];
+        String year = info[4];
+        curTime = new UTCDate(day, month, year);
         Message m = Message.obtain();
         m.obj = curTime;
         m.what = 3;
