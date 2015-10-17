@@ -79,8 +79,7 @@ public class GPSActivity extends Activity {
         tv_locH = (TextView) findViewById(R.id.tv_locH);
         tv_connect = (TextView) findViewById(R.id.tv_connect);
         //根据所选连接方式来获得对应的数据
-        Data d = (Data) getApplication();
-        int connect = d.getmConnectType();
+        int connect = Data.getmConnectType();
         if (connect==Constant.InnerGPSConnect) {
             GPSinit();
             tv_connect.setText("内置GPS");

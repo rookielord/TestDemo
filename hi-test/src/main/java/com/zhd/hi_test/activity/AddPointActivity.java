@@ -57,8 +57,7 @@ public class AddPointActivity extends Activity {
         tv_add = (TextView) findViewById(R.id.tv_add);
         tv_back = (TextView) findViewById(R.id.tv_back);
         //获取全局变量中表的信息
-        final Data d = (Data) getApplication();
-        mTableName = d.getmProject().getmTableName();
+        mTableName = Data.getmProject().getmTableName();
         mContext = this;
         curd = new Curd(mTableName, mContext);
         //根据传过来的数据TextView
@@ -67,7 +66,7 @@ public class AddPointActivity extends Activity {
         final String id = intent.getStringExtra("ID");
         if (id == null) {//添加
             //在添加栏目中获得目标高,无论有否，都将仪高赋给editview
-            mheight = d.getMheight();
+            mheight = Data.getMheight();
             et_height.setText(String.valueOf(mheight));
             //获得最后的插入id，然后拼接成点号
             final int lastID = curd.getLastID();
@@ -101,7 +100,7 @@ public class AddPointActivity extends Activity {
                     cv.put("time",tv_time.getText().toString());
                     values.add(cv);
                     //这里将mheight重新赋值给全局变量
-                    d.setMheight(Double.parseDouble(et_height.getText().toString()));
+                    Data.setMheight(Double.parseDouble(et_height.getText().toString()));
                     boolean res = curd.insertData(values);
                     if (res) {
                         Toast.makeText(AddPointActivity.this, "添加成功", Toast.LENGTH_SHORT).show();

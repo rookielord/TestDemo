@@ -57,10 +57,9 @@ public class ProjectActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project);
         //首先查看是否当前项目已经打开
-        d = (Data) getApplication();
         //全局路径
-        mPath = d.getmPath();
-        mProject = d.getmProject();
+        mPath = Data.getmPath();
+        mProject = Data.getmProject();
         //找控件：1.进行填充的listview
         lv = (ListView) findViewById(R.id.lv);
         //进行项目信息显示

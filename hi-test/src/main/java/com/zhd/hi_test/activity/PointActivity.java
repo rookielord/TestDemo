@@ -57,13 +57,12 @@ public class PointActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_point);
-        Data d = (Data) getApplication();
         //这里来进行判断是否打开项目不然就不做操作
-        if (d.getmProject() == null) {
+        if (Data.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
-        mTableName = d.getmProject().getmTableName();
+        mTableName = Data.getmProject().getmTableName();
         initViews();
     }
 

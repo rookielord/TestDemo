@@ -11,7 +11,6 @@ import android.view.WindowManager;
 
 
 import com.zhd.hi_test.Data;
-import com.zhd.hi_test.activity.MainActivity;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.Project;
 
@@ -72,7 +71,6 @@ public class Method {
      */
     public static boolean createProject(String path, String[] configs, Activity activity) {
         File pro_file = new File(path + "/" + configs[0]);
-        Data d = (Data) activity.getApplication();
         if (!pro_file.exists()) {
             pro_file.mkdir();
             //写入配置文件
@@ -87,7 +85,7 @@ public class Method {
                 Project p = new Project(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file, configs[5]);
                 out.writeObject(p);
                 //将其设为全局变量
-                d.setmProject(p);
+                Data.setmProject(p);
                 //并创建对应的数据库表
                 Curd curd = new Curd(tableName, activity);
                 curd.createTable(tableName);
@@ -136,8 +134,7 @@ public class Method {
     }
 
     //在储存卡上创建文件夹
-    public static void createDirectory(Activity activity) {
-        Data d = (Data) activity.getApplication();
+    public static void createDirectory() {
         String mPath = null;
         File ext_path = Environment.getExternalStorageDirectory();
         File file = new File(ext_path, "ZHD_TEST");
@@ -153,7 +150,7 @@ public class Method {
         }
         //最终获取其路径,并将其赋值给全局变量
         mPath = pro_file.getPath();
-        d.setmPath(mPath);
+        Data.setmPath(mPath);
     }
 
     //获取数据参数
@@ -203,15 +200,13 @@ public class Method {
      * @param activity
      */
     public static void createDefaultProject(Activity activity) {
-        //获得路径
-        Data d = (Data) activity.getApplication();
         //获得当前是否第一次运行
         SharedPreferences sp = activity.getSharedPreferences("VALUE", Context.MODE_PRIVATE);
         Editor editor = sp.edit();
         boolean isFirst = sp.getBoolean("isFirst", true);
         //获得全局变量的Project路径
         if (isFirst) {
-            String path = d.getmPath();//path是指Project的位置
+            String path = Data.getmPath();//path是指Project的位置
             String time = Method.getCurrentTime();
             String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系", "3度带"};
             //创建默认项目
@@ -219,7 +214,7 @@ public class Method {
             //然后读取config.txt来创建项目
             Project p = Method.getDefaultProject(path);
             //设置为全局变量
-            d.setmProject(p);
+            Data.setmProject(p);
             //设置其为false，不是第一次启动
             editor.putBoolean("isFirst", false);
             editor.commit();
@@ -275,7 +270,6 @@ public class Method {
     }
 
     public static void setLastProject(Activity mainActivity) {
-        Data d = (Data) mainActivity.getApplication();
         //先检测是否存在
         File file = new File(mainActivity.getFilesDir(), "last.txt");
         if (file.exists()) {
@@ -287,16 +281,8 @@ public class Method {
                 ois = new ObjectInputStream(fis);
                 Project p = (Project) ois.readObject();
                 //设置为全局变量
-                d.setmProject(p);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (OptionalDataException e) {
-                e.printStackTrace();
-            } catch (StreamCorruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+                Data.setmProject(p);
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (fis != null)

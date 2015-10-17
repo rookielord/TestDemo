@@ -66,9 +66,8 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        d= (Data) getApplication();
         //设置全局变量，创建project文件夹，并且创建项目
-        Method.createDirectory(this);
+        Method.createDirectory();
         //创建默认文件夹并选中
         Method.createDefaultProject(this);
         //获取上一次打开的项目,将其设置为全局变量

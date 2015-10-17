@@ -44,8 +44,7 @@ public class ProjectAdapter extends BaseAdapter {
     public ProjectAdapter(List<Project> Projects, Context context) {
         this.mProjects = Projects;
         this.mContext = context;
-        Data d= (Data) context.getApplicationContext();
-        mProject=d.getmProject();
+        mProject=Data.getmProject();
     }
 
     //定义一个Viewholder,用来存放layout上面的控件对象

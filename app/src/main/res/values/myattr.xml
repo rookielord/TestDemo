@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <declare-styleable name="StarView">
-        <attr name="TextSize" format="dimension"/>
-        <attr name="TextColor" format="color"/>
-    </declare-styleable>
-</resources>

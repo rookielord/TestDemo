@@ -1,1 +1,1 @@
-include ':app', ':hi-test', ':iotest'
+include ':hi-test'

@@ -50,7 +50,6 @@ import java.util.List;
  */
 public class SurveyActivity extends Activity implements OnClickListener {
 
-    private Data d;
     //控件
     TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time,tv_date;
     Button btn_add;
@@ -92,7 +91,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     mDireL = location.getmDireL();
                     double b = Double.valueOf(location.getmProgressB());
                     double l = Double.valueOf(location.getmProgressL());
-                    HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, d.getmProject());
+                    HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, Data.getmProject());
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
                     tv_Z.setText(location.getmH());
@@ -117,12 +116,11 @@ public class SurveyActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         //获得表名来进行数据的操作
-        d = (Data) getApplication();
-        if (d.getmProject() == null) {
+        if (Data.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
-        mCurd = new Curd(d.getmProject().getmTableName(), this);
+        mCurd = new Curd(Data.getmProject().getmTableName(), this);
         //获得最后一个id的名称
         //初始化滑动界面的内容
         init();
@@ -130,9 +128,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         iniSurveyView();
         //初始化下面的点
         initDoc();
-        if (d.getmConnectType() == Constant.BlueToothConncet) {
+        if (Data.getmConnectType() == Constant.BlueToothConncet) {
             Infomation.setHandler(mHandler);
-        } else if (d.getmConnectType() == Constant.InnerGPSConnect) {
+        } else if (Data.getmConnectType() == Constant.InnerGPSConnect) {
             ConnectActivity.setmHandler(mHandler);
         }
 
@@ -154,7 +152,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         cv.put("DireB", mDireB);
         cv.put("DireL", mDireL);
         cv.put("DES", "");
-        cv.put("height", String.valueOf(d.getMheight()));
+        cv.put("height", String.valueOf(Data.getMheight()));
         values.add(cv);
         boolean res = mCurd.insertData(values);
         if (res) {
@@ -335,14 +333,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image_add://直接进行数据采集
-                if (d.isConnected()) {
+                if (Data.isConnected()) {
                     addPoint();
                     refreshPoints();
                     surveyView.invalidate();
                 }
                 break;
             case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
-                if (d.isConnected()) {
+                if (Data.isConnected()) {
                     Intent intent = new Intent("com.zhd.addPoint.START");
                     intent.putExtra("B", tv_B.getText().toString());
                     intent.putExtra("L", tv_L.getText().toString());
