@@ -1,5 +1,6 @@
 package com.zhd.hi_test.module;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.GpsSatellite;
@@ -36,10 +37,10 @@ public class InnerGPSConnect implements IConnect {
     private int minTime = 1000;
     private int minDistance = 0;
     private Handler mHandler;
-    private Context mContext;
+    private Activity mActivity;
 
     //显示连接状态和连接对象的Textview
-    TextView tv_connect, tv_info;
+    TextView tv_connect;
 
     /**
      * 内置GPS的位置监听字段
@@ -57,11 +58,11 @@ public class InnerGPSConnect implements IConnect {
      *
      * @param handler
      */
-    public InnerGPSConnect(Handler handler, Context context) {
+    public InnerGPSConnect(Handler handler, Activity activity) {
         mHandler = handler;
-        mContext = context;
-        mManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        tv_connect = (TextView) Data.getmActivity().findViewById(R.id.tv_connect);
+        mActivity = activity;
+        mManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        tv_connect = (TextView) mActivity.findViewById(R.id.tv_connect);
     }
 
     //判断打开GPS操作
@@ -115,11 +116,7 @@ public class InnerGPSConnect implements IConnect {
 
             }
         };
-    }
 
-    //当前是在字段中重写方法来，在这里添加卫星监听
-    @Override
-    public void readMessage() {
         mListener = new GpsStatus.Listener() {
             @Override
             public void onGpsStatusChanged(int event) {
@@ -167,8 +164,24 @@ public class InnerGPSConnect implements IConnect {
         };
     }
 
+    //当前是在字段中重写方法来，在这里添加卫星监听,开始注册监听
+    @Override
+    public void readMessage() {
+        if (!Data.isConnected())
+            return;
+        mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+        mManager.addGpsStatusListener(mListener);
+        //这里才能算上GPS连上了
+        Data.setmConnectType(Constant.InnerGPSConnect);
+        ((TextView) mActivity.findViewById(R.id.btn_connect)).setText("断开");
+        Data.setIsConnected(true);
+        Data.setmInfo("内置GPS");
+    }
+
     @Override
     public void breakConnect() {
+        if (!Data.isConnected())
+            return;
         if (mListener != null)
             mManager.removeGpsStatusListener(mListener);
         if (mLocListener != null)
@@ -180,19 +193,14 @@ public class InnerGPSConnect implements IConnect {
     private void GPSinit() {
         mProviders = mManager.getProviders(true);
         if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(mContext, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
-            mProvider = LocationManager.GPS_PROVIDER;
-            mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
-            mManager.addGpsStatusListener(mListener);
-            //这里才能算上GPS连上了
-            Data.setmConnectType(Constant.InnerGPSConnect);
-            ((TextView) Data.getmActivity().findViewById(R.id.btn_connect)).setText("断开");
+            Toast.makeText(mActivity, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
+            mProvider=LocationManager.GPS_PROVIDER;
             Data.setIsConnected(true);
-            Data.setmInfo("内置GPS");
+            Data.setmConnectType(Constant.BlueToothConncet);
         } else {//这里是对ConnectActivity进行操作
-            Toast.makeText(mContext, "请打开GPS服务", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            Data.getmActivity().startActivityForResult(intent, Data.GPS_REQUEST);
+            mActivity.startActivityForResult(intent, Data.GPS_REQUEST);
         }
     }
 }

@@ -60,7 +60,6 @@ public class BluetoothConnect implements IConnect {
             mSocket.connect();
             in = mSocket.getInputStream();
             out = mSocket.getOutputStream();
-            sendMessage();
             Data.setIsConnected(true);
             Data.setmConnectType(Constant.BlueToothConncet);
         } catch (IOException e) {
@@ -68,6 +67,9 @@ public class BluetoothConnect implements IConnect {
         }
     }
 
+    /**
+     * 发送读取的数据
+     */
     @Override
     public void sendMessage() {
         if (!Data.isConnected())

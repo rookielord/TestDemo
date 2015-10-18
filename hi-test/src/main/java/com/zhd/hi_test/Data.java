@@ -34,7 +34,6 @@ public class Data {
     private static Closeable mSocket;
     //用于跳转的Activity
     private static Activity mActivity;
-    //用于测试返回值
     //设置返回是否允许启动蓝牙
     public static final int REQUEST_CODE = 1;
     //启动返回得到地址
