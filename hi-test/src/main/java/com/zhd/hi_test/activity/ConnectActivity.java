@@ -10,6 +10,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +32,7 @@ import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.BluetoothConnect;
+import com.zhd.hi_test.module.InnerGPSConnect;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.util.Infomation;
@@ -70,9 +72,6 @@ public class ConnectActivity extends Activity {
     private static final int DISCOVERED = 3;
     //判断GPS是否开启
     private static final int GPS_REQUEST = 4;
-    //连接数据对象和连接数据device
-    private BluetoothDevice mDevice;
-    private BluetoothSocket mSocket;
     //uuid
     private static UUID mUUid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     //读取内容
@@ -83,14 +82,9 @@ public class ConnectActivity extends Activity {
     //获取连接的方式
     private int mConnectWay;
     //使用内置GPS进行连接
-    private LocationManager mManager;
-    private List<String> mProviders;
-    private String mProvider;
-    private int minTime = 1000;
-    private int minDistance = 0;
     private static Handler mHandler;
     //当前连接的信息
-    private static String minfo;
+//    private static String minfo = Data.getmInfo();
 
     //当前的连接对象
     private IConnect mConnect;
@@ -104,14 +98,8 @@ public class ConnectActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect);
-        sp_device = (Spinner) findViewById(R.id.sp_device);
-        sp_way = (Spinner) findViewById(R.id.sp_way);
-        btn_connect = (Button) findViewById(R.id.btn_connect);
-        tv_content = (TextView) findViewById(R.id.tv_device_info);
-        image_title = (ImageView) findViewById(R.id.image_title);
-        //因为重新打开后，mManager都为空值，所以要取消的话，必须得到同一个mManger,同一个listener。
-        //获取连接状态和连接内容。然后对其内容进行赋值，如何保证单个连接
-        getSingleInfo();
+        init();
+//        getSingleInfo();
         btn_connect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,13 +108,20 @@ public class ConnectActivity extends Activity {
                     startConnect();
                 } else {
                     btn_connect.setText("连接");
-                    disconnect();
                     Data.setIsConnected(false);
                     Data.setmConnectType(0);
                     tv_content.setText("设备未连接");
                 }
             }
         });
+    }
+
+    private void init() {
+        sp_device = (Spinner) findViewById(R.id.sp_device);
+        sp_way = (Spinner) findViewById(R.id.sp_way);
+        btn_connect = (Button) findViewById(R.id.btn_connect);
+        tv_content = (TextView) findViewById(R.id.tv_device_info);
+        image_title = (ImageView) findViewById(R.id.image_title);
         //获取设备的内容
         String[] device_items = getResources().getStringArray(R.array.devices);
         //创建对应的内容适配器
@@ -135,8 +130,6 @@ public class ConnectActivity extends Activity {
         deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //进行数据填充,只对厂商Device进行填充，由它来决定接下来的方式中的内容
         sp_device.setAdapter(deviceAdapter);
-        //获得蓝牙的适配器
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
         //根据所选择仪器类型，对连接方式进行设置,注意是onItemSelected
         sp_device.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -178,32 +171,31 @@ public class ConnectActivity extends Activity {
 
             }
         });
+        //当前显示的默认信息
         setDefaultInfo();
     }
 
-    private void getSingleInfo() {
-        LocationManager manager = Data.getmManager();
-        LocationListener locListener = Data.getmLocListener();
-        GpsStatus.Listener listener = Data.getmListener();
-        BluetoothSocket socket = (BluetoothSocket) Data.getmSocket();
-        if (manager == null) {
-            mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            Data.setmManager(mManager);
-        } else
-            mManager = manager;
-        if (locListener == null)
-            Data.setmLocListener(mLocListener);
-        else
-            mLocListener = locListener;
-        if (listener == null)
-            Data.setmListener(mListener);
-        else
-            mListener = listener;
-        if (socket != null)
-            mSocket = socket;
-
-
-    }
+//    private void getSingleInfo() {
+//        LocationManager manager = Data.getmManager();
+//        LocationListener locListener = Data.getmLocListener();
+//        GpsStatus.Listener listener = Data.getmListener();
+//        BluetoothSocket socket = (BluetoothSocket) Data.getmSocket();
+//        if (manager == null) {
+//            mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//            Data.setmManager(mManager);
+//        } else
+//            mManager = manager;
+//        if (locListener == null)
+//            Data.setmLocListener(mLocListener);
+//        else
+//            mLocListener = locListener;
+//        if (listener == null)
+//            Data.setmListener(mListener);
+//        else
+//            mListener = listener;
+//        if (socket != null)
+//            mSocket = socket;
+//    }
 
     private void setDefaultInfo() {
         int ConnectType = Data.getmConnectType();
@@ -225,35 +217,31 @@ public class ConnectActivity extends Activity {
                 sp_way.setSelection(0);//内置GPS
                 break;
         }
-        if (minfo == null || minfo.equals("设备尚未连接")) {
-            tv_content.setText("设备尚未连接");
-        } else {
-            tv_content.setText(minfo);
-        }
+        tv_content.setText(Data.getmInfo());
     }
 
     /**
      * 取消时，定位操作仍然在继续
      */
-    private void disconnect() {
-        //取消内置GPS定位
-        if (mManager != null) {
-            mManager.removeUpdates(mLocListener);
-            mManager.removeGpsStatusListener(mListener);
-        }
-
-        if (mSocket != null) {
-            try {
-                if (mSocket.isConnected()) {
-                    mSocket.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        minfo = "设备尚未连接";
-
-    }
+//    private void disconnect() {
+//        //取消内置GPS定位
+//        if (mManager != null) {
+//            mManager.removeUpdates(mLocListener);
+//            mManager.removeGpsStatusListener(mListener);
+//        }
+//
+//        if (mSocket != null) {
+//            try {
+//                if (mSocket.isConnected()) {
+//                    mSocket.close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        Data.setmInfo("设备尚未连接");
+//
+//    }
 
     /**
      * 1.首先判断连接方式
@@ -262,15 +250,19 @@ public class ConnectActivity extends Activity {
      * 4.设置全局变量的打开类型
      */
     private void startConnect() {
-
         if (mConnectWay == Constant.BlueToothConncet) {
+            //只有选择蓝牙，才获得蓝牙适配器进行操作
+            mAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
                 StartDeviceList();
             } else {//打开蓝牙
                 OpenBluetooth();
             }
         } else if (mConnectWay == Constant.InnerGPSConnect) {
-            GPSinit();
+            mConnect = new InnerGPSConnect(mHandler, this);
+            mConnect.startConnect();
+            mConnect.sendMessage();
+            mConnect.readMessage();
         }
     }
 
@@ -281,15 +273,14 @@ public class ConnectActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE://获取蓝牙打开，选择可以被搜索
+            case REQUEST_CODE://打开蓝牙选项
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
                     startActivityForResult(intent, DISCOVERED);
                 }
                 break;
-            //这里是真正打开的地方
-            case DEVICE_MESSAGE:
+            case DEVICE_MESSAGE://建立蓝牙连接的选项
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
                     mConnect = new BluetoothConnect(address, mAdapter);
@@ -298,233 +289,229 @@ public class ConnectActivity extends Activity {
                     if (Data.isConnected()) {
                         String name = data.getExtras().getString(BluetoothDeviceActivity.NAME);
                         tv_content.setText(name);
-                        minfo = name;
+                        Data.setmInfo(name);
                     }
-
                 }
                 break;
-            case DISCOVERED:
+            case DISCOVERED://打开蓝牙设备连接窗口的
                 StartDeviceList();
                 break;
             case GPS_REQUEST:
-                //判断是否打开，没有打开则提示打开，
-                // 判断的话只能用当前是否包含GPS服务,只有在打开为true的情况下才行
+                //通过选择GPS打开界面来确定是否打开GPS
                 if (resultCode == RESULT_OK) {
-                    mProviders = mManager.getProviders(true);
-                    if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
-                        mManager.addGpsStatusListener(mListener);
-                        mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
-                    } else {
-                        Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
-                    }
-                    btn_connect.setText("断开");
-                    tv_content.setText("内置GPS");
-                    minfo = "内置GPS";
-                    Data.setIsConnected(true);
-                    Data.setmConnectType(Constant.InnerGPSConnect);
+                    mConnect = new InnerGPSConnect(mHandler, this);
+                    mConnect.startConnect();
+                } else {
+                    Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    /**
-     * 这里获取到输入输出流，然后输入流开启线程不断地读
-     * 需要在这里开始解析数据并处理丢包问题
-     * 这里也需要开启一个线程用来确认用户蓝牙连接成功和失败
-     *
-     * @param mDevice
-     */
-    private void connect(BluetoothDevice mDevice) {
-        try {
-            //这里打开socket连接，并将其
-            mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            //这里进行配对,主要是这一步
-            if (mSocket != null) {
-                mSocket.connect();
-                Data.setmSocket(mSocket);
-            }
-            //这里执行的太快
-            //在这里进行适配，如果连接成功，正确执行
-            Toast.makeText(ConnectActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-            sendMessage();
-            btn_connect.setText("断开");
-            Data.setIsConnected(true);
-            Data.setmConnectType(Constant.BlueToothConncet);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(ConnectActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                InputStream in = null;
-                //用来查看读取了多少的数据
-                int num;
-                //缓冲区,用来读取数据
-                byte[] buffer = new byte[1024 * 4];
-                //$符号之前的数据，用来和上一次的不完整数据进行拼接
-                byte[] completeInfo;
-                //$符号之后不完整的数据，用来和下一次的数据进行拼接
-                byte[] uncompleteInfo = null;
-                //拼接后得到的完整数据
-                byte[] useInfo;
-                try {
-                    in = mSocket.getInputStream();
-                    while (true) {
-                        while ((num = in.read(buffer)) != -1) {
-                            //获取$最后的位置
-                            int loc = getLastLocation(buffer, num);
-                            //获取最后$之前的数据的所有数据
-                            completeInfo = getcomplete(buffer, loc);
-                            //拼接之前的不完整的数据，得到的完整的数据
-                            useInfo = MergeInfo(completeInfo, uncompleteInfo);
-                            //获取不完整的数据
-                            uncompleteInfo = getuncomplete(buffer, loc, num);
-                            //首先要发指令，让其发送位置和卫星信息
-                            if (useInfo != null) {
-                                String msg1 = new String(useInfo);
-                                //注意，显示数据是不完善的，经过调试后发现是完整拼接
-                                Log.d(Constant.TAG, msg1);
-                                Infomation.setmInputMsg(msg1);
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
+//    /**
+//     * 这里获取到输入输出流，然后输入流开启线程不断地读
+//     * 需要在这里开始解析数据并处理丢包问题
+//     * 这里也需要开启一个线程用来确认用户蓝牙连接成功和失败
+//     *
+//     * @param mDevice
+//     */
+//    private void connect(BluetoothDevice mDevice) {
+//        try {
+//            //这里打开socket连接，并将其
+//            mSocket = mDevice.createRfcommSocketToServiceRecord(mUUid);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            //这里进行配对,主要是这一步
+//            if (mSocket != null) {
+//                mSocket.connect();
+//                Data.setmSocket(mSocket);
+//            }
+//            //这里执行的太快
+//            //在这里进行适配，如果连接成功，正确执行
+//            Toast.makeText(ConnectActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+//            sendMessage();
+//            btn_connect.setText("断开");
+//            Data.setIsConnected(true);
+//            Data.setmConnectType(Constant.BlueToothConncet);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            Toast.makeText(ConnectActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+//        }
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                InputStream in = null;
+//                //用来查看读取了多少的数据
+//                int num;
+//                //缓冲区,用来读取数据
+//                byte[] buffer = new byte[1024 * 4];
+//                //$符号之前的数据，用来和上一次的不完整数据进行拼接
+//                byte[] completeInfo;
+//                //$符号之后不完整的数据，用来和下一次的数据进行拼接
+//                byte[] uncompleteInfo = null;
+//                //拼接后得到的完整数据
+//                byte[] useInfo;
+//                try {
+//                    in = mSocket.getInputStream();
+//                    while (true) {
+//                        while ((num = in.read(buffer)) != -1) {
+//                            //获取$最后的位置
+//                            int loc = getLastLocation(buffer, num);
+//                            //获取最后$之前的数据的所有数据
+//                            completeInfo = getcomplete(buffer, loc);
+//                            //拼接之前的不完整的数据，得到的完整的数据
+//                            useInfo = MergeInfo(completeInfo, uncompleteInfo);
+//                            //获取不完整的数据
+//                            uncompleteInfo = getuncomplete(buffer, loc, num);
+//                            //首先要发指令，让其发送位置和卫星信息
+//                            if (useInfo != null) {
+//                                String msg1 = new String(useInfo);
+//                                //注意，显示数据是不完善的，经过调试后发现是完整拼接
+//                                Log.d(Constant.TAG, msg1);
+//                                Infomation.setmInputMsg(msg1);
+//                            }
+//                        }
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+//    }
+//
+//    /**
+//     * 获得不完整的数据，如果没有找到$符号的话，则返回整个读到的byte[] buffer，其长度为num
+//     * 注意$符号位置的情况：
+//     * 1.$不存在，2.$位于第一位，整条数据都是不完整的，返回<读到的>整条数据
+//     * 3.$正常位置，返回$位置之后<读到的>数据4.$位于最后一位，不会返回数据
+//     *
+//     * @param buffer
+//     * @param loc
+//     * @param num
+//     * @return
+//     */
+//    private byte[] getuncomplete(byte[] buffer, int loc, int num) {
+//        byte[] temp;
+//        if (loc == -2 || loc == -1) {//不存在$的情况和$位置是第一位的情况
+//            temp = new byte[num];
+//            for (int i = 0; i < num; i++) {
+//                temp[i] = buffer[i];
+//            }
+//        } else {
+//            int length = num - loc;//正确
+//            temp = new byte[length];//创建不完整数据的长度
+//            for (int i = 0; i < length; i++) {//赋值
+//                temp[i] = buffer[i + loc];
+//            }
+//        }
+//        return temp;
+//    }
+//
+//    /**
+//     * 通过$的位置来创建完整的byte[] complete
+//     * 需要注意不包含$符号的情况，需要分情况讨论
+//     * 1.不包含$符号和2.$符号为第一位==当条数据都不完整
+//     * 3.最后一位和4.通常位置==获得$之前的数据
+//     *
+//     * @param buffer
+//     * @param loc
+//     * @return
+//     */
+//    private byte[] getcomplete(byte[] buffer, int loc) {
+//        if (loc == -2 || loc == -1) {
+//            return null;
+//        }
+//        byte[] temp = new byte[loc];
+//        for (int i = 0; i < loc; i++) {
+//            temp[i] = buffer[i];
+//        }
+//        return temp;
+//    }
+//
+//    /**
+//     * 这里进行 本次查询到完整的数据，以及上次查词到的不完整的数据的拼接
+//     * 注意：
+//     * 1.第一次进行合并时，uncompleteInfo为null,需要返回完整数据
+//     * 2.有时会有没有包含$符的情况，则整个buffer都是不完整的数据，让其和下一次进行拼接，其返回null
+//     * 3.首先判断是否有completeinfo[]然后再判断uncompleteinfo
+//     *
+//     * @param completeInfo
+//     * @param uncompleteInfo
+//     * @return
+//     */
+//    private byte[] MergeInfo(byte[] completeInfo, byte[] uncompleteInfo) {
+//        if (completeInfo == null)
+//            return null;
+//        if (uncompleteInfo == null)
+//            return completeInfo;
+//        byte[] useinfo = new byte[completeInfo.length + uncompleteInfo.length];
+//        System.arraycopy(uncompleteInfo, 0, useinfo, 0, uncompleteInfo.length);
+//        System.arraycopy(completeInfo, 0, useinfo, uncompleteInfo.length, completeInfo.length);
+//        return useinfo;
+//    }
+//
+//    /**
+//     * 最后一个$位置的4种状态：
+//     * 1.通常状态，介于(0,length-1)之间；
+//     * 2.不存在，返回值为-2
+//     * 3.位于首位，返回值为-1
+//     * 4.位于末尾，返回值为length-1
+//     *
+//     * @param buffer
+//     * @param num
+//     * @return
+//     */
+//    private int getLastLocation(byte[] buffer, int num) {
+//        byte Fdelimiter = 0x24;//$符号的byte
+//        int location = -1;//默认没有找到$符的位置
+//        for (int i = 0; i < num; i++) {
+//            if (buffer[i] == Fdelimiter && i > location) {//判断条件1.当前位置大于位置2.确定是$符
+//                location = i;
+//            }
+//        }
+//        //因为获取到的是$之前的数据，而找到的是$符号的位置，所以要-1
+//        return location - 1;
+//    }
+//
+//    /**
+//     * 这里发送命令，分别清空当前发送信息，获取卫星数据和位置信息
+//     * 即发送两条指令，包括($GPGGA和$GPGSV)
+//     * 关闭流就是断开连接，然后中间间隔时间才能发送两条命令
+//     * 是否第一条必须获得流后就必须发送？
+//     * 是否只能一次性发送两次数据？
+//     */
+//    private void sendMessage() {
+//        try {
+//            out = mSocket.getOutputStream();
+//            out.write(TrimbleOrder.CLOSE_COM1);
+//            Thread.sleep(200);
+//            out.write(TrimbleOrder.GPGSV);
+//            Thread.sleep(200);
+//            out.write(TrimbleOrder.GGA);
+//            Thread.sleep(200);
+//            out.write(TrimbleOrder.GPZDA);
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
-     * 获得不完整的数据，如果没有找到$符号的话，则返回整个读到的byte[] buffer，其长度为num
-     * 注意$符号位置的情况：
-     * 1.$不存在，2.$位于第一位，整条数据都是不完整的，返回<读到的>整条数据
-     * 3.$正常位置，返回$位置之后<读到的>数据4.$位于最后一位，不会返回数据
-     *
-     * @param buffer
-     * @param loc
-     * @param num
-     * @return
+     * 打开蓝牙设备的选择画面
      */
-    private byte[] getuncomplete(byte[] buffer, int loc, int num) {
-        byte[] temp;
-        if (loc == -2 || loc == -1) {//不存在$的情况和$位置是第一位的情况
-            temp = new byte[num];
-            for (int i = 0; i < num; i++) {
-                temp[i] = buffer[i];
-            }
-        } else {
-            int length = num - loc;//正确
-            temp = new byte[length];//创建不完整数据的长度
-            for (int i = 0; i < length; i++) {//赋值
-                temp[i] = buffer[i + loc];
-            }
-        }
-        return temp;
-    }
-
-    /**
-     * 通过$的位置来创建完整的byte[] complete
-     * 需要注意不包含$符号的情况，需要分情况讨论
-     * 1.不包含$符号和2.$符号为第一位==当条数据都不完整
-     * 3.最后一位和4.通常位置==获得$之前的数据
-     *
-     * @param buffer
-     * @param loc
-     * @return
-     */
-    private byte[] getcomplete(byte[] buffer, int loc) {
-        if (loc == -2 || loc == -1) {
-            return null;
-        }
-        byte[] temp = new byte[loc];
-        for (int i = 0; i < loc; i++) {
-            temp[i] = buffer[i];
-        }
-        return temp;
-    }
-
-    /**
-     * 这里进行 本次查询到完整的数据，以及上次查词到的不完整的数据的拼接
-     * 注意：
-     * 1.第一次进行合并时，uncompleteInfo为null,需要返回完整数据
-     * 2.有时会有没有包含$符的情况，则整个buffer都是不完整的数据，让其和下一次进行拼接，其返回null
-     * 3.首先判断是否有completeinfo[]然后再判断uncompleteinfo
-     *
-     * @param completeInfo
-     * @param uncompleteInfo
-     * @return
-     */
-    private byte[] MergeInfo(byte[] completeInfo, byte[] uncompleteInfo) {
-        if (completeInfo == null)
-            return null;
-        if (uncompleteInfo == null)
-            return completeInfo;
-        byte[] useinfo = new byte[completeInfo.length + uncompleteInfo.length];
-        System.arraycopy(uncompleteInfo, 0, useinfo, 0, uncompleteInfo.length);
-        System.arraycopy(completeInfo, 0, useinfo, uncompleteInfo.length, completeInfo.length);
-        return useinfo;
-    }
-
-    /**
-     * 最后一个$位置的4种状态：
-     * 1.通常状态，介于(0,length-1)之间；
-     * 2.不存在，返回值为-2
-     * 3.位于首位，返回值为-1
-     * 4.位于末尾，返回值为length-1
-     *
-     * @param buffer
-     * @param num
-     * @return
-     */
-    private int getLastLocation(byte[] buffer, int num) {
-        byte Fdelimiter = 0x24;//$符号的byte
-        int location = -1;//默认没有找到$符的位置
-        for (int i = 0; i < num; i++) {
-            if (buffer[i] == Fdelimiter && i > location) {//判断条件1.当前位置大于位置2.确定是$符
-                location = i;
-            }
-        }
-        //因为获取到的是$之前的数据，而找到的是$符号的位置，所以要-1
-        return location - 1;
-    }
-
-    /**
-     * 这里发送命令，分别清空当前发送信息，获取卫星数据和位置信息
-     * 即发送两条指令，包括($GPGGA和$GPGSV)
-     * 关闭流就是断开连接，然后中间间隔时间才能发送两条命令
-     * 是否第一条必须获得流后就必须发送？
-     * 是否只能一次性发送两次数据？
-     */
-    private void sendMessage() {
-        try {
-            out = mSocket.getOutputStream();
-            out.write(TrimbleOrder.CLOSE_COM1);
-            Thread.sleep(200);
-            out.write(TrimbleOrder.GPGSV);
-            Thread.sleep(200);
-            out.write(TrimbleOrder.GGA);
-            Thread.sleep(200);
-            out.write(TrimbleOrder.GPZDA);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void StartDeviceList() {
         Intent intent = new Intent(this, BluetoothDeviceActivity.class);
         startActivityForResult(intent, DEVICE_MESSAGE);
     }
 
+    /**
+     * 打开系统的蓝牙
+     */
     private void OpenBluetooth() {
         if (!mAdapter.isEnabled()) {
             //设置开启请求
@@ -535,119 +522,118 @@ public class ConnectActivity extends Activity {
         }
     }
 
-    /**
-     * 在打开GPS的情况下可以直接的进行位置和GPS的监听
-     */
-    private void GPSinit() {
-        mProviders = mManager.getProviders(true);
-        if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
-            mProvider = LocationManager.GPS_PROVIDER;
-            mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
-            mManager.addGpsStatusListener(mListener);
-            //这里才能算上GPS连上了
-            Data.setmConnectType(Constant.InnerGPSConnect);
-            btn_connect.setText("断开");
-            Data.setIsConnected(true);
-            tv_content.setText("内置GPS");
-            minfo = "内置GPS";
-        } else {
-            Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivityForResult(intent, GPS_REQUEST);
-        }
-    }
+//    /**
+//     * 在打开GPS的情况下可以直接的进行位置和GPS的监听
+//     */
+//    private void GPSinit() {
+//        mProviders = mManager.getProviders(true);
+//        if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
+//            Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
+//            mProvider = LocationManager.GPS_PROVIDER;
+//            mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
+//            mManager.addGpsStatusListener(mListener);
+//            //这里才能算上GPS连上了
+//            Data.setmConnectType(Constant.InnerGPSConnect);
+//            btn_connect.setText("断开");
+//            Data.setIsConnected(true);
+//            tv_content.setText("内置GPS");
+//        } else {
+//            Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//            startActivityForResult(intent, GPS_REQUEST);
+//        }
+//    }
 
-    /**
-     * 位置和卫星状态的监听字段也必须保证是同一个对象
-     */
-    private GpsStatus.Listener mListener = new GpsStatus.Listener() {
-        @Override
-        public void onGpsStatusChanged(int event) {
-            //获取卫星对象
-            switch (event) {
-                //第一次定位
-                case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    Log.d(Constant.GPS_TAG, "卫星第一次锁定");
-                    break;
-                //卫星状态改变,当定位信息启动一次，那么它就会调用一次
-                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                    Log.d(Constant.GPS_TAG, "卫星的状态");
-                    //获取当前接收到的卫星情况
-                    GpsStatus status = mManager.getGpsStatus(null);
-                    //迭代接口，只有实现了这个接口才能实现其迭代器对象,可以对数据进行修改
-                    Iterable<GpsSatellite> satellites = status.getSatellites();
-                    //获得迭代对象，然后进行遍历
-                    Iterator<GpsSatellite> it = satellites.iterator();
-                    //获得最大的卫星数量，对接收的数量进行限制
-                    int maxSatellite = status.getMaxSatellites();
-                    int SatelliteNum = 0;
-                    //这里创建需要进行传递的对象
-                    ArrayList<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();
-                    while (it.hasNext() && SatelliteNum <= maxSatellite) {//判断条件1.有卫星数据2.小于最大卫星接收数
-                        GpsSatellite s = it.next();
-                        satelliteList.add(s);
-                        SatelliteNum++;
-                    }
-                    //只有在有handler的情况下才进行数据传输，因为卫星数据分两套解析所以，需要对mesaage携带的数据进行赋值
-                    if (mHandler != null) {
-                        Object satellitesInfo = satelliteList.clone();
-                        Message message = Message.obtain();
-                        message.what = 2;
-                        message.obj = satellitesInfo;
-                        message.arg1 = 1;//确保是内置GPS的卫星数据
-                        mHandler.sendMessage(message);
-                    }
-                    break;
-                //GPS定位启动
-                case GpsStatus.GPS_EVENT_STARTED:
-                    Log.d(Constant.GPS_TAG, "定位启动");
-                    break;
-                case GpsStatus.GPS_EVENT_STOPPED:
-                    Log.d(Constant.GPS_TAG, "定位结束");
-                    break;
-            }
-        }
-    };
-
-    private LocationListener mLocListener = new LocationListener() {
-        //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
-        @Override
-        public void onLocationChanged(Location location) {
-            String longitude = String.valueOf(location.getLongitude());
-            String altitude = String.valueOf(location.getAltitude());
-            String latitude = String.valueOf(location.getLatitude());
-            long time = location.getTime();
-            //在有handler的情况下才进行数据传输
-            if (mHandler != null) {
-                MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
-                Message m1 = Message.obtain();
-                m1.what = 1;
-                m1.obj = loc;
-                mHandler.sendMessage(m1);
-
-                UTCDate t = new UTCDate(time);
-                Message m2 = Message.obtain();
-                m2.what = 3;
-                m2.obj = t;
-                mHandler.sendMessage(m2);
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
+//    /**
+//     * 位置和卫星状态的监听字段也必须保证是同一个对象
+//     */
+//    private GpsStatus.Listener mListener = new GpsStatus.Listener() {
+//        @Override
+//        public void onGpsStatusChanged(int event) {
+//            //获取卫星对象
+//            switch (event) {
+//                //第一次定位
+//                case GpsStatus.GPS_EVENT_FIRST_FIX:
+//                    Log.d(Constant.GPS_TAG, "卫星第一次锁定");
+//                    break;
+//                //卫星状态改变,当定位信息启动一次，那么它就会调用一次
+//                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+//                    Log.d(Constant.GPS_TAG, "卫星的状态");
+//                    //获取当前接收到的卫星情况
+//                    GpsStatus status = mManager.getGpsStatus(null);
+//                    //迭代接口，只有实现了这个接口才能实现其迭代器对象,可以对数据进行修改
+//                    Iterable<GpsSatellite> satellites = status.getSatellites();
+//                    //获得迭代对象，然后进行遍历
+//                    Iterator<GpsSatellite> it = satellites.iterator();
+//                    //获得最大的卫星数量，对接收的数量进行限制
+//                    int maxSatellite = status.getMaxSatellites();
+//                    int SatelliteNum = 0;
+//                    //这里创建需要进行传递的对象
+//                    ArrayList<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();
+//                    while (it.hasNext() && SatelliteNum <= maxSatellite) {//判断条件1.有卫星数据2.小于最大卫星接收数
+//                        GpsSatellite s = it.next();
+//                        satelliteList.add(s);
+//                        SatelliteNum++;
+//                    }
+//                    //只有在有handler的情况下才进行数据传输，因为卫星数据分两套解析所以，需要对mesaage携带的数据进行赋值
+//                    if (mHandler != null) {
+//                        Object satellitesInfo = satelliteList.clone();
+//                        Message message = Message.obtain();
+//                        message.what = 2;
+//                        message.obj = satellitesInfo;
+//                        message.arg1 = 1;//确保是内置GPS的卫星数据
+//                        mHandler.sendMessage(message);
+//                    }
+//                    break;
+//                //GPS定位启动
+//                case GpsStatus.GPS_EVENT_STARTED:
+//                    Log.d(Constant.GPS_TAG, "定位启动");
+//                    break;
+//                case GpsStatus.GPS_EVENT_STOPPED:
+//                    Log.d(Constant.GPS_TAG, "定位结束");
+//                    break;
+//            }
+//        }
+//    };
+//
+//    private LocationListener mLocListener = new LocationListener() {
+//        //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
+//        @Override
+//        public void onLocationChanged(Location location) {
+//            String longitude = String.valueOf(location.getLongitude());
+//            String altitude = String.valueOf(location.getAltitude());
+//            String latitude = String.valueOf(location.getLatitude());
+//            long time = location.getTime();
+//            //在有handler的情况下才进行数据传输
+//            if (mHandler != null) {
+//                MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
+//                Message m1 = Message.obtain();
+//                m1.what = 1;
+//                m1.obj = loc;
+//                mHandler.sendMessage(m1);
+//
+//                UTCDate t = new UTCDate(time);
+//                Message m2 = Message.obtain();
+//                m2.what = 3;
+//                m2.obj = t;
+//                mHandler.sendMessage(m2);
+//            }
+//        }
+//
+//        @Override
+//        public void onStatusChanged(String provider, int status, Bundle extras) {
+//
+//        }
+//
+//        @Override
+//        public void onProviderEnabled(String provider) {
+//
+//        }
+//
+//        @Override
+//        public void onProviderDisabled(String provider) {
+//
+//        }
+//    };
 
 }

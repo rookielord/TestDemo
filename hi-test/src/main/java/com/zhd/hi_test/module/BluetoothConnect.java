@@ -23,6 +23,7 @@ import java.util.UUID;
 
 /**
  * Created by 2015032501 on 2015/10/17.
+ * 除了连接其它的发送、关闭、读取操作都必须建立在打开了连接之后
  */
 public class BluetoothConnect implements IConnect {
 
@@ -49,7 +50,7 @@ public class BluetoothConnect implements IConnect {
     }
 
     /**
-     * 通过传入的蓝牙地址来进行蓝牙匹配，
+     * 通过传入的蓝牙地址来进行蓝牙匹配
      */
     @Override
     public void startConnect() {
@@ -69,6 +70,8 @@ public class BluetoothConnect implements IConnect {
 
     @Override
     public void sendMessage() {
+        if (!Data.isConnected())
+            return;
         try {
             out.write(TrimbleOrder.CLOSE_COM1);
             Thread.sleep(200);
@@ -86,6 +89,8 @@ public class BluetoothConnect implements IConnect {
 
     @Override
     public void readMessage() {
+        if (!Data.isConnected())
+            return;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -109,7 +114,7 @@ public class BluetoothConnect implements IConnect {
                             if (useInfo != null) {
                                 String msg1 = new String(useInfo);
                                 //注意，显示数据是不完善的，经过调试后发现是完整拼接
-                                Log.d(Constant.TAG, msg1);
+//                                Log.d(Constant.TAG, msg1);
                                 Infomation.setmInputMsg(msg1);
                             }
                         }
@@ -126,6 +131,8 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void breakConnect() {
+        if (!Data.isConnected())
+            return;
         isRead=false;
         if (in!=null)
             try {
@@ -151,6 +158,4 @@ public class BluetoothConnect implements IConnect {
         }
 
     }
-
-
 }
