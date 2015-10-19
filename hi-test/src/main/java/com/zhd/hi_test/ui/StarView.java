@@ -228,6 +228,7 @@ public class StarView extends View {
     }
 
     private void drawdivideLines(Canvas canvas, int divideNum) {
+        mPaint.setAntiAlias(false);
         mPaint.setColor(Color.WHITE);
         //将360度等分化为个数，然后分别求得各个点的x,y坐标
         float[] ptr = new float[divideNum * 4];//每条线都有4个点

@@ -3,13 +3,11 @@ package com.zhd.hi_test.util;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
-import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.Location;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.UTCDate;
 
-import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +30,7 @@ public class Infomation {
 
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();
-    private static MyLocation location;
+    private static Location location;
     private static UTCDate curTime;
     //用来存放临时的数据然后发送过去
     private static Object mTemps;
@@ -61,7 +59,6 @@ public class Infomation {
 
     private static void getLoactionInfo(String group) {
         //1.获得位置信息和时间
-        Log.d("GGA", group);
         String[] info = group.split(",");
         //注意，刚刚开机时是没有定位的，GGA数据都为空，对B是否有值进行判断,没有值则不进行穿件location对象
         if (info.length == 1 || info[1].equals(""))
@@ -74,7 +71,7 @@ public class Infomation {
         //定位质量
         int quality = Integer.valueOf(info[6]);
         String H = info[9];
-        String HDPO = info[8];
+        String HDOP = info[8];
         //差分龄期,必须是完整的GGA数据才会有，即开始是没有的
         String age;
         if (info.length < 15)
@@ -82,7 +79,7 @@ public class Infomation {
         else
             age = info[13];
         //坐标点
-        location = new MyLocation(B, L, H, BDire, LDire, time, quality, age);
+        location = new Location(B, L, H, BDire, LDire, time, quality, age, HDOP);
         Message m = Message.obtain();
         m.obj = location;
         m.what = 1;
@@ -140,9 +137,8 @@ public class Infomation {
 
     private static void getTimeInfo(String group) {
         String[] info = group.split(",");
-        //没有数据返回
-        Log.d("GDP",group);
-        if (info.length == 7 || info[1].equals(""))
+        //没有数据时，长度依然为7，所以只能用内容来判断
+        if (info[1].equals(""))
             return;
         String day = info[2];
         String month = info[3];

@@ -1,5 +1,6 @@
 package com.zhd.hi_test.util;
 
+
 import com.zhd.hi_test.module.Project;
 
 import java.text.DecimalFormat;
@@ -16,7 +17,6 @@ public class Coordinate {
      * A:长半轴
      * B:短半径
      */
-
     static final double R2D = 180 / Math.PI;
     static final double D2R = Math.PI / 180;
     private static double A;
@@ -24,12 +24,12 @@ public class Coordinate {
 
     /**
      * 这个是iRTK的数据类型
-     * 把NMEA格式ddmm.mmm表示的角度值转成以度为
+     * 把NMEA格式ddmm.mmm表示的角度值转成以度为单位的大小
      *
      * @param ddmm 传过来的数据
      * @return
      */
-    public static double getLatitudeDegree(String ddmm) {
+    public static double getDegree(String ddmm) {
         if (ddmm.equals("")) {
             return 0.0;
         } else {
@@ -41,48 +41,6 @@ public class Coordinate {
     }
 
     /**
-     * 获得经度的度数
-     * 转化为弧度数，
-     *
-     * @param dddmm
-     * @return
-     */
-    public static double getLongtitudeDegree(String dddmm) {
-        if (dddmm.equals(""))
-            return 0;
-        else {
-            double value = Double.valueOf(dddmm);
-            int degree = getIntegerPart(value / 100);
-            double m = (value - degree * 100) / 60;
-            return degree + m;
-        }
-    }
-
-    /**
-     * 将内置GPS的经度，转化为IRTK的样式的纬度
-     * 将度=ddd.dddddd=》dddmm.mmmm
-     * 123.556666=>12355.6666
-     *
-     * @param degree_value
-     * @return
-     */
-    public static String getGPSdegree(String degree_value) {
-        if (degree_value.equals("0"))
-            return "0";
-        else {
-            double value = Double.valueOf(degree_value);
-            //将小数点前的转化为整数
-            int degree = getIntegerPart(value);
-            //将小数点后转化为mm,并获取整数部分
-            int mm = getIntegerPart((value - degree) * 60);
-            String ss = saveAfterPoint(value * 3600 - degree * 3600 - mm * 60, 5);
-            //两者进行字符串拼接
-            return String.valueOf(degree) + ":" + String.valueOf(mm) + ":" + ss;
-        }
-    }
-
-
-    /**
      * 将一个double型的数保留n位小数
      * 即将小数点后面的位数结局,使用四舍五入来计算
      *
@@ -91,20 +49,13 @@ public class Coordinate {
      * @return 保留数值过后的double
      */
     public static String saveAfterPoint(double value, int n) {
-        //使用math.round()只会保留整数位
-        //保留位数需要乘以10^n移动小数点
-        //最后再把小数位移动过来
-        double num = Math.pow(10, n);
-        double res = Math.round(value * num) / num;
-        //以00.000……为样板模式
         String pattern = "00.";
         for (int i = 0; i < n; i++) {
             pattern = pattern + "0";
         }
         DecimalFormat df = new DecimalFormat(pattern);
-        return df.format(res);
+        return df.format(value);
     }
-
 
     /**
      * 将dd.dddd=>dd:mm:ss.sssss的格式
@@ -114,10 +65,13 @@ public class Coordinate {
      * @return
      */
     public static String getDmsString(double degree) {
+        //获取度数的整数部分==度的大小
         int d = getIntegerPart(degree);
+        //将度数的小数位*60之后获取整数位==分位的大小
         int m = getIntegerPart(getFractionalPart(degree) * 60);
+        //获取分为的小数位*60==秒位的大小
         double s = getFractionalPart(getFractionalPart(degree) * 60) * 60;
-        return d + ":" + getZeroString(m) + ":" + (saveAfterPoint(s, 5));
+        return d + ":" + getZeroString(m) + ":" + saveAfterPoint(s, 5);
     }
 
     /**

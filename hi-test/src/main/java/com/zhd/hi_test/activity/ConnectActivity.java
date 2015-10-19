@@ -2,20 +2,8 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.location.GpsSatellite;
-import android.location.GpsStatus;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -33,19 +21,11 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.BluetoothConnect;
 import com.zhd.hi_test.module.InnerGPSConnect;
-import com.zhd.hi_test.module.MyLocation;
-import com.zhd.hi_test.module.UTCDate;
-import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.TrimbleOrder;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -69,18 +49,8 @@ public class ConnectActivity extends Activity {
     private ArrayAdapter<String> wayAdapter;
     //获取连接的方式
     private int mConnectWay;
-    //使用内置GPS进行连接
-    private static Handler mHandler;
-    //当前连接的信息
-//    private static String minfo = Data.getmInfo();
-
     //当前的连接对象
-    private IConnect mConnect;
-
-    //判断是否连接上，用来断开连接。清空发送的数据用
-    public static void setmHandler(Handler mHandler) {
-        ConnectActivity.mHandler = mHandler;
-    }
+    private static IConnect mConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,10 +130,10 @@ public class ConnectActivity extends Activity {
             }
         });
         //当前显示的默认信息
-        setDefaultInfo();
+        getDefaultInfo();
     }
 
-    private void setDefaultInfo() {
+    private void getDefaultInfo() {
         int ConnectType = Data.getmConnectType();
         boolean IsConnected = Data.isConnected();
         if (IsConnected) {
@@ -190,7 +160,6 @@ public class ConnectActivity extends Activity {
      * 1.首先判断连接方式
      * 2.打开蓝牙连接
      * 3.打开连接后跳转
-     * 4.设置全局变量的打开类型
      */
     private void startConnect() {
         if (mConnectWay == Constant.BlueToothConncet) {
@@ -202,21 +171,17 @@ public class ConnectActivity extends Activity {
                 OpenBluetooth();
             }
         } else if (mConnectWay == Constant.InnerGPSConnect) {
-            mConnect = new InnerGPSConnect(mHandler, this);
-            startingConnect();
+            mConnect = new InnerGPSConnect(this);
+           startConnecting();
         }
     }
 
-    private void startingConnect() {
+    private void startConnecting() {
         mConnect.startConnect();
         mConnect.sendMessage();
         mConnect.readMessage();
     }
 
-    /**
-     * 要求销毁资源数据
-     * 在注销mSocket之前要判断是否有蓝牙连接对象
-     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
@@ -230,13 +195,16 @@ public class ConnectActivity extends Activity {
             case Data.DEVICE_MESSAGE://建立蓝牙连接的选项
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
-                    mConnect = new BluetoothConnect(address, mAdapter);
-                    startingConnect();
-                    if (Data.isConnected()) {
-                        String name = data.getExtras().getString(BluetoothDeviceActivity.NAME);
-                        tv_content.setText(name);
-                        Data.setmInfo(name);
-                    }
+                    mConnect = new BluetoothConnect(address, mAdapter, this);
+                    startConnecting();
+//                    mConnect.startConnect();
+//                    List<byte[]> orders = new ArrayList<byte[]>() {{
+//                        add(TrimbleOrder.CLOSE_COM1);
+//                        add(TrimbleOrder.GGA);
+//                        add(TrimbleOrder.GPGSV);
+//                        add(TrimbleOrder.GPZDA);
+//                    }};
+//                    mConnect.sendMessage(orders);
                 }
                 break;
             case Data.DISCOVERED://打开蓝牙设备连接窗口的
@@ -245,7 +213,7 @@ public class ConnectActivity extends Activity {
             case Data.GPS_REQUEST:
                 //通过选择GPS打开界面来确定是否打开GPS
                 if (resultCode == RESULT_OK) {
-                    mConnect = new InnerGPSConnect(mHandler, this);
+                    mConnect = new InnerGPSConnect(this);
                     mConnect.startConnect();
                 } else {
                     Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
@@ -275,5 +243,4 @@ public class ConnectActivity extends Activity {
             Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

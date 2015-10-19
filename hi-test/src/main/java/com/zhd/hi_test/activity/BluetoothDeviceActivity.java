@@ -47,7 +47,6 @@ public class BluetoothDeviceActivity extends Activity {
     IntentFilter filter = new IntentFilter();
     //在上个Activity中获取设备地址的名称
     public static final String ADDRESS = "ADDRESS";
-    public static final String NAME = "NAME";
     //设置蓝牙开启返回的对应code
     private static final int BLUETOOTH_REQUEST = 0x1;
     //设置判断是否开启过蓝牙搜索，只有开启过蓝牙搜索后搜索到为0才能添加没有数据
@@ -175,7 +174,7 @@ public class BluetoothDeviceActivity extends Activity {
             //点击时停止查找
             mAdapter.cancelDiscovery();
             String name=((TextView)view).getText().toString();
-            //如果是没有项目的话，则不会进行下去
+            //如果没有数据则不会进行下去
             if (name.equals("当前没有配对的数据")||name.equals("当前没有设备")){
                 return;
             }
@@ -187,7 +186,6 @@ public class BluetoothDeviceActivity extends Activity {
             else
                 address=mNewDevices.get(position);
             intent.putExtra(ADDRESS, address);
-            intent.putExtra(NAME,name);
             setResult(RESULT_OK, intent);
             finish();
         }

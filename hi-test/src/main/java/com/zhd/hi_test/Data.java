@@ -26,14 +26,6 @@ public class Data {
     private static int mConnectType = 0;
     private static boolean IsConnected = false;
     private static double mheight = 0;
-    //内置GPS的一些监听
-    private static LocationManager mManager;
-    private static LocationListener mLocListener;
-    private static GpsStatus.Listener mListener;
-    //连接的scocket对象
-    private static Closeable mSocket;
-    //用于跳转的Activity
-    private static Activity mActivity;
     //设置返回是否允许启动蓝牙
     public static final int REQUEST_CODE = 1;
     //启动返回得到地址
@@ -51,22 +43,6 @@ public class Data {
 
     public static void setmInfo(String mInfo) {
         Data.mInfo = mInfo;
-    }
-
-    public static Activity getmActivity() {
-        return mActivity;
-    }
-
-    public static void setmActivity(Activity mActivity) {
-        Data.mActivity = mActivity;
-    }
-
-    public static Closeable getmSocket() {
-        return mSocket;
-    }
-
-    public static void setmSocket(Closeable mSocket) {
-        Data.mSocket = mSocket;
     }
 
     public static Project getmProject() {
@@ -109,27 +85,4 @@ public class Data {
         Data.mheight = mheight;
     }
 
-    public static LocationManager getmManager() {
-        return mManager;
-    }
-
-    public static void setmManager(LocationManager mManager) {
-        Data.mManager = mManager;
-    }
-
-    public static LocationListener getmLocListener() {
-        return mLocListener;
-    }
-
-    public static void setmLocListener(LocationListener mLocListener) {
-        Data.mLocListener = mLocListener;
-    }
-
-    public static GpsStatus.Listener getmListener() {
-        return mListener;
-    }
-
-    public static void setmListener(GpsStatus.Listener mListener) {
-        Data.mListener = mListener;
-    }
 }

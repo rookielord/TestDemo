@@ -23,7 +23,7 @@ public class UTCDate {
     /**
      * 转化后的当前年月日
      */
-    private String mCurrentDate="尚未确定";
+    private String mCurrentDate=getDate(System.currentTimeMillis());
 
     public UTCDate(String Day, String Month, String Year) {
         this.mDay = Day;

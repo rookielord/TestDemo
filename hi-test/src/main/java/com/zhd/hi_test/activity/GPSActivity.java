@@ -15,7 +15,8 @@ import android.widget.Toast;
 import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.InnerGPSConnect;
+import com.zhd.hi_test.module.Location;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.ui.StarView;
 import com.zhd.hi_test.util.Infomation;
@@ -43,7 +44,7 @@ public class GPSActivity extends Activity {
             switch (msg.what){
                 //位置数据，因为都是用的同一个类型所以不转移
                 case 1:
-                    MyLocation location= (MyLocation) msg.obj;
+                    Location location= (Location) msg.obj;
                     tv_locB.setText(String.valueOf(location.getmB()));
                     tv_locL.setText(String.valueOf(location.getmL()));
                     tv_locH.setText(String.valueOf(location.getmH()));
@@ -83,8 +84,7 @@ public class GPSActivity extends Activity {
         if (connect==Constant.InnerGPSConnect) {
             GPSinit();
             tv_connect.setText("内置GPS");
-            //这里将handler传递给ConnetActivity,来接受数据。主要是这一句话，将handler传过去后就会一直运行。如果没有传递过去则没有问题
-            ConnectActivity.setmHandler(mHandler);
+            InnerGPSConnect.setmHandler(mHandler);
         } else if(connect==Constant.BlueToothConncet){
             tv_connect.setText("蓝牙");
             Infomation.setHandler(mHandler);
@@ -98,7 +98,7 @@ public class GPSActivity extends Activity {
     @Override
     protected void onStop() {
         Log.d(Constant.GPS_TAG,"设置为空");
-        ConnectActivity.setmHandler(null);
+        InnerGPSConnect.setmHandler(null);
         super.onStop();
     }
 

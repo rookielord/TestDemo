@@ -238,7 +238,8 @@
 
                 <TextView
                     android:id="@+id/tv_time"
-                    style="@style/AddPointInfo" />
+                    style="@style/AddPointInfo"
+                    android:layout_height="60dp"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

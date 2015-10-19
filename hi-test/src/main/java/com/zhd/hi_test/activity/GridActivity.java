@@ -21,12 +21,12 @@ public class GridActivity extends Activity {
 
     //这里创建所有的图标资源，然后通过传入的PageID来决定传入使用哪些进行进行填充
     private static ArrayList<Icon> AllSource = new ArrayList<Icon>(){{
-        add(new Icon("项目管理", R.drawable.ic_root_file_proj, new Intent("com.zhd.project.START")));
-        add(new Icon("数据管理", R.drawable.ic_root_file_data, new Intent("com.zhd.manage.START")));
-        add(new Icon("仪器连接", R.drawable.ic_root_device_mag, new Intent("com.zhd.connect.START")));
-        add(new Icon("星图展示", R.drawable.ic_root_file_param, new Intent("com.zhd.starmap.START")));
-        add(new Icon("当前信息", R.drawable.ic_root_device_base, new Intent("com.zhd.device.START")));
-        add(new Icon("数据采集", R.drawable.ic_root_survey_point, new Intent("com.zhd.survey.START")));
+        add(new Icon("项目管理", R.mipmap.ic_root_file_proj, new Intent("com.zhd.project.START")));
+        add(new Icon("数据管理", R.mipmap.ic_root_file_data, new Intent("com.zhd.manage.START")));
+        add(new Icon("仪器连接", R.mipmap.ic_root_device_mag, new Intent("com.zhd.connect.START")));
+        add(new Icon("星图展示", R.mipmap.ic_root_file_param, new Intent("com.zhd.starmap.START")));
+        add(new Icon("当前信息", R.mipmap.ic_root_device_base, new Intent("com.zhd.device.START")));
+        add(new Icon("数据采集", R.mipmap.ic_root_survey_point, new Intent("com.zhd.survey.START")));
     }};
 
     //控件
@@ -37,7 +37,7 @@ public class GridActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.grid_main);
+        setContentView(R.layout.activity_grid);
         getMyadapter();
         gridView = (GridView) findViewById(R.id.project_gridview);
         gridView.setAdapter(myAdapter);

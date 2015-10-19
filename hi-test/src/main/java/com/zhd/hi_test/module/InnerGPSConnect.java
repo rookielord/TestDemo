@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,11 +36,8 @@ public class InnerGPSConnect implements IConnect {
     private String mProvider;
     private int minTime = 1000;
     private int minDistance = 0;
-    private Handler mHandler;
+    private static Handler mHandler;
     private Activity mActivity;
-
-    //显示连接状态和连接对象的Textview
-    TextView tv_connect;
 
     /**
      * 内置GPS的位置监听字段
@@ -53,41 +50,49 @@ public class InnerGPSConnect implements IConnect {
     private GpsStatus.Listener mListener;
 
 
-    /**
-     * 进行对象的传输
-     *
-     * @param handler
-     */
-    public InnerGPSConnect(Handler handler, Activity activity) {
-        mHandler = handler;
+    public InnerGPSConnect(Activity activity) {
         mActivity = activity;
         mManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        tv_connect = (TextView) mActivity.findViewById(R.id.tv_connect);
     }
 
-    //判断打开GPS操作
+    public static void setmHandler(Handler mHandler) {
+        InnerGPSConnect.mHandler = mHandler;
+    }
+
+    /**
+     * 打开GPS操作
+     */
     @Override
     public void startConnect() {
         GPSinit();
     }
 
-    //因为在实例化私有字段的时候就会传输数据,所以发送数据和读取数据其实是一回事
-    //但是为了区别还是在这里添加位置监听
+    /**
+     * 因为在实例化私有字段的时候就会传输数据,所以发送数据和读取数据其实是一回事
+     * 但是为了区别还是在这里添加位置监听
+     */
     @Override
     public void sendMessage() {
+    }
+
+    /**
+     * 当前是在字段中重写方法来，在这里添加卫星监听,开始注册监听
+     */
+    @Override
+    public void readMessage() {
         if (!Data.isConnected())
             return;
         mLocListener = new LocationListener() {
             //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
             @Override
-            public void onLocationChanged(Location location) {
+            public void onLocationChanged(android.location.Location location) {
                 String longitude = String.valueOf(location.getLongitude());
                 String altitude = String.valueOf(location.getAltitude());
                 String latitude = String.valueOf(location.getLatitude());
                 long time = location.getTime();
                 //在有handler的情况下才进行数据传输
                 if (mHandler != null) {
-                    MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
+                    Location loc = new Location(latitude, longitude, altitude, time);
                     Message m1 = Message.obtain();
                     m1.what = 1;
                     m1.obj = loc;
@@ -162,20 +167,9 @@ public class InnerGPSConnect implements IConnect {
                 }
             }
         };
-    }
-
-    //当前是在字段中重写方法来，在这里添加卫星监听,开始注册监听
-    @Override
-    public void readMessage() {
-        if (!Data.isConnected())
-            return;
         mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
         mManager.addGpsStatusListener(mListener);
         //这里才能算上GPS连上了
-        Data.setmConnectType(Constant.InnerGPSConnect);
-        ((TextView) mActivity.findViewById(R.id.btn_connect)).setText("断开");
-        Data.setIsConnected(true);
-        Data.setmInfo("内置GPS");
     }
 
     @Override
@@ -190,13 +184,19 @@ public class InnerGPSConnect implements IConnect {
 
     }
 
+    /**
+     * 判断GPS定位是否打开的操作
+     */
     private void GPSinit() {
         mProviders = mManager.getProviders(true);
         if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(mActivity, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
-            mProvider=LocationManager.GPS_PROVIDER;
+            mProvider = LocationManager.GPS_PROVIDER;
+            Data.setmConnectType(Constant.InnerGPSConnect);
+            ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
+            ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText("内置GPS");
             Data.setIsConnected(true);
-            Data.setmConnectType(Constant.BlueToothConncet);
+            Data.setmInfo("内置GPS");
         } else {//这里是对ConnectActivity进行操作
             Toast.makeText(mActivity, "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);

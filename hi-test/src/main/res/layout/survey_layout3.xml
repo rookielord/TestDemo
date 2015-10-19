@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,30 +15,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="B" />
+            android:text="卫星数" />
 
         <TextView
-            android:id="@+id/tv_B"
-            style="@style/SurveyText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <TextView
-            style="@style/SurveyText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="L" />
-
-        <TextView
-            android:id="@+id/tv_L"
+            android:id="@+id/tv_satellite"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -57,10 +36,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="H" />
+            android:text="差分龄期" />
 
         <TextView
-            android:id="@+id/tv_H"
+            android:id="@+id/tv_age"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -77,16 +56,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="解状态" />
+            android:text="HDOP" />
 
         <TextView
-            android:id="@+id/tv_solution"
+            android:id="@+id/tv_HDOP"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1" />
     </LinearLayout>
-
-
-
 </LinearLayout>

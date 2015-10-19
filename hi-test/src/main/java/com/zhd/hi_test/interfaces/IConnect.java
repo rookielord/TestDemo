@@ -17,7 +17,7 @@ public interface IConnect {
     //发送命令
     void sendMessage();
 
-    //读取命令
+    //读取信息
     void readMessage();
 
     //断开连接

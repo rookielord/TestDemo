@@ -12,11 +12,11 @@
 
         <ImageView
             android:id="@+id/image_title"
-            android:layout_width="200dp"
+            android:layout_width="174dp"
             android:layout_centerHorizontal="true"
-            android:layout_height="wrap_content"
+            android:layout_height="103dp"
             android:scaleType="fitXY"
-            android:src="@drawable/img_gps" />
+            android:src="@mipmap/img_gps" />
         <TextView
             android:id="@+id/tv_device_info"
             android:text="@string/unconnect"

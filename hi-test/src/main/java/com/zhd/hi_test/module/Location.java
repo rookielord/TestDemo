@@ -15,7 +15,7 @@ import java.util.Date;
  * 最好是全部的数据都存满，不要留下空隙
  * 注意内置GPS和IRTK的数据格式是不一样的
  */
-public class MyLocation {
+public class Location {
 
     private String mB;
     private String mL;
@@ -26,7 +26,20 @@ public class MyLocation {
     private String mProgressB;
     private String mProgressL;
     private String mQuality;
-    private String mAge;
+    private String mAge="尚无差分龄期";
+    private String mHDOP;
+
+    public String getmHDOP() {
+        return mHDOP;
+    }
+
+    public String getmQuality() {
+        return mQuality;
+    }
+
+    public String getmAge() {
+        return mAge;
+    }
 
     public String getmDireB() {
         return mDireB;
@@ -53,27 +66,50 @@ public class MyLocation {
     }
 
     //RTK传过来的数据
-    public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int mQuality, String mAge) {
-        this.mQuality = String.valueOf(mQuality);
-        this.mAge = mAge;
-        this.mB = String.valueOf(Coordinate.getDmsString(Coordinate.getLatitudeDegree(B)));
-        this.mL = String.valueOf(Coordinate.getDmsString(Coordinate.getLongtitudeDegree(L)));
-        this.mProgressB = String.valueOf(Coordinate.getLatitudeDegree(B));
-        this.mProgressL = String.valueOf(Coordinate.getLongtitudeDegree(L));
+    public Location(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String HDOP) {
+        this.mHDOP = HDOP;
+        this.mQuality = getQuality(Quality);
+        this.mAge = Age;
+        this.mB = Coordinate.getDmsString(Coordinate.getDegree(B));
+        this.mL = Coordinate.getDmsString(Coordinate.getDegree(L));
+        this.mProgressB = String.valueOf(Coordinate.getDegree(B));
+        this.mProgressL = String.valueOf(Coordinate.getDegree(L));
         this.mH = H;
         this.mDireB = DireB;
         this.mDireL = DireL;
         this.mTime=getLocalTime(time);
     }
 
+    private String getQuality(int quality) {
+        //默认无解
+        String msg="无解";
+        switch (quality){
+            case 0:
+                msg="无解";
+                break;
+            case 1:
+                msg="GPS固定解";
+                break;
+            case 2:
+                msg="不同GPS固定解";
+                break;
+            case 4:
+                msg="实时差分固定解";
+                break;
+            case 5:
+                msg="实时差分浮动解";
+                break;
+        }
+        return msg;
+    }
 
 
     //内置GPS传过来的数据
-    public MyLocation(String mB, String mL, String mH,long time) {
+    public Location(String mB, String mL, String mH, long time) {
         this.mProgressB = mB;
         this.mProgressL = mL;
-        this.mB = Coordinate.getGPSdegree(mB);
-        this.mL = Coordinate.getGPSdegree(mL);
+        this.mB = Coordinate.getDmsString(Double.valueOf(mB));
+        this.mL = Coordinate.getDmsString(Double.valueOf(mL));
         this.mH = mH;
         this.mTime=getTime(time);
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针

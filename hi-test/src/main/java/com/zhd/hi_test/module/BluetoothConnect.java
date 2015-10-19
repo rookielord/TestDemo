@@ -1,15 +1,20 @@
 package com.zhd.hi_test.module;
 
+import android.app.Activity;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
+import com.zhd.hi_test.R;
 import com.zhd.hi_test.activity.BluetoothDeviceActivity;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.util.Infomation;
@@ -19,11 +24,13 @@ import com.zhd.hi_test.util.TrimbleOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by 2015032501 on 2015/10/17.
  * 除了连接其它的发送、关闭、读取操作都必须建立在打开了连接之后
+ * 调用这个类的情况就是返回了蓝牙地址的情况
  */
 public class BluetoothConnect implements IConnect {
 
@@ -34,18 +41,23 @@ public class BluetoothConnect implements IConnect {
     private InputStream in;
     private BluetoothAdapter mAdapter;
     private String mAddress;
+    private Activity mActivity;
 
     //设置一个量用于维护读取操作
     private boolean isRead = false;
 
     /**
-     * 蓝牙连接只需要传入一个地址则可以了
+     * 为了在Connect上面显示toast需要传入Activity
+     * 为了创建蓝牙连接对象，需要使用BluetoothAdapter对象，但是为了方便，会把在主Activity中的mAdapter传过来进行判断
      *
      * @param address
+     * @param adapter
+     * @param activity
      */
-    public BluetoothConnect(String address, BluetoothAdapter adapter) {
+    public BluetoothConnect(String address, BluetoothAdapter adapter, Activity activity) {
         this.mAddress = address;
         this.mAdapter = adapter;
+        this.mActivity = activity;
         isRead = true;
     }
 
@@ -60,12 +72,36 @@ public class BluetoothConnect implements IConnect {
             mSocket.connect();
             in = mSocket.getInputStream();
             out = mSocket.getOutputStream();
+            Data.setmInfo(mAddress);
             Data.setIsConnected(true);
             Data.setmConnectType(Constant.BlueToothConncet);
+            ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
+            ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
+            Data.setmInfo(mDevice.getName());
+            Toast.makeText(mActivity, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(mActivity, "连接失败", Toast.LENGTH_SHORT).show();
         }
     }
+
+//    @Override
+//    public void sendMessage(List<byte[]> orders) {
+//        if (!Data.isConnected())
+//            return;
+//        int i = 0;
+//        for (byte[] order : orders) {
+//            try {
+//                out.write(order);
+//                Thread.sleep(200);
+//                i++;
+//                if (i == orders.size() - 1)
+//                    out.flush();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     /**
      * 发送读取的数据
@@ -89,6 +125,9 @@ public class BluetoothConnect implements IConnect {
 
     }
 
+    /**
+     * 读取其中的数据
+     */
     @Override
     public void readMessage() {
         if (!Data.isConnected())
@@ -135,14 +174,14 @@ public class BluetoothConnect implements IConnect {
     public void breakConnect() {
         if (!Data.isConnected())
             return;
-        isRead=false;
-        if (in!=null)
+        isRead = false;
+        if (in != null)
             try {
                 in.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        if (out!=null){
+        if (out != null) {
             try {
                 out.close();
             } catch (IOException e) {
@@ -151,7 +190,7 @@ public class BluetoothConnect implements IConnect {
         }
         if (mSocket != null) {
             try {
-                if (mSocket.isConnected()){
+                if (mSocket.isConnected()) {
                     mSocket.close();
                 }
             } catch (IOException e) {
@@ -160,4 +199,5 @@ public class BluetoothConnect implements IConnect {
         }
 
     }
+
 }

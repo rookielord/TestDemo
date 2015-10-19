@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.GpsSatellite;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,8 +30,10 @@ import com.zhd.hi_test.Constant;
 import com.zhd.hi_test.Data;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
-import com.zhd.hi_test.module.MyLocation;
-import com.zhd.hi_test.module.MyPoint;
+import com.zhd.hi_test.module.InnerGPSConnect;
+import com.zhd.hi_test.module.Location;
+import com.zhd.hi_test.module.Point;
+import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.ui.SurveyView;
 import com.zhd.hi_test.ui.ZoomListener;
@@ -51,16 +60,16 @@ import java.util.List;
 public class SurveyActivity extends Activity implements OnClickListener {
 
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time,tv_date;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_HDOP, tv_age,tv_solution;
     Button btn_add;
-    ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all;
+    ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all, image_compass;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
     private static String mDireL;
     //自定义控件更新点的集合,包括当前点的位置
-    List<MyPoint> points = new ArrayList<>();
+    List<Point> points = new ArrayList<>();
     SurveyView surveyView;
-    private MyPoint point;
+    private Point point;
     //滑动需要的控件和数值
     LinearLayout pointLayout;
     ViewPager viewPager;
@@ -76,17 +85,27 @@ public class SurveyActivity extends Activity implements OnClickListener {
     private Cursor mCursor;
     //从AddActivity中返回，判断是否添加后更新点集合
     private static final int ADD_RESULT = 0;
+
+
+    //指南针的控件相关
+    private Sensor mSensor;
+    private SensorManager mSensorManager;
+    //方向向量数组
+
     //线程通信
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
-                    MyLocation location = (MyLocation) msg.obj;
+                    Location location = (Location) msg.obj;
                     tv_B.setText(location.getmB());
                     tv_L.setText(location.getmL());
                     tv_H.setText(location.getmH());
                     tv_time.setText(location.getmTime());
+                    tv_age.setText(location.getmAge());
+                    tv_HDOP.setText(location.getmHDOP());
+                    tv_solution.setText(location.getmQuality());
                     mDireB = location.getmDireB();
                     mDireL = location.getmDireL();
                     double b = Double.valueOf(location.getmProgressB());
@@ -96,18 +115,49 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_E.setText(info.get("e").toString());
                     tv_Z.setText(location.getmH());
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
-                    point = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
+                    point = new Point("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
                     surveyView.setMyLocation(point);
                     //重绘
                     surveyView.invalidate();
                     break;
                 case 2:
+                    switch (msg.arg1){
+                        case 1://内置GPS的数据
+                            List<GpsSatellite> satellites= (ArrayList<GpsSatellite>) msg.obj;
+                            tv_satellite.setText(String.valueOf(satellites.size()));
+                            break;
+                        case 2://IRTK的数据
+                            List<Satellite> satellites1= (List<Satellite>) msg.obj;
+                            tv_satellite.setText(String.valueOf(satellites1.size()));
+                            break;
+                    }
                     break;
                 case 3:
-                    UTCDate time= (UTCDate) msg.obj;
+                    UTCDate time = (UTCDate) msg.obj;
                     tv_date.setText(time.getmCurrentDate());
                     break;
             }
+        }
+    };
+
+    //指南针事件监听
+    SensorEventListener mListener = new SensorEventListener() {
+
+        private float predegree = 0;
+
+        public void onSensorChanged(SensorEvent event) {
+            float degree = event.values[0];// 数组中的第一个数是方向值
+            //以自身为中心进行旋转
+            RotateAnimation anim = new RotateAnimation(predegree, -degree,
+                    Animation.RELATIVE_TO_SELF, 0.5f,
+                    Animation.RELATIVE_TO_SELF, 0.5f);
+            anim.setDuration(200);
+            image_compass.startAnimation(anim);
+            predegree = -degree;//记录这一次的起始角度作为下次旋转的初始角度
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
         }
     };
 
@@ -121,19 +171,27 @@ public class SurveyActivity extends Activity implements OnClickListener {
             return;
         }
         mCurd = new Curd(Data.getmProject().getmTableName(), this);
-        //获得最后一个id的名称
-        //初始化滑动界面的内容
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        //获取方向传感器
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+
         init();
-        //对自定义控件中的数据进行初始化，注意:这会将数据在
         iniSurveyView();
         //初始化下面的点
         initDoc();
         if (Data.getmConnectType() == Constant.BlueToothConncet) {
             Infomation.setHandler(mHandler);
         } else if (Data.getmConnectType() == Constant.InnerGPSConnect) {
-            ConnectActivity.setmHandler(mHandler);
+            InnerGPSConnect.setmHandler(mHandler);
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //注册传感器
+        mSensorManager.registerListener(mListener, mSensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
     private void addPoint() {
@@ -148,7 +206,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         cv.put("N", tv_N.getText().toString());
         cv.put("E", tv_E.getText().toString());
         cv.put("Z", tv_Z.getText().toString());
-        cv.put("time", tv_time.getText().toString());
+        cv.put("time", tv_date.getText().toString() + " " + tv_time.getText().toString());
         cv.put("DireB", mDireB);
         cv.put("DireL", mDireL);
         cv.put("DES", "");
@@ -188,7 +246,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 double N = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("N")));
                 double E = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("E")));
                 String name = "pt" + mCursor.getString(mCursor.getColumnIndex("id"));
-                MyPoint p = new MyPoint(name, N, E);
+                Point p = new Point(name, N, E);
                 points.add(p);
             }
             mCursor.close();
@@ -206,6 +264,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         image_zoom_in = (ImageView) findViewById(R.id.image_zoom_in);
         image_zoom_out = (ImageView) findViewById(R.id.image_zoom_out);
         image_zoom_all = (ImageView) findViewById(R.id.image_zoom_all);
+        image_compass = (ImageView) findViewById(R.id.image_compass);
+        //保证画面不会黑屏
+        image_compass.setKeepScreenOn(true);
         btn_add = (Button) findViewById(R.id.btn_add_point);
         image_add.setOnClickListener(this);
         image_zoom_in.setOnClickListener(this);
@@ -217,16 +278,22 @@ public class SurveyActivity extends Activity implements OnClickListener {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view1 = inflater.inflate(R.layout.survey_layout1, null);
         View view2 = inflater.inflate(R.layout.survey_layout2, null);
+        View view3 = inflater.inflate(R.layout.survey_layout3, null);
         tv_B = (TextView) view1.findViewById(R.id.tv_B);
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
-        tv_time = (TextView) view1.findViewById(R.id.tv_time);
-        tv_date= (TextView) view1.findViewById(R.id.tv_date);
+        tv_solution= (TextView) view1.findViewById(R.id.tv_solution);
         tv_N = (TextView) view2.findViewById(R.id.tv_N);
         tv_E = (TextView) view2.findViewById(R.id.tv_E);
         tv_Z = (TextView) view2.findViewById(R.id.tv_Z);
+        tv_time = (TextView) view2.findViewById(R.id.tv_time);
+        tv_date = (TextView) view2.findViewById(R.id.tv_date);
+        tv_satellite= (TextView) view3.findViewById(R.id.tv_satellite);
+        tv_HDOP= (TextView) view3.findViewById(R.id.tv_HDOP);
+        tv_age= (TextView) view3.findViewById(R.id.tv_age);
         mViews.add(view1);
         mViews.add(view2);
+        mViews.add(view3);
         //设置填充内容，以及页面改变的监听
         viewPager.setAdapter(mAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -260,7 +327,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         }
         //默认选中的当前页面
         mCurrentIndex = 0;
-        dots[mCurrentIndex].setBackgroundResource(R.drawable.dian_down);
+        dots[mCurrentIndex].setBackgroundResource(R.mipmap.dian_down);
     }
 
     /**
@@ -272,9 +339,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
             return;
         }
         //当前选中位置改变
-        dots[position].setBackgroundResource(R.drawable.dian_down);
+        dots[position].setBackgroundResource(R.mipmap.dian_down);
         //之前选中位置变为没被选中的状态
-        dots[mCurrentIndex].setBackgroundResource(R.drawable.dian);
+        dots[mCurrentIndex].setBackgroundResource(R.mipmap.dian);
         mCurrentIndex = position;
     }
 
@@ -319,13 +386,17 @@ public class SurveyActivity extends Activity implements OnClickListener {
 
     /**
      * 在关闭的时候需要进行的操作：
-     * 1.不再解析数据
-     * 2.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
+     * 1.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
+     * 2.不再解析数据
+     * 3.不再接收内置GPS的数据
      */
     @Override
     protected void onDestroy() {
-        Infomation.setHandler(null);
+        if (mListener != null)
+            mSensorManager.unregisterListener(mListener);
         surveyView.setMyLocation(null);
+        Infomation.setHandler(null);
+        InnerGPSConnect.setmHandler(null);
         super.onDestroy();
     }
 
@@ -348,7 +419,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     intent.putExtra("N", tv_N.getText().toString());
                     intent.putExtra("E", tv_E.getText().toString());
                     intent.putExtra("Z", tv_Z.getText().toString());
-                    intent.putExtra("time", tv_time.getText().toString());
+                    intent.putExtra("time", tv_date.getText().toString() + " " + tv_time.getText().toString());
                     intent.putExtra("DireB", mDireB);
                     intent.putExtra("DireL", mDireL);
                     startActivityForResult(intent, ADD_RESULT);
