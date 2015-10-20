@@ -1,17 +1,9 @@
 package com.zhd.hi_test;
 
-import android.app.Activity;
-import android.app.Application;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.location.GpsStatus;
-import android.location.LocationListener;
-import android.location.LocationManager;
 
-import com.zhd.hi_test.module.Project;
 
-import java.io.Closeable;
-import java.net.Socket;
+import com.zhd.hi_test.module.MyProject;
+
 
 /**
  * Created by 2015032501 on 2015/9/18.
@@ -19,8 +11,12 @@ import java.net.Socket;
  * 包含项目对象Project
  * 包含ZHD_TEST路径
  */
-public class Data {
-    private static Project mProject;
+public class Const {
+    public static final int BlueToothConncet = 1;
+    public static final int InnerGPSConnect = 2;
+    //当前打开的项目对象
+    private static MyProject mMyProject;
+    //HI_TEST的路径
     private static String mPath;
     //0为未连接;1为蓝牙连接;2为内置GPS
     private static int mConnectType = 0;
@@ -35,22 +31,28 @@ public class Data {
     //判断GPS是否开启
     public static final int GPS_REQUEST = 4;
     //当前的连接信息，为了在第二次打开的时候用
-    public static String mInfo = "设备尚未连接";
+    private static String mInfo = "设备尚未连接";
+    //判断当前是否解析了日期信息，如果没有则在刷新位置信息的时候，获取手机本身的日期如果有，则不会去获取手机本身
+    public static boolean HasDataInfo=false;
+    public static final String PFNAME = "config";//SharePreference文件名
+    public static final String ISUPDATA = "updata";//是否检查版本更新
+    public static final String SAFEPASSWORD = "password";//设置我的手机防盗密码
+
 
     public static String getmInfo() {
         return mInfo;
     }
 
     public static void setmInfo(String mInfo) {
-        Data.mInfo = mInfo;
+        Const.mInfo = mInfo;
     }
 
-    public static Project getmProject() {
-        return mProject;
+    public static MyProject getmProject() {
+        return mMyProject;
     }
 
-    public static void setmProject(Project mProject) {
-        Data.mProject = mProject;
+    public static void setmProject(MyProject mMyProject) {
+        Const.mMyProject = mMyProject;
     }
 
     public static String getmPath() {
@@ -58,7 +60,7 @@ public class Data {
     }
 
     public static void setmPath(String mPath) {
-        Data.mPath = mPath;
+        Const.mPath = mPath;
     }
 
     public static int getmConnectType() {
@@ -66,7 +68,7 @@ public class Data {
     }
 
     public static void setmConnectType(int mConnectType) {
-        Data.mConnectType = mConnectType;
+        Const.mConnectType = mConnectType;
     }
 
     public static boolean isConnected() {
@@ -82,7 +84,7 @@ public class Data {
     }
 
     public static void setMheight(double mheight) {
-        Data.mheight = mheight;
+        Const.mheight = mheight;
     }
 
 }

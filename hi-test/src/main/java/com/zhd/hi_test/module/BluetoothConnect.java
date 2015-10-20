@@ -1,21 +1,15 @@
 package com.zhd.hi_test.module;
 
 import android.app.Activity;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhd.hi_test.Constant;
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
-import com.zhd.hi_test.activity.BluetoothDeviceActivity;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.util.Infomation;
 import com.zhd.hi_test.util.ProgressInfo;
@@ -24,7 +18,6 @@ import com.zhd.hi_test.util.TrimbleOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -42,6 +35,7 @@ public class BluetoothConnect implements IConnect {
     private BluetoothAdapter mAdapter;
     private String mAddress;
     private Activity mActivity;
+    private static final String TAG="BlueTooth_TEST";
 
     //设置一个量用于维护读取操作
     private boolean isRead = false;
@@ -72,12 +66,12 @@ public class BluetoothConnect implements IConnect {
             mSocket.connect();
             in = mSocket.getInputStream();
             out = mSocket.getOutputStream();
-            Data.setmInfo(mAddress);
-            Data.setIsConnected(true);
-            Data.setmConnectType(Constant.BlueToothConncet);
+            Const.setmInfo(mAddress);
+            Const.setIsConnected(true);
+            Const.setmConnectType(Const.BlueToothConncet);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
-            Data.setmInfo(mDevice.getName());
+            Const.setmInfo(mDevice.getName());
             Toast.makeText(mActivity, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,7 +81,7 @@ public class BluetoothConnect implements IConnect {
 
 //    @Override
 //    public void sendMessage(List<byte[]> orders) {
-//        if (!Data.isConnected())
+//        if (!Const.isConnected())
 //            return;
 //        int i = 0;
 //        for (byte[] order : orders) {
@@ -108,7 +102,7 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void sendMessage() {
-        if (!Data.isConnected())
+        if (!Const.isConnected())
             return;
         try {
             out.write(TrimbleOrder.CLOSE_COM1);
@@ -130,7 +124,7 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void readMessage() {
-        if (!Data.isConnected())
+        if (!Const.isConnected())
             return;
         new Thread(new Runnable() {
             @Override
@@ -155,7 +149,7 @@ public class BluetoothConnect implements IConnect {
                             if (useInfo != null) {
                                 String msg1 = new String(useInfo);
                                 //注意，显示数据是不完善的，经过调试后发现是完整拼接
-//                                Log.d(Constant.TAG, msg1);
+//                                Log.d(TAG, msg1);
                                 Infomation.setmInputMsg(msg1);
                             }
                         }
@@ -172,7 +166,7 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void breakConnect() {
-        if (!Data.isConnected())
+        if (!Const.isConnected())
             return;
         isRead = false;
         if (in != null)

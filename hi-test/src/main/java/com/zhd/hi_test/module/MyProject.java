@@ -14,7 +14,7 @@ import java.io.Serializable;
  * 配置文件(以上4个都会被写入其中)
  * 考虑到下一次自动打开项目，需要将最后打开的项目对象写入file/last.txt,之后读取该对象，让其为全局project对象
  */
-public class Project implements Serializable {
+public class MyProject implements Serializable {
     private String mName;
     private String mTime;
     private String mBackup;
@@ -44,7 +44,7 @@ public class Project implements Serializable {
      * @param mConfig config.txt文件位置6
      * @param mGuass 所采用的高斯投影带数
      */
-    public Project(String mName, String mBackup, String mTime, String mLastTime, String mCoordinate, String mTableName, File mConfig, String mGuass) {
+    public MyProject(String mName, String mBackup, String mTime, String mLastTime, String mCoordinate, String mTableName, File mConfig, String mGuass) {
         this.mName = mName;
         this.mTime = mTime;
         this.mBackup = mBackup;

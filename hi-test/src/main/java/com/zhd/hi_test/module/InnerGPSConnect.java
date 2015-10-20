@@ -16,8 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhd.hi_test.Constant;
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.IConnect;
 
@@ -38,6 +37,7 @@ public class InnerGPSConnect implements IConnect {
     private int minDistance = 0;
     private static Handler mHandler;
     private Activity mActivity;
+    private static final String TAG="GPS_TEST";
 
     /**
      * 内置GPS的位置监听字段
@@ -80,7 +80,7 @@ public class InnerGPSConnect implements IConnect {
      */
     @Override
     public void readMessage() {
-        if (!Data.isConnected())
+        if (!Const.isConnected())
             return;
         mLocListener = new LocationListener() {
             //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
@@ -92,7 +92,7 @@ public class InnerGPSConnect implements IConnect {
                 long time = location.getTime();
                 //在有handler的情况下才进行数据传输
                 if (mHandler != null) {
-                    Location loc = new Location(latitude, longitude, altitude, time);
+                    MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
                     Message m1 = Message.obtain();
                     m1.what = 1;
                     m1.obj = loc;
@@ -127,10 +127,10 @@ public class InnerGPSConnect implements IConnect {
             public void onGpsStatusChanged(int event) {
                 switch (event) {
                     case GpsStatus.GPS_EVENT_FIRST_FIX:
-                        Log.d(Constant.GPS_TAG, "卫星第一次锁定");
+                        Log.d(TAG, "卫星第一次锁定");
                         break;
                     case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                        Log.d(Constant.GPS_TAG, "卫星的状态");
+                        Log.d(TAG, "卫星的状态");
                         //获取当前接收到的卫星情况
                         GpsStatus status = mManager.getGpsStatus(null);
                         //迭代接口，只有实现了这个接口才能实现其迭代器对象,可以对数据进行修改
@@ -159,10 +159,10 @@ public class InnerGPSConnect implements IConnect {
                         break;
                     //GPS定位启动
                     case GpsStatus.GPS_EVENT_STARTED:
-                        Log.d(Constant.GPS_TAG, "定位启动");
+                        Log.d(TAG, "定位启动");
                         break;
                     case GpsStatus.GPS_EVENT_STOPPED:
-                        Log.d(Constant.GPS_TAG, "定位结束");
+                        Log.d(TAG, "定位结束");
                         break;
                 }
             }
@@ -174,13 +174,13 @@ public class InnerGPSConnect implements IConnect {
 
     @Override
     public void breakConnect() {
-        if (!Data.isConnected())
+        if (!Const.isConnected())
             return;
         if (mListener != null)
             mManager.removeGpsStatusListener(mListener);
         if (mLocListener != null)
             mManager.removeUpdates(mLocListener);
-        Data.setIsConnected(false);
+        Const.setIsConnected(false);
 
     }
 
@@ -192,15 +192,15 @@ public class InnerGPSConnect implements IConnect {
         if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(mActivity, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
             mProvider = LocationManager.GPS_PROVIDER;
-            Data.setmConnectType(Constant.InnerGPSConnect);
+            Const.setmConnectType(Const.InnerGPSConnect);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText("内置GPS");
-            Data.setIsConnected(true);
-            Data.setmInfo("内置GPS");
+            Const.setIsConnected(true);
+            Const.setmInfo("内置GPS");
         } else {//这里是对ConnectActivity进行操作
             Toast.makeText(mActivity, "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            mActivity.startActivityForResult(intent, Data.GPS_REQUEST);
+            mActivity.startActivityForResult(intent, Const.GPS_REQUEST);
         }
     }
 }

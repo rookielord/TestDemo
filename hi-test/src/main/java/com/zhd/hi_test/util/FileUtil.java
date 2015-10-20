@@ -10,9 +10,9 @@ import android.view.Display;
 import android.view.WindowManager;
 
 
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.db.Curd;
-import com.zhd.hi_test.module.Project;
+import com.zhd.hi_test.module.MyProject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,8 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.StreamCorruptedException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -32,10 +31,10 @@ import java.util.regex.Pattern;
  * Created by 2015032501 on 2015/9/8.
  * 用来存放一些静态方法来做一些小功能，例如获得时间或者输入内容检查……
  */
-public class Method {
+public class FileUtil {
 
     public static boolean checkMsg(String msg, String path) {
-        boolean check1, check2, check3=false;
+        boolean check1, check2, check3 = false;
         check1 = msg.trim().isEmpty();
         String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Pattern p = Pattern.compile(regEx);
@@ -48,7 +47,7 @@ public class Method {
                     check3 = true;
             }
         }
-        if (check1 || check2||check3) {
+        if (check1 || check2 || check3) {
             return false;
         } else {
             return true;
@@ -82,10 +81,10 @@ public class Method {
                 //写入内容
                 String tableName = createTableName();
                 //创建project对象,最后一个是配置文件的File路径
-                Project p = new Project(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file, configs[5]);
+                MyProject p = new MyProject(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file, configs[5]);
                 out.writeObject(p);
                 //将其设为全局变量
-                Data.setmProject(p);
+                Const.setmProject(p);
                 //并创建对应的数据库表
                 Curd curd = new Curd(tableName, activity);
                 curd.createTable(tableName);
@@ -135,7 +134,7 @@ public class Method {
 
     //在储存卡上创建文件夹
     public static void createDirectory() {
-        String mPath = null;
+        String mPath;
         File ext_path = Environment.getExternalStorageDirectory();
         File file = new File(ext_path, "ZHD_TEST");
         //第一次安装，或判断是否存在
@@ -150,7 +149,7 @@ public class Method {
         }
         //最终获取其路径,并将其赋值给全局变量
         mPath = pro_file.getPath();
-        Data.setmPath(mPath);
+        Const.setmPath(mPath);
     }
 
     //获取数据参数
@@ -170,15 +169,15 @@ public class Method {
     /**
      * [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
      *
-     * @param project
+     * @param myProject
      */
-    public static void updateProject(Project project) {
+    public static void updateProject(MyProject myProject) {
         ObjectOutputStream out = null;
         try {
-            out = new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
+            out = new ObjectOutputStream(new FileOutputStream(myProject.getmConfig()));
             //写入内容
-            project.setmLastTime(getCurrentTime());
-            out.writeObject(project);
+            myProject.setmLastTime(getCurrentTime());
+            out.writeObject(myProject);
             out.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -206,15 +205,15 @@ public class Method {
         boolean isFirst = sp.getBoolean("isFirst", true);
         //获得全局变量的Project路径
         if (isFirst) {
-            String path = Data.getmPath();//path是指Project的位置
-            String time = Method.getCurrentTime();
+            String path = Const.getmPath();//path是指Project的位置
+            String time = FileUtil.getCurrentTime();
             String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系", "3度带"};
             //创建默认项目
-            Method.createProject(path, configs, activity);
+            FileUtil.createProject(path, configs, activity);
             //然后读取config.txt来创建项目
-            Project p = Method.getDefaultProject(path);
+            MyProject p = FileUtil.getDefaultProject(path);
             //设置为全局变量
-            Data.setmProject(p);
+            Const.setmProject(p);
             //设置其为false，不是第一次启动
             editor.putBoolean("isFirst", false);
             editor.commit();
@@ -222,14 +221,14 @@ public class Method {
     }
 
 
-    public static Project getDefaultProject(String path) {
+    public static MyProject getDefaultProject(String path) {
 
         File config = new File(path + "/" + "default", "config.txt");
-        Project p = null;
+        MyProject p = null;
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(new FileInputStream(config));
-            p = (Project) in.readObject();
+            p = (MyProject) in.readObject();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -248,12 +247,12 @@ public class Method {
         return p;
     }
 
-    public static void savelastProject(Project p, Activity activity) {
+    public static void savelastProject(MyProject p, Activity activity) {
         ObjectOutputStream oos = null;
         File file = new File(activity.getFilesDir(), "last.txt");
         try {
             oos = new ObjectOutputStream(new FileOutputStream(file));
-            p.setmLastTime(Method.getCurrentTime());
+            p.setmLastTime(FileUtil.getCurrentTime());
             oos.writeObject(p);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -279,9 +278,9 @@ public class Method {
                 fis = new FileInputStream(file);
                 //读取对象
                 ois = new ObjectInputStream(fis);
-                Project p = (Project) ois.readObject();
+                MyProject p = (MyProject) ois.readObject();
                 //设置为全局变量
-                Data.setmProject(p);
+                Const.setmProject(p);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -301,8 +300,8 @@ public class Method {
         }
     }
 
-    public static Project getLastProject(Activity mainActivity) {
-        Project p = null;
+    public static MyProject getLastProject(Activity mainActivity) {
+        MyProject p = null;
         //先检测是否存在
         File file = new File(mainActivity.getFilesDir(), "last.txt");
         if (file.exists()) {
@@ -312,7 +311,7 @@ public class Method {
                 fis = new FileInputStream(file);
                 //读取对象
                 ois = new ObjectInputStream(fis);
-                p = (Project) ois.readObject();
+                p = (MyProject) ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -333,7 +332,39 @@ public class Method {
         return p;
     }
 
-    public static double degreeToRadian(double degree) {
-        return (degree * Math.PI) / 180.0d;
+    /**
+     * 字符串写入文件
+     * @param filePath
+     * @param data
+     */
+    public static void writeFileByString(String filePath, String data) {
+        FileOutputStream fOut = null;
+        OutputStreamWriter osw = null;
+        File file = new File(filePath);
+
+        try {
+            if (!file.isFile()) {
+                String path = filePath.substring(0, filePath.lastIndexOf("/"));
+                File dirFile = new File(path);
+                dirFile.mkdirs();
+                file.createNewFile();
+            }
+            fOut = new FileOutputStream(file, false);
+            osw = new OutputStreamWriter(fOut, "UTF-8");
+            osw.write(data);
+            osw.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (osw != null)
+                    osw.close();
+                if (fOut != null)
+                    fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 }

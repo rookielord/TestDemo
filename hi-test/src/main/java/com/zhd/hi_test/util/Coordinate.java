@@ -1,7 +1,7 @@
 package com.zhd.hi_test.util;
 
 
-import com.zhd.hi_test.module.Project;
+import com.zhd.hi_test.module.MyProject;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -121,10 +121,10 @@ public class Coordinate {
      * @param longtitude 经度
      * @return 返回HASH表，转化后的B,L的度数
      */
-    public static HashMap<String, String> getCoordinateXY(double latitude, double longtitude, Project project) {
+    public static HashMap<String, String> getCoordinateXY(double latitude, double longtitude, MyProject project) {
 
-        double radB = Method.degreeToRadian(latitude);
-        double radL = Method.degreeToRadian(longtitude);
+        double radB = degreeToRadian(latitude);
+        double radL = degreeToRadian(longtitude);
 
         //根据传入的coordinate来判断所用的变量
         getConvertValue(project);
@@ -175,8 +175,8 @@ public class Coordinate {
         return info;
     }
 
-    private static void getConvertValue(Project project) {
-        switch (project.getmCoordinate()) {
+    private static void getConvertValue(MyProject myProject) {
+        switch (myProject.getmCoordinate()) {
             case "国家2000坐标系":
                 A = 6378137.0;
                 B = 6356752.31414;
@@ -194,6 +194,10 @@ public class Coordinate {
                 B = 6356755;
                 break;
         }
+    }
+
+    public static double degreeToRadian(double degree) {
+        return (degree * Math.PI) / 180.0d;
     }
 
 }

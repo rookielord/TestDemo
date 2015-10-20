@@ -11,10 +11,10 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.OnProjectListener;
-import com.zhd.hi_test.module.Project;
+import com.zhd.hi_test.module.MyProject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,17 +34,17 @@ public class ProjectAdapter extends BaseAdapter {
     }
 
     //闯过来所有Project对象
-    private List<Project> mProjects;
+    private List<MyProject> mMyProjects;
     private Context mContext;
     //用来存放所有的Radio状态
     Map<String, Boolean> states = new HashMap<>();
     //让当前项目打开项目的名称和列表中项目进行比较，然后选中项目背景变色
-    private Project mProject;
+    private MyProject mMyProject;
 
-    public ProjectAdapter(List<Project> Projects, Context context) {
-        this.mProjects = Projects;
+    public ProjectAdapter(List<MyProject> myProjects, Context context) {
+        this.mMyProjects = myProjects;
         this.mContext = context;
-        mProject=Data.getmProject();
+        mMyProject = Const.getmProject();
     }
 
     //定义一个Viewholder,用来存放layout上面的控件对象
@@ -55,12 +55,12 @@ public class ProjectAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mProjects.size();
+        return mMyProjects.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mProjects.get(position);
+        return mMyProjects.get(position);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ProjectAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         //获得填充数据
-        Project p = mProjects.get(position);
+        MyProject p = mMyProjects.get(position);
         ViewHolder holder;
         final int index = position;
         //获得布局填充器
@@ -128,8 +128,8 @@ public class ProjectAdapter extends BaseAdapter {
             res = true;//如果为里面有选中的则一直为true,第一次肯定是都不选中的
         holder.radio.setChecked(res);
         //在这里进行判断当前的mProject是否等于convertview的project
-        if (mProject!=null){
-            if (p.getmName().equals(mProject.getmName())){
+        if (mMyProject !=null){
+            if (p.getmName().equals(mMyProject.getmName())){
                 convertView.setBackgroundResource(R.drawable.project_selected);
             }
         }

@@ -26,13 +26,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhd.hi_test.Constant;
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.module.InnerGPSConnect;
-import com.zhd.hi_test.module.Location;
-import com.zhd.hi_test.module.Point;
+import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.MyPoint;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.ui.SurveyView;
@@ -60,16 +59,16 @@ import java.util.List;
 public class SurveyActivity extends Activity implements OnClickListener {
 
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_HDOP, tv_age,tv_solution;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_HDOP, tv_age, tv_solution;
     Button btn_add;
     ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all, image_compass;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
     private static String mDireL;
     //自定义控件更新点的集合,包括当前点的位置
-    List<Point> points = new ArrayList<>();
+    List<MyPoint> myPoints = new ArrayList<>();
     SurveyView surveyView;
-    private Point point;
+    private MyPoint myPoint;
     //滑动需要的控件和数值
     LinearLayout pointLayout;
     ViewPager viewPager;
@@ -85,8 +84,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
     private Cursor mCursor;
     //从AddActivity中返回，判断是否添加后更新点集合
     private static final int ADD_RESULT = 0;
-
-
     //指南针的控件相关
     private Sensor mSensor;
     private SensorManager mSensorManager;
@@ -98,41 +95,44 @@ public class SurveyActivity extends Activity implements OnClickListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
-                    Location location = (Location) msg.obj;
-                    tv_B.setText(location.getmB());
-                    tv_L.setText(location.getmL());
-                    tv_H.setText(location.getmH());
-                    tv_time.setText(location.getmTime());
-                    tv_age.setText(location.getmAge());
-                    tv_HDOP.setText(location.getmHDOP());
-                    tv_solution.setText(location.getmQuality());
-                    mDireB = location.getmDireB();
-                    mDireL = location.getmDireL();
-                    double b = Double.valueOf(location.getmProgressB());
-                    double l = Double.valueOf(location.getmProgressL());
-                    HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, Data.getmProject());
+                    MyLocation myLocation = (MyLocation) msg.obj;
+                    tv_B.setText(myLocation.getmB());
+                    tv_L.setText(myLocation.getmL());
+                    tv_H.setText(myLocation.getmH());
+                    tv_time.setText(myLocation.getmTime());
+                    tv_age.setText(myLocation.getmAge());
+                    tv_HDOP.setText(myLocation.getmHDOP());
+                    tv_solution.setText(myLocation.getmQuality());
+                    mDireB = myLocation.getmDireB();
+                    mDireL = myLocation.getmDireL();
+                    double b = Double.valueOf(myLocation.getmProgressB());
+                    double l = Double.valueOf(myLocation.getmProgressL());
+                    HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, Const.getmProject());
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
-                    tv_Z.setText(location.getmH());
+                    tv_Z.setText(myLocation.getmH());
+                    if (!Const.HasDataInfo)
+                        tv_date.setText(UTCDate.getDefaultTime());
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
-                    point = new Point("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
-                    surveyView.setMyLocation(point);
+                    myPoint = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
+                    surveyView.setMyLocation(myPoint);
                     //重绘
                     surveyView.invalidate();
                     break;
                 case 2:
-                    switch (msg.arg1){
+                    switch (msg.arg1) {
                         case 1://内置GPS的数据
-                            List<GpsSatellite> satellites= (ArrayList<GpsSatellite>) msg.obj;
+                            List<GpsSatellite> satellites = (ArrayList<GpsSatellite>) msg.obj;
                             tv_satellite.setText(String.valueOf(satellites.size()));
                             break;
                         case 2://IRTK的数据
-                            List<Satellite> satellites1= (List<Satellite>) msg.obj;
+                            List<Satellite> satellites1 = (List<Satellite>) msg.obj;
                             tv_satellite.setText(String.valueOf(satellites1.size()));
                             break;
                     }
                     break;
-                case 3:
+                case 3://如果没有日期过来的话，如果没有解析蓝牙的GPZDA数据时，其仍然不会有更新
+                    Const.HasDataInfo = true;
                     UTCDate time = (UTCDate) msg.obj;
                     tv_date.setText(time.getmCurrentDate());
                     break;
@@ -166,11 +166,11 @@ public class SurveyActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         //获得表名来进行数据的操作
-        if (Data.getmProject() == null) {
+        if (Const.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
-        mCurd = new Curd(Data.getmProject().getmTableName(), this);
+        mCurd = new Curd(Const.getmProject().getmTableName(), this);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         //获取方向传感器
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
@@ -179,9 +179,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         iniSurveyView();
         //初始化下面的点
         initDoc();
-        if (Data.getmConnectType() == Constant.BlueToothConncet) {
+        if (Const.getmConnectType() == Const.BlueToothConncet) {
             Infomation.setHandler(mHandler);
-        } else if (Data.getmConnectType() == Constant.InnerGPSConnect) {
+        } else if (Const.getmConnectType() == Const.InnerGPSConnect) {
             InnerGPSConnect.setmHandler(mHandler);
         }
 
@@ -210,7 +210,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         cv.put("DireB", mDireB);
         cv.put("DireL", mDireL);
         cv.put("DES", "");
-        cv.put("height", String.valueOf(Data.getMheight()));
+        cv.put("height", String.valueOf(Const.getMheight()));
         values.add(cv);
         boolean res = mCurd.insertData(values);
         if (res) {
@@ -238,7 +238,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
      * 4.在刷新的时候，需要判断
      */
     private void refreshPoints() {
-        points.clear();
+        myPoints.clear();
         mCursor = mCurd.queryData(new String[]{"*"}, "id desc", null);
         if (mCursor.getCount() != 0) {
             while (mCursor.moveToNext()) {
@@ -246,11 +246,11 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 double N = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("N")));
                 double E = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("E")));
                 String name = "pt" + mCursor.getString(mCursor.getColumnIndex("id"));
-                Point p = new Point(name, N, E);
-                points.add(p);
+                MyPoint p = new MyPoint(name, N, E);
+                myPoints.add(p);
             }
             mCursor.close();
-            surveyView.setPoints(points);
+            surveyView.setPoints(myPoints);
             surveyView.invalidate();
         }
     }
@@ -282,15 +282,15 @@ public class SurveyActivity extends Activity implements OnClickListener {
         tv_B = (TextView) view1.findViewById(R.id.tv_B);
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
-        tv_solution= (TextView) view1.findViewById(R.id.tv_solution);
+        tv_solution = (TextView) view1.findViewById(R.id.tv_solution);
         tv_N = (TextView) view2.findViewById(R.id.tv_N);
         tv_E = (TextView) view2.findViewById(R.id.tv_E);
         tv_Z = (TextView) view2.findViewById(R.id.tv_Z);
         tv_time = (TextView) view2.findViewById(R.id.tv_time);
         tv_date = (TextView) view2.findViewById(R.id.tv_date);
-        tv_satellite= (TextView) view3.findViewById(R.id.tv_satellite);
-        tv_HDOP= (TextView) view3.findViewById(R.id.tv_HDOP);
-        tv_age= (TextView) view3.findViewById(R.id.tv_age);
+        tv_satellite = (TextView) view3.findViewById(R.id.tv_satellite);
+        tv_HDOP = (TextView) view3.findViewById(R.id.tv_HDOP);
+        tv_age = (TextView) view3.findViewById(R.id.tv_age);
         mViews.add(view1);
         mViews.add(view2);
         mViews.add(view3);
@@ -376,7 +376,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 //如果添加成功，则进行数据的刷新
                 if (resultCode == RESULT_OK) {
                     refreshPoints();
-                    surveyView.setPoints(points);
+                    surveyView.setPoints(myPoints);
                     surveyView.invalidate();
                 }
                 break;
@@ -404,14 +404,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image_add://直接进行数据采集
-                if (Data.isConnected()) {
+                if (Const.isConnected()) {
                     addPoint();
                     refreshPoints();
                     surveyView.invalidate();
                 }
                 break;
             case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
-                if (Data.isConnected()) {
+                if (Const.isConnected()) {
                     Intent intent = new Intent("com.zhd.addPoint.START");
                     intent.putExtra("B", tv_B.getText().toString());
                     intent.putExtra("L", tv_L.getText().toString());
@@ -434,9 +434,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 surveyView.invalidate();
                 break;
             case R.id.image_zoom_center://当前点居中
-                if (point != null) {
+                if (myPoint != null) {
                     refreshPoints();
-                    surveyView.SetCurrentLocation(point);
+                    surveyView.SetCurrentLocation(myPoint);
                     surveyView.invalidate();
                 }
                 break;

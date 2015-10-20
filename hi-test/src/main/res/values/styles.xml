@@ -4,6 +4,9 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
+    <style name="MyTheme" parent="AppTheme">
+        <item name="android:theme">@android:style/Theme.NoTitleBar</item>
+    </style>
 <!--蓝牙连接列表，引用了Connect-->
     <style name="BluetoothText">
         <item name="android:textSize">18sp</item>

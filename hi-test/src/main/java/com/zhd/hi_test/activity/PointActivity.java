@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 
 import com.zhd.hi_test.db.Curd;
@@ -58,11 +58,11 @@ public class PointActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_point);
         //这里来进行判断是否打开项目不然就不做操作
-        if (Data.getmProject() == null) {
+        if (Const.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
-        mTableName = Data.getmProject().getmTableName();
+        mTableName = Const.getmProject().getmTableName();
         initViews();
     }
 

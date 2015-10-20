@@ -3,8 +3,9 @@ package com.zhd.hi_test.util;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
-import com.zhd.hi_test.module.Location;
+import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.UTCDate;
 
@@ -30,7 +31,7 @@ public class Infomation {
 
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();
-    private static Location location;
+    private static MyLocation myLocation;
     private static UTCDate curTime;
     //用来存放临时的数据然后发送过去
     private static Object mTemps;
@@ -79,9 +80,9 @@ public class Infomation {
         else
             age = info[13];
         //坐标点
-        location = new Location(B, L, H, BDire, LDire, time, quality, age, HDOP);
+        myLocation = new MyLocation(B, L, H, BDire, LDire, time, quality, age, HDOP);
         Message m = Message.obtain();
-        m.obj = location;
+        m.obj = myLocation;
         m.what = 1;
         mHandler.sendMessage(m);
     }
@@ -137,6 +138,7 @@ public class Infomation {
 
     private static void getTimeInfo(String group) {
         String[] info = group.split(",");
+        Log.d("TEST",group);
         //没有数据时，长度依然为7，所以只能用内容来判断
         if (info[1].equals(""))
             return;

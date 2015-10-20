@@ -8,26 +8,29 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.interfaces.OnFileListener;
 import com.zhd.hi_test.interfaces.OnIconChangeListener;
 import com.zhd.hi_test.module.Icon;
+import com.zhd.hi_test.module.MyFile;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/19.
  * 在这里根据穿过来的数据进行内容的填充
  */
-public class GridAdapter extends BaseAdapter {
+public class FileAdapter extends BaseAdapter {
     //设置所有的显示数据
-    private ArrayList<Icon> mSource = new ArrayList<>();
+    private List<MyFile> mSource = new ArrayList<>();
     private Context mContext;
-    private OnIconChangeListener mIicon;
+    private OnFileListener mListener;
 
-    public void setmIicon(OnIconChangeListener mIicon) {
-        this.mIicon = mIicon;
+    public void setmListener(OnFileListener mListener) {
+        this.mListener = mListener;
     }
 
-    public GridAdapter(Context context, ArrayList<Icon> resource) {
+    public FileAdapter(Context context, List<MyFile> resource) {
         this.mContext = context;
         this.mSource = resource;
     }
@@ -54,7 +57,7 @@ public class GridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final Icon icon = mSource.get(position);
+        final MyFile file = mSource.get(position);
         ViewHolder holder;
         if (convertView == null) {
             convertView = View.inflate(mContext, R.layout.grid_item, null);
@@ -65,12 +68,12 @@ public class GridAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.itemImage.setImageResource(icon.getIcon_image_soure());
-        holder.itemText.setText(icon.getIcon_name());
+        holder.itemImage.setImageResource(file.getImage_soure());
+        holder.itemText.setText(file.getName());
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mIicon.Onclick(icon);
+                mListener.onFileSelected(file);
             }
         });
         return convertView;

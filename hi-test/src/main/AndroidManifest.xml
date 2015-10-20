@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activity.GPSActivity">
             <intent-filter>
-                <action android:name="com.zhd.starmap.START" />
+                <action android:name="com.zhd.star_map.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -27,9 +27,8 @@
         </activity>
         <activity android:name=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="com.zhd.main.START" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>
@@ -45,15 +44,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.GridActivity">
+        <activity android:name=".activity.IconActivity">
             <intent-filter>
                 <action android:name="com.zhd.grid.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.DeviceActivity">
+        <activity android:name=".activity.FileExchangeActivity">
             <intent-filter>
-                <action android:name="com.zhd.device.START" />
+                <action android:name="com.zhd.file_exchange.START" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -67,6 +66,13 @@
             <intent-filter>
                 <action android:name="com.zhd.addPoint.START" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

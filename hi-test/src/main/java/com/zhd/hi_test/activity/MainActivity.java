@@ -2,38 +2,22 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.app.LocalActivityManager;
-import android.app.WallpaperManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.MyPagerAdapter;
-import com.zhd.hi_test.module.Project;
-import com.zhd.hi_test.util.Method;
+import com.zhd.hi_test.module.MyProject;
+import com.zhd.hi_test.util.FileUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,18 +44,18 @@ public class MainActivity extends Activity {
 
     //动画跳转
     private int currIndex = 0;// 当前页卡编号
-    private Data d;
+    private Const d;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //设置全局变量，创建project文件夹，并且创建项目
-        Method.createDirectory();
+        FileUtil.createDirectory();
         //创建默认文件夹并选中
-        Method.createDefaultProject(this);
+        FileUtil.createDefaultProject(this);
         //获取上一次打开的项目,将其设置为全局变量
-        Method.setLastProject(this);
+        FileUtil.setLastProject(this);
         context = MainActivity.this;
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
@@ -104,15 +88,15 @@ public class MainActivity extends Activity {
     private void initPagerViewer() {
         pager = (ViewPager) findViewById(R.id.viewpage);
         final ArrayList<View> list = new ArrayList<>();
-        Intent intent = new Intent(context, GridActivity.class);
+        Intent intent = new Intent(context, IconActivity.class);
         intent.putExtra("PageNum", 1);
         list.add(getView("A", intent));
 
-        Intent intent2 = new Intent(context, GridActivity.class);
+        Intent intent2 = new Intent(context, IconActivity.class);
         intent2.putExtra("PageNum", 2);
         list.add(getView("B", intent2));
 
-        Intent intent3 = new Intent(context, GridActivity.class);
+        Intent intent3 = new Intent(context, IconActivity.class);
         intent3.putExtra("PageNum", 3);
         list.add(getView("C", intent3));
 
@@ -206,10 +190,10 @@ public class MainActivity extends Activity {
      */
     @Override
     protected void onDestroy() {
-        Project p = d.getmProject();
+        MyProject p = d.getmProject();
         if (p != null) {
-            Method.updateProject(p);
-            Method.savelastProject(p,this);
+            FileUtil.updateProject(p);
+            FileUtil.savelastProject(p, this);
         }
         //将全局变量project清空
         d.setmProject(null);

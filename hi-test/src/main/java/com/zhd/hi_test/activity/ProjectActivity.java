@@ -16,13 +16,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.ProjectAdapter;
 import com.zhd.hi_test.interfaces.OnProjectListener;
 import com.zhd.hi_test.db.Curd;
-import com.zhd.hi_test.module.Project;
-import com.zhd.hi_test.util.Method;
+import com.zhd.hi_test.module.MyProject;
+import com.zhd.hi_test.util.FileUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,13 +44,12 @@ public class ProjectActivity extends Activity {
 
     //加载过来的项目，判断是否有项目
     private String mPath;
-    private List<Project> mProjects;
+    private List<MyProject> mMyProjects;
     private boolean mHasProject;
 
     //当前选中的项目，是用来显示当前选中的project的
-    private Project mProject;
+    private MyProject mProject;
     private ProjectAdapter mpa;
-    private Data d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +57,8 @@ public class ProjectActivity extends Activity {
         setContentView(R.layout.activity_project);
         //首先查看是否当前项目已经打开
         //全局路径
-        mPath = Data.getmPath();
-        mProject = Data.getmProject();
+        mPath = Const.getmPath();
+        mProject = Const.getmProject();
         //找控件：1.进行填充的listview
         lv = (ListView) findViewById(R.id.lv);
         //进行项目信息显示
@@ -75,13 +74,13 @@ public class ProjectActivity extends Activity {
         //判断是否有项目内容
         if (mHasProject) {
             //获得当前的Project目录下所有的project对象
-            mProjects = getProjectInstance(mPath);
+            mMyProjects = getProjectInstance(mPath);
             //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示,当点击后就将当前项目显示到上面去
-            mpa = new ProjectAdapter(mProjects, this);
+            mpa = new ProjectAdapter(mMyProjects, this);
             mpa.setmP(new OnProjectListener() {
                 @Override
                 public void getItemPosition(int position) {
-                    mProject = mProjects.get(position);
+                    mProject = mMyProjects.get(position);
                     showProjectInfo(mProject);
                 }
             });
@@ -92,11 +91,11 @@ public class ProjectActivity extends Activity {
         }
     }
 
-    private void showProjectInfo(Project project) {
-        tv_name.setText(project.getmName());
-        tv_coordinate.setText(project.getmCoordinate());
-        tv_guass.setText(project.getmGuass());
-        tv_lasttime.setText(project.getmLastTime());
+    private void showProjectInfo(MyProject myProject) {
+        tv_name.setText(myProject.getmName());
+        tv_coordinate.setText(myProject.getmCoordinate());
+        tv_guass.setText(myProject.getmGuass());
+        tv_lasttime.setText(myProject.getmLastTime());
     }
 
     //第一步查看是否有新建项目
@@ -117,8 +116,8 @@ public class ProjectActivity extends Activity {
      * @param path 配置文件的路径
      * @return
      */
-    private List<Project> getProjectInstance(String path) {
-        List<Project> projectList = new ArrayList<Project>();
+    private List<MyProject> getProjectInstance(String path) {
+        List<MyProject> myProjectList = new ArrayList<>();
         //对应路径下的config.txt文件进行读取，并创建project对象
         String[] proPaths = new File(path).list();//这个只会得到对应的文件夹名，没有路径
         for (String proName : proPaths) {
@@ -129,8 +128,8 @@ public class ProjectActivity extends Activity {
             try {
                 //设置文件读取流
                 in = new ObjectInputStream(new FileInputStream(config));
-                Project p = (Project) in.readObject();
-                projectList.add(p);
+                MyProject p = (MyProject) in.readObject();
+                myProjectList.add(p);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -147,7 +146,7 @@ public class ProjectActivity extends Activity {
                 }
             }
         }
-        return projectList;
+        return myProjectList;
     }
 
     @Override
@@ -185,7 +184,7 @@ public class ProjectActivity extends Activity {
                             public void onClick(DialogInterface dialog, int which) {
                                 EditText et1 = (EditText) finalView.findViewById(R.id.et_pro_name);
                                 String pro_name = et1.getText().toString();
-                                boolean isRight = Method.checkMsg(pro_name,mPath);
+                                boolean isRight = FileUtil.checkMsg(pro_name, mPath);
                                 String[] mConfigs = new String[6];
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称
@@ -196,14 +195,14 @@ public class ProjectActivity extends Activity {
                                 EditText et2 = (EditText) finalView.findViewById(R.id.et_pro_back);
                                 String pro_back = et2.getText().toString();
                                 mConfigs[1] = pro_back;//项目备注
-                                String add_time = Method.getCurrentTime();
+                                String add_time = FileUtil.getCurrentTime();
                                 mConfigs[2] = add_time;//添加时间
                                 mConfigs[3] = add_time;//第一次创建的时间就是最近的打开时间
                                 //获得其中的坐标系统
                                 mConfigs[4] = String.valueOf(sp_coordinate.getSelectedItem().toString());
                                 //获取其中的高斯带数
                                 mConfigs[5] = String.valueOf(sp_guass.getSelectedItem().toString());
-                                boolean res = Method.createProject(mPath, mConfigs, ProjectActivity.this);
+                                boolean res = FileUtil.createProject(mPath, mConfigs, ProjectActivity.this);
                                 if (res) {
                                     Toast.makeText(ProjectActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
                                     //刷新
@@ -234,10 +233,10 @@ public class ProjectActivity extends Activity {
         switch (item.getItemId()) {
             case 0:
                 //如果当前有打开项目，则更新最后的时间
-                if (d.getmProject()!=null){
-                    Method.updateProject(d.getmProject());
+                if (Const.getmProject()!=null){
+                    FileUtil.updateProject(Const.getmProject());
                 }
-                d.setmProject(mProject);
+                Const.setmProject(mProject);
                 Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
                 refresh();
                 break;
@@ -254,12 +253,12 @@ public class ProjectActivity extends Activity {
     private void deleteProject() {
         //注意：关闭后打开得到的Application中的project对象和当前选中的mProject对象是不一样的，只能根据名称进行判断
         //如果名称相同则当前项目为空
-        if (d.getmProject() != null) {
-            if (d.getmProject().getmName().equals(mProject.getmName())) {
-                d.setmProject(null);
+        if (Const.getmProject() != null) {
+            if (Const.getmProject().getmName().equals(mProject.getmName())) {
+                Const.setmProject(null);
             }
         }
-        Project p = Method.getLastProject(this);
+        MyProject p = FileUtil.getLastProject(this);
         if (p != null) { //如果当前删除项目是最后一个打开项目
             if (p.getmName().equals(mProject.getmName())) {
                 File file = new File(this.getFilesDir(), "last.txt");
@@ -271,7 +270,7 @@ public class ProjectActivity extends Activity {
         curd.dropTable(mProject.getmTableName());
         //删除项目文件
         File file = new File(mPath + "/" + mProject.getmName());
-        Method.deleteDirectory(file);
+        FileUtil.deleteDirectory(file);
         //提示
         Toast.makeText(ProjectActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
         //这里刷新只会重读ProjectAdapter，但Adapter中projects对象的数量没有变化，可以在这里对
@@ -292,10 +291,10 @@ public class ProjectActivity extends Activity {
      */
     @Override
     protected void onDestroy() {
-        Project p = d.getmProject();
+        MyProject p = Const.getmProject();
         if (p != null) {
-            Method.updateProject(p);
-            Method.savelastProject(p,this);
+            FileUtil.updateProject(p);
+            FileUtil.savelastProject(p, this);
         }
         //将全局变量project清空
         super.onDestroy();

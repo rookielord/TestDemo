@@ -1,8 +1,6 @@
 package com.zhd.hi_test.module;
 
-import android.print.PrinterId;
 
-import com.zhd.hi_test.Data;
 import com.zhd.hi_test.util.Coordinate;
 
 import java.text.SimpleDateFormat;
@@ -10,12 +8,12 @@ import java.util.Date;
 
 /**
  * Created by 2015032501 on 2015/9/23.
- * <p/>
+ * <p>
  * 需要显示到屏幕上的数据，其中包括有位置信息和时间信息
  * 最好是全部的数据都存满，不要留下空隙
  * 注意内置GPS和IRTK的数据格式是不一样的
  */
-public class Location {
+public class MyLocation {
 
     private String mB;
     private String mL;
@@ -26,8 +24,8 @@ public class Location {
     private String mProgressB;
     private String mProgressL;
     private String mQuality;
-    private String mAge="尚无差分龄期";
-    private String mHDOP;
+    private String mAge = "尚无差分龄期";
+    private String mHDOP = "0";
 
     public String getmHDOP() {
         return mHDOP;
@@ -53,20 +51,13 @@ public class Location {
         return mProgressB;
     }
 
-    public void setmProgressB(String mProgressB) {
-        this.mProgressB = mProgressB;
-    }
-
     public String getmProgressL() {
         return mProgressL;
     }
 
-    public void setmProgressL(String mProgressL) {
-        this.mProgressL = mProgressL;
-    }
 
     //RTK传过来的数据
-    public Location(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String HDOP) {
+    public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String HDOP) {
         this.mHDOP = HDOP;
         this.mQuality = getQuality(Quality);
         this.mAge = Age;
@@ -77,27 +68,27 @@ public class Location {
         this.mH = H;
         this.mDireB = DireB;
         this.mDireL = DireL;
-        this.mTime=getLocalTime(time);
+        this.mTime = getLocalTime(time);
     }
 
     private String getQuality(int quality) {
         //默认无解
-        String msg="无解";
-        switch (quality){
+        String msg = "无解";
+        switch (quality) {
             case 0:
-                msg="无解";
+                msg = "无解";
                 break;
             case 1:
-                msg="GPS固定解";
+                msg = "GPS固定解";
                 break;
             case 2:
-                msg="不同GPS固定解";
+                msg = "不同GPS固定解";
                 break;
             case 4:
-                msg="实时差分固定解";
+                msg = "实时差分固定解";
                 break;
             case 5:
-                msg="实时差分浮动解";
+                msg = "实时差分浮动解";
                 break;
         }
         return msg;
@@ -105,16 +96,17 @@ public class Location {
 
 
     //内置GPS传过来的数据
-    public Location(String mB, String mL, String mH, long time) {
+    public MyLocation(String mB, String mL, String mH, long time) {
         this.mProgressB = mB;
         this.mProgressL = mL;
         this.mB = Coordinate.getDmsString(Double.valueOf(mB));
         this.mL = Coordinate.getDmsString(Double.valueOf(mL));
         this.mH = mH;
-        this.mTime=getTime(time);
+        this.mTime = getTime(time);
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针
         double B = Double.valueOf(mB);
         double L = Double.valueOf(mL);
+        this.mQuality = "GPS单点定位";
         if (B > 0)
             this.mDireB = "N";
         else
@@ -129,33 +121,21 @@ public class Location {
         return mB;
     }
 
-    public void setmB(String mB) {
-        this.mB = mB;
-    }
 
     public String getmL() {
         return mL;
     }
 
-    public void setmL(String mL) {
-        this.mL = mL;
-    }
 
     public String getmH() {
         return mH;
     }
 
-    public void setmH(String mH) {
-        this.mH = mH;
-    }
 
     public String getmTime() {
         return mTime;
     }
 
-    public void setmTime(String mTime) {
-        this.mTime = mTime;
-    }
 
     private String getTime(long mTime) {
         Date date = new Date(mTime);//GPSneizhi

@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.zhd.hi_test.module.DrawPoint;
-import com.zhd.hi_test.module.Point;
+import com.zhd.hi_test.module.MyPoint;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -24,15 +24,15 @@ public class SurveyView extends View {
     private int mHeight;
     private int mWidth;
     //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高
-    List<Point> temp;
+    List<MyPoint> temp;
     //需要画的点集合
     List<DrawPoint> drawPoints = new ArrayList<>();
     //我的位置
     DrawPoint Mypoint;
-    Point point;
+    MyPoint myPoint;
     //作为基准的点的N,E坐标和控件中心位置的坐标
 
-    private Point mREFpoint;
+    private MyPoint mREFpoint;
     //屏幕中心
     private static float mCenterX;
     private static float mCenterY;
@@ -70,22 +70,22 @@ public class SurveyView extends View {
     /**
      * 主要用于当前点的居中
      *
-     * @param point
+     * @param myPoint
      */
-    public void SetCurrentLocation(Point point) {
-        mOffsetx = (float) (mREFpoint.getmN() - point.getmN()) * mScale;
-        mOffsety = (float) (mREFpoint.getmE() - point.getmE()) * mScale;
+    public void SetCurrentLocation(MyPoint myPoint) {
+        mOffsetx = (float) (mREFpoint.getmN() - myPoint.getmN()) * mScale;
+        mOffsety = (float) (mREFpoint.getmE() - myPoint.getmE()) * mScale;
     }
 
     /**
      * 以最开始的点进行画图
      *
-     * @param points 根据数据库倒序查询出来的点
+     * @param myPoints 根据数据库倒序查询出来的点
      */
-    public void setPoints(List<Point> points) {
-        if (points != null) {
-            setCenterValue(points.get(points.size() - 1));
-            temp = points;
+    public void setPoints(List<MyPoint> myPoints) {
+        if (myPoints != null) {
+            setCenterValue(myPoints.get(myPoints.size() - 1));
+            temp = myPoints;
         }
     }
 
@@ -123,12 +123,12 @@ public class SurveyView extends View {
      */
     private void updatePoints() {
         //1.当前有位置才会绘制当前点
-        if (point != null) {
+        if (myPoint != null) {
             if (temp == null) {//如果没有参考点的情况，即没有已知点的情况
                 Mypoint = new DrawPoint(mCenterX, mCenterY);
             } else {//根据根据传进来的当前位置，获得在屏幕上的对应坐标
-                float myX = (float) (mCenterX + (point.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
-                float myY = (float) (mCenterY + (point.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
+                float myX = (float) (mCenterX + (myPoint.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
+                float myY = (float) (mCenterY + (myPoint.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
                 Mypoint = new DrawPoint(myX, myY);
             }
         }
@@ -139,11 +139,11 @@ public class SurveyView extends View {
         if (temp == null)
             return;
         drawPoints.clear();
-        for (Point point : temp) {
+        for (MyPoint myPoint : temp) {
             //要在自定义控件上画图的集合
-            float x = (float) (mCenterX + (point.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
-            float y = (float) (mCenterY + (point.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
-            DrawPoint p = new DrawPoint(x, y, point.getName());
+            float x = (float) (mCenterX + (myPoint.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
+            float y = (float) (mCenterY + (myPoint.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
+            DrawPoint p = new DrawPoint(x, y, myPoint.getName());
             drawPoints.add(p);
         }
         //4.获得最后一个点在屏幕上的坐标
@@ -155,12 +155,12 @@ public class SurveyView extends View {
      * 并根据参考点来画其位置
      * 如果不存在参考点，则当前点的位置为中心点的位置
      */
-    public void setMyLocation(Point p) {
-        point = p;
+    public void setMyLocation(MyPoint p) {
+        myPoint = p;
     }
 
-    private void setCenterValue(Point point) {
-        mREFpoint = point;
+    private void setCenterValue(MyPoint myPoint) {
+        mREFpoint = myPoint;
     }
 
 

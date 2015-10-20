@@ -15,17 +15,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhd.hi_test.Constant;
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.BluetoothConnect;
 import com.zhd.hi_test.module.InnerGPSConnect;
-import com.zhd.hi_test.util.TrimbleOrder;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -60,15 +54,19 @@ public class ConnectActivity extends Activity {
         btn_connect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean IsConnected = Data.isConnected();
+                boolean IsConnected = Const.isConnected();
                 if (!IsConnected) {
                     startConnect();
+                    sp_way.setEnabled(false);
+                    sp_device.setEnabled(false);
                 } else {
                     mConnect.breakConnect();
                     btn_connect.setText("连接");
-                    Data.setIsConnected(false);
-                    Data.setmConnectType(0);
+                    Const.setIsConnected(false);
+                    Const.setmConnectType(0);
                     tv_content.setText("设备未连接");
+                    sp_way.setEnabled(true);
+                    sp_device.setEnabled(true);
                 }
             }
         });
@@ -119,9 +117,9 @@ public class ConnectActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String way = parent.getItemAtPosition(position).toString();
                 if (way.equals("蓝牙"))
-                    mConnectWay = Constant.BlueToothConncet;
+                    mConnectWay = Const.BlueToothConncet;
                 else if (way.equals("内置GPS"))
-                    mConnectWay = Constant.InnerGPSConnect;
+                    mConnectWay = Const.InnerGPSConnect;
             }
 
             @Override
@@ -134,12 +132,16 @@ public class ConnectActivity extends Activity {
     }
 
     private void getDefaultInfo() {
-        int ConnectType = Data.getmConnectType();
-        boolean IsConnected = Data.isConnected();
+        int ConnectType = Const.getmConnectType();
+        boolean IsConnected = Const.isConnected();
         if (IsConnected) {
             btn_connect.setText("断开");
+            sp_way.setEnabled(false);
+            sp_device.setEnabled(false);
         } else {
             btn_connect.setText("连接");
+            sp_way.setEnabled(true);
+            sp_device.setEnabled(true);
         }
         switch (ConnectType) {
             //蓝牙
@@ -153,7 +155,7 @@ public class ConnectActivity extends Activity {
                 sp_way.setSelection(0);//内置GPS
                 break;
         }
-        tv_content.setText(Data.getmInfo());
+        tv_content.setText(Const.getmInfo());
     }
 
     /**
@@ -162,7 +164,7 @@ public class ConnectActivity extends Activity {
      * 3.打开连接后跳转
      */
     private void startConnect() {
-        if (mConnectWay == Constant.BlueToothConncet) {
+        if (mConnectWay == Const.BlueToothConncet) {
             //只有选择蓝牙，才获得蓝牙适配器进行操作
             mAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mAdapter.isEnabled()) {//判断蓝牙是否开启
@@ -170,7 +172,7 @@ public class ConnectActivity extends Activity {
             } else {//打开蓝牙
                 OpenBluetooth();
             }
-        } else if (mConnectWay == Constant.InnerGPSConnect) {
+        } else if (mConnectWay == Const.InnerGPSConnect) {
             mConnect = new InnerGPSConnect(this);
            startConnecting();
         }
@@ -185,14 +187,14 @@ public class ConnectActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case Data.REQUEST_CODE://打开蓝牙选项
+            case Const.REQUEST_CODE://打开蓝牙选项
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                    startActivityForResult(intent, Data.DISCOVERED);
+                    startActivityForResult(intent, Const.DISCOVERED);
                 }
                 break;
-            case Data.DEVICE_MESSAGE://建立蓝牙连接的选项
+            case Const.DEVICE_MESSAGE://建立蓝牙连接的选项
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
                     mConnect = new BluetoothConnect(address, mAdapter, this);
@@ -207,10 +209,10 @@ public class ConnectActivity extends Activity {
 //                    mConnect.sendMessage(orders);
                 }
                 break;
-            case Data.DISCOVERED://打开蓝牙设备连接窗口的
+            case Const.DISCOVERED://打开蓝牙设备连接窗口的
                 StartDeviceList();
                 break;
-            case Data.GPS_REQUEST:
+            case Const.GPS_REQUEST:
                 //通过选择GPS打开界面来确定是否打开GPS
                 if (resultCode == RESULT_OK) {
                     mConnect = new InnerGPSConnect(this);
@@ -228,7 +230,7 @@ public class ConnectActivity extends Activity {
      */
     private void StartDeviceList() {
         Intent intent = new Intent(this, BluetoothDeviceActivity.class);
-        startActivityForResult(intent, Data.DEVICE_MESSAGE);
+        startActivityForResult(intent, Const.DEVICE_MESSAGE);
     }
 
     /**
@@ -238,7 +240,7 @@ public class ConnectActivity extends Activity {
         if (!mAdapter.isEnabled()) {
             //设置开启请求
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, Data.REQUEST_CODE);
+            startActivityForResult(intent, Const.REQUEST_CODE);
         } else {
             Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
         }

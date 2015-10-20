@@ -12,11 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.zhd.hi_test.Constant;
-import com.zhd.hi_test.Data;
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.module.InnerGPSConnect;
-import com.zhd.hi_test.module.Location;
+import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.ui.StarView;
 import com.zhd.hi_test.util.Infomation;
@@ -30,7 +29,7 @@ import java.util.List;
  */
 public class GPSActivity extends Activity {
 
-
+    private static final String TAG="GPS_TEST";
     private LocationManager mManager;
     //控件对象
     StarView my_view;
@@ -44,10 +43,10 @@ public class GPSActivity extends Activity {
             switch (msg.what){
                 //位置数据，因为都是用的同一个类型所以不转移
                 case 1:
-                    Location location= (Location) msg.obj;
-                    tv_locB.setText(String.valueOf(location.getmB()));
-                    tv_locL.setText(String.valueOf(location.getmL()));
-                    tv_locH.setText(String.valueOf(location.getmH()));
+                    MyLocation myLocation = (MyLocation) msg.obj;
+                    tv_locB.setText(String.valueOf(myLocation.getmB()));
+                    tv_locL.setText(String.valueOf(myLocation.getmL()));
+                    tv_locH.setText(String.valueOf(myLocation.getmH()));
                     break;
                 //卫星数据，分两种来解析
                 case 2:
@@ -80,12 +79,12 @@ public class GPSActivity extends Activity {
         tv_locH = (TextView) findViewById(R.id.tv_locH);
         tv_connect = (TextView) findViewById(R.id.tv_connect);
         //根据所选连接方式来获得对应的数据
-        int connect = Data.getmConnectType();
-        if (connect==Constant.InnerGPSConnect) {
+        int connect = Const.getmConnectType();
+        if (connect== Const.InnerGPSConnect) {
             GPSinit();
             tv_connect.setText("内置GPS");
             InnerGPSConnect.setmHandler(mHandler);
-        } else if(connect==Constant.BlueToothConncet){
+        } else if(connect== Const.BlueToothConncet){
             tv_connect.setText("蓝牙");
             Infomation.setHandler(mHandler);
             //进行从IRTK中获得数据进行处理
@@ -97,7 +96,7 @@ public class GPSActivity extends Activity {
     //
     @Override
     protected void onStop() {
-        Log.d(Constant.GPS_TAG,"设置为空");
+        Log.d(TAG,"设置为空");
         InnerGPSConnect.setmHandler(null);
         super.onStop();
     }
