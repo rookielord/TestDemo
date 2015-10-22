@@ -20,4 +20,8 @@
         <item>3度带</item>
         <item>6度带</item>
     </string-array>
+    <string-array name="outtype">
+        <item>自定义</item>
+        <item>南方cass</item>
+    </string-array>
 </resources>

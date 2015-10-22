@@ -16,10 +16,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="N" />
+            android:text="卫星数" />
 
         <TextView
-            android:id="@+id/tv_N"
+            android:id="@+id/tv_satellite"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -37,10 +37,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="E" />
+            android:text="PDOP" />
 
         <TextView
-            android:id="@+id/tv_E"
+            android:id="@+id/tv_PDOP"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -58,15 +58,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Z" />
+            android:text="使用卫星数" />
 
         <TextView
-            android:id="@+id/tv_Z"
+            android:id="@+id/tv_usesate"
             style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1" />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -78,25 +79,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="时间" />
+            android:text="差分龄期" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tv_age"
+            style="@style/SurveyText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/tv_date"
-                style="@style/SurveyText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-            <TextView
-                android:id="@+id/tv_time"
-                style="@style/SurveyText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-        </LinearLayout>
+            android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>

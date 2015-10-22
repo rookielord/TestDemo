@@ -25,10 +25,10 @@ public class MyLocation {
     private String mProgressL;
     private String mQuality;
     private String mAge = "尚无差分龄期";
-    private String mHDOP = "0";
+    private String mUseSate = "0";
 
-    public String getmHDOP() {
-        return mHDOP;
+    public String getmUseSate() {
+        return mUseSate;
     }
 
     public String getmQuality() {
@@ -57,18 +57,18 @@ public class MyLocation {
 
 
     //RTK传过来的数据
-    public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String HDOP) {
-        this.mHDOP = HDOP;
+    public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String useSate) {
         this.mQuality = getQuality(Quality);
         this.mAge = Age;
-        this.mB = Coordinate.getDmsString(Coordinate.getDegree(B));
-        this.mL = Coordinate.getDmsString(Coordinate.getDegree(L));
-        this.mProgressB = String.valueOf(Coordinate.getDegree(B));
-        this.mProgressL = String.valueOf(Coordinate.getDegree(L));
+        this.mB = Coordinate.getDmsString(Coordinate.getDegreeFromRTK(B));
+        this.mL = Coordinate.getDmsString(Coordinate.getDegreeFromRTK(L));
+        this.mProgressB = String.valueOf(Coordinate.getDegreeFromRTK(B));
+        this.mProgressL = String.valueOf(Coordinate.getDegreeFromRTK(L));
         this.mH = H;
         this.mDireB = DireB;
         this.mDireL = DireL;
         this.mTime = getLocalTime(time);
+        this.mUseSate = useSate;
     }
 
     private String getQuality(int quality) {
@@ -121,21 +121,17 @@ public class MyLocation {
         return mB;
     }
 
-
     public String getmL() {
         return mL;
     }
-
 
     public String getmH() {
         return mH;
     }
 
-
     public String getmTime() {
         return mTime;
     }
-
 
     private String getTime(long mTime) {
         Date date = new Date(mTime);//GPSneizhi

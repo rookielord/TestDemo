@@ -10,13 +10,11 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            style="@style/exchange_text"
             android:layout_weight="2"
-            android:gravity="center"
             android:text="数据类型"
-            android:textColor="#000"
-            android:textSize="15sp" />
+
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,6 +22,7 @@
             android:layout_weight="1">
 
             <RadioGroup
+                android:id="@+id/rg_type"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
@@ -32,17 +31,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_weight="1"
+                    android:checked="true"
                     android:text="导出"
-                    android:textColor="#000" />
-                <RadioButton
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:text="导入"
                     android:textColor="#000" />
             </RadioGroup>
         </LinearLayout>
+
     </LinearLayout>
+
+    <TextView style="@style/exchange_br" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,20 +47,25 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            style="@style/exchange_text"
             android:layout_weight="2"
-            android:gravity="center"
-            android:text="当前目录"
-            android:textColor="#000"
-            android:textSize="15sp" />
+            android:text="当前目录" />
 
-        <TextView
-            android:id="@+id/tv_current_path"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_weight="1"></TextView>
+            android:layout_weight="1"
+            android:scrollbars="none">
+
+            <TextView
+                android:id="@+id/tv_current_path"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"></TextView>
+        </HorizontalScrollView>
     </LinearLayout>
+
+    <TextView style="@style/exchange_br" />
 
     <GridView
         android:id="@+id/gv_file_list"
@@ -79,17 +81,45 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="20dp"></GridView>
 
-    <EditText
-        android:id="@+id/out_name"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <TextView style="@style/exchange_br" />
 
-    <Spinner
-        android:id="@+id/sp_out_style"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></Spinner>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/exchange_text"
+            android:layout_weight="2"
+            android:text="文件名称" />
+
+        <EditText
+            android:id="@+id/out_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/exchange_text"
+            android:layout_weight="2"
+            android:text="当前目录" />
+
+        <Spinner
+            android:id="@+id/sp_out_style"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            ></Spinner>
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_confirm"

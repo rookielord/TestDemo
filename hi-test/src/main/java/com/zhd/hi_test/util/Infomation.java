@@ -28,6 +28,7 @@ public class Infomation {
     private static Pattern GGA_pattern = Pattern.compile("\\$GPGGA.*?(?=\\*)");
     private static Pattern Satellite_pattern = Pattern.compile("(\\$GPGSV|\\$GLGSV|\\$BDGSV).*?(?=\\*)");
     private static Pattern GPZDA_pattern = Pattern.compile("\\$GPZDA.*?(?=\\*)");
+    private static Pattern GPGSA_pattern = Pattern.compile("\\$GNGSA.*?(?=\\*)");
 
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();
@@ -56,6 +57,21 @@ public class Infomation {
         while (mMacher.find()) {
             getTimeInfo(mMacher.group());
         }
+        mMacher=GPGSA_pattern.matcher(mInputMsg);
+        while (mMacher.find()){
+            getPDOP(mMacher.group());
+        }
+    }
+
+    private static void getPDOP(String group) {
+        String[] info = group.split(",");
+        if (info.length == 1 || info[1].equals(""))
+            return;
+        String PDOP=info[info.length-2];
+        Message m=Message.obtain();
+        m.obj=PDOP;
+        m.what=4;
+        mHandler.sendMessage(m);
     }
 
     private static void getLoactionInfo(String group) {
@@ -64,6 +80,7 @@ public class Infomation {
         //注意，刚刚开机时是没有定位的，GGA数据都为空，对B是否有值进行判断,没有值则不进行穿件location对象
         if (info.length == 1 || info[1].equals(""))
             return;
+        String useSatenum = info[7];
         String time = info[1];
         String B = info[2];
         String BDire = info[3];
@@ -72,7 +89,6 @@ public class Infomation {
         //定位质量
         int quality = Integer.valueOf(info[6]);
         String H = info[9];
-        String HDOP = info[8];
         //差分龄期,必须是完整的GGA数据才会有，即开始是没有的
         String age;
         if (info.length < 15)
@@ -80,7 +96,7 @@ public class Infomation {
         else
             age = info[13];
         //坐标点
-        myLocation = new MyLocation(B, L, H, BDire, LDire, time, quality, age, HDOP);
+        myLocation = new MyLocation(B, L, H, BDire, LDire, time, quality, age, useSatenum);
         Message m = Message.obtain();
         m.obj = myLocation;
         m.what = 1;
@@ -138,7 +154,6 @@ public class Infomation {
 
     private static void getTimeInfo(String group) {
         String[] info = group.split(",");
-        Log.d("TEST",group);
         //没有数据时，长度依然为7，所以只能用内容来判断
         if (info[1].equals(""))
             return;

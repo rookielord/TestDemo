@@ -57,8 +57,6 @@ public class ConnectActivity extends Activity {
                 boolean IsConnected = Const.isConnected();
                 if (!IsConnected) {
                     startConnect();
-                    sp_way.setEnabled(false);
-                    sp_device.setEnabled(false);
                 } else {
                     mConnect.breakConnect();
                     btn_connect.setText("连接");
@@ -157,7 +155,6 @@ public class ConnectActivity extends Activity {
         }
         tv_content.setText(Const.getmInfo());
     }
-
     /**
      * 1.首先判断连接方式
      * 2.打开蓝牙连接
@@ -174,7 +171,8 @@ public class ConnectActivity extends Activity {
             }
         } else if (mConnectWay == Const.InnerGPSConnect) {
             mConnect = new InnerGPSConnect(this);
-           startConnecting();
+            startConnecting();
+            getDefaultInfo();
         }
     }
 
@@ -199,6 +197,7 @@ public class ConnectActivity extends Activity {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
                     mConnect = new BluetoothConnect(address, mAdapter, this);
                     startConnecting();
+                    getDefaultInfo();
 //                    mConnect.startConnect();
 //                    List<byte[]> orders = new ArrayList<byte[]>() {{
 //                        add(TrimbleOrder.CLOSE_COM1);
@@ -217,6 +216,8 @@ public class ConnectActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     mConnect = new InnerGPSConnect(this);
                     mConnect.startConnect();
+                    sp_way.setEnabled(false);
+                    sp_device.setEnabled(false);
                 } else {
                     Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
                 }

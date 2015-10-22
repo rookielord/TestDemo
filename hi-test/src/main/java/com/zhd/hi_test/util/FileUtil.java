@@ -33,20 +33,32 @@ import java.util.regex.Pattern;
  */
 public class FileUtil {
 
-    public static boolean checkMsg(String msg, String path) {
+    /**
+     * 传入文件的名称和当前的路径
+     *
+     * @param msg
+     * @param path
+     * @param type 是文件夹还是文件
+     * @return true命名可行，false命名不行
+     */
+    public static boolean checkMsg(String msg, String path, int type) {
         boolean check1, check2, check3 = false;
         check1 = msg.trim().isEmpty();
         String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(msg);
         check2 = m.find();
-        String[] proName = new File(path).list();
-        if (proName.length > 0) {
-            for (String name : proName) {
+        if (type==2)
+            msg+=".txt";
+        String[] FileNames = new File(path).list();
+        if (FileNames.length > 0) {
+            for (String name : FileNames) {
                 if (name.equals(msg))
                     check3 = true;
             }
         }
+
+
         if (check1 || check2 || check3) {
             return false;
         } else {
@@ -171,13 +183,13 @@ public class FileUtil {
      *
      * @param myProject
      */
-    public static void updateProject(MyProject myProject) {
+    public static void updateProject(MyProject project) {
         ObjectOutputStream out = null;
         try {
-            out = new ObjectOutputStream(new FileOutputStream(myProject.getmConfig()));
+            out = new ObjectOutputStream(new FileOutputStream(project.getmConfig()));
             //写入内容
-            myProject.setmLastTime(getCurrentTime());
-            out.writeObject(myProject);
+            project.setmLastTime(getCurrentTime());
+            out.writeObject(project);
             out.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -247,6 +259,11 @@ public class FileUtil {
         return p;
     }
 
+    /**
+     *
+     * @param p
+     * @param activity
+     */
     public static void savelastProject(MyProject p, Activity activity) {
         ObjectOutputStream oos = null;
         File file = new File(activity.getFilesDir(), "last.txt");
@@ -268,6 +285,10 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 得到上一次存储对象后，会去检查该项目是否存在，如果存在则设置，如果不在则不会将其设为全局变量
+     * @param mainActivity
+     */
     public static void setLastProject(Activity mainActivity) {
         //先检测是否存在
         File file = new File(mainActivity.getFilesDir(), "last.txt");
@@ -280,6 +301,7 @@ public class FileUtil {
                 ois = new ObjectInputStream(fis);
                 MyProject p = (MyProject) ois.readObject();
                 //设置为全局变量
+                if (p.getmConfig().exists())
                 Const.setmProject(p);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -334,6 +356,7 @@ public class FileUtil {
 
     /**
      * 字符串写入文件
+     *
      * @param filePath
      * @param data
      */

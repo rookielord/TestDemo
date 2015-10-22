@@ -45,6 +45,6 @@ public class SafePreference {
      */
     public static Boolean getBoolean(Context context, String key){
         SharedPreferences sp = context.getSharedPreferences(Const.PFNAME, 0);
-        return sp.getBoolean(key, false);
+        return sp.getBoolean(key, true);
     }
 }

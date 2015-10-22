@@ -27,7 +27,6 @@ public class Curd {
     public void createTable(String Tablename) {
         String create_table = "CREATE TABLE " + Tablename + "( " +
                 "id integer primary key ," +
-                "name varchar(10) ," +
                 "B varchar(32) ," +
                 "L varchar(32) ," +
                 "H varchar(32) ," +
@@ -39,9 +38,6 @@ public class Curd {
                 "DireB char(1)," +
                 "DireL char(1)," +
                 "height char(5)," +
-                "NRMS varchar(32)," +
-                "ERMS varchar(32)," +
-                "ZRMS varchar(32)," +
                 "DES text);";
         mDb.execSQL(create_table);
     }

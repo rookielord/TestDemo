@@ -98,6 +98,7 @@
     </style>
     <!-- 设备连接时的样式-->
     <style name="ConnectButton">
+        <item name="android:layout_margin">5dp</item>
         <item name="android:background">@drawable/connect_selector</item>
         <item name="android:textColor">@color/textcolor</item>
     </style>
@@ -113,5 +114,19 @@
         <item name="android:background">@drawable/surveybackgroud</item>
         <item name="android:padding">5dp</item>
     </style>
+<!--导出数据时的样式-->
+    <style name="exchange_br">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1px</item>
+        <item name="android:background">#FF35E6F6</item>
+    </style>
+    <style name="exchange_text">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+    <!-- 所有项目的所有Activity的title-->
 
 </resources>

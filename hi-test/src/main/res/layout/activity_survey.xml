@@ -54,8 +54,16 @@
             android:layout_height="40dp"
             android:layout_above="@id/image_zoom_center"
             android:scaleType="fitCenter"
+            android:layout_marginTop="10dp"
             android:src="@mipmap/ic_zoom_all" />
 
+        <ImageView
+            android:id="@+id/image_baidumap"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/image_zoom_all"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_baidumap" />
 
         <ImageView
             android:id="@+id/image_add"
@@ -94,12 +102,6 @@
                 android:layout_gravity="center"
                 android:background="@mipmap/dian" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="20dip"
-                android:background="@mipmap/dian" />
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

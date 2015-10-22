@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.GpsSatellite;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -59,9 +60,12 @@ import java.util.List;
 public class SurveyActivity extends Activity implements OnClickListener {
 
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_HDOP, tv_age, tv_solution;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_PDOP, tv_age, tv_solution,tv_usesate;
     Button btn_add;
-    ImageView image_add, image_zoom_in, image_zoom_out, image_zoom_center, image_zoom_all, image_compass;
+    ImageView image_add, image_zoom_in, image_zoom_out,
+            image_zoom_center, image_zoom_all, image_compass
+            ,image_baidumap;
+    LinearLayout ll_part1, ll_part2, ll_layout1;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
     private static String mDireL;
@@ -101,8 +105,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_H.setText(myLocation.getmH());
                     tv_time.setText(myLocation.getmTime());
                     tv_age.setText(myLocation.getmAge());
-                    tv_HDOP.setText(myLocation.getmHDOP());
                     tv_solution.setText(myLocation.getmQuality());
+                    tv_usesate.setText(myLocation.getmUseSate());
                     mDireB = myLocation.getmDireB();
                     mDireL = myLocation.getmDireL();
                     double b = Double.valueOf(myLocation.getmProgressB());
@@ -136,6 +140,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     UTCDate time = (UTCDate) msg.obj;
                     tv_date.setText(time.getmCurrentDate());
                     break;
+                case 4:
+                    tv_PDOP.setText(msg.obj.toString());
+                    break;
             }
         }
     };
@@ -165,20 +172,23 @@ public class SurveyActivity extends Activity implements OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
-        //获得表名来进行数据的操作
+        //指南针可用
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        //获取方向传感器
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        image_compass = (ImageView) findViewById(R.id.image_compass);
+
+
         if (Const.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
         }
-        mCurd = new Curd(Const.getmProject().getmTableName(), this);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        //获取方向传感器
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-
+        //初始化页面
         init();
-        iniSurveyView();
         //初始化下面的点
         initDoc();
+        mCurd = new Curd(Const.getmProject().getmTableName(), this);
+        iniSurveyView();
         if (Const.getmConnectType() == Const.BlueToothConncet) {
             Infomation.setHandler(mHandler);
         } else if (Const.getmConnectType() == Const.InnerGPSConnect) {
@@ -264,9 +274,10 @@ public class SurveyActivity extends Activity implements OnClickListener {
         image_zoom_in = (ImageView) findViewById(R.id.image_zoom_in);
         image_zoom_out = (ImageView) findViewById(R.id.image_zoom_out);
         image_zoom_all = (ImageView) findViewById(R.id.image_zoom_all);
-        image_compass = (ImageView) findViewById(R.id.image_compass);
+        image_baidumap= (ImageView) findViewById(R.id.image_baidumap);
+        image_baidumap.setOnClickListener(this);
         //保证画面不会黑屏
-        image_compass.setKeepScreenOn(true);
+//        image_compass.setKeepScreenOn(true);
         btn_add = (Button) findViewById(R.id.btn_add_point);
         image_add.setOnClickListener(this);
         image_zoom_in.setOnClickListener(this);
@@ -278,22 +289,27 @@ public class SurveyActivity extends Activity implements OnClickListener {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view1 = inflater.inflate(R.layout.survey_layout1, null);
         View view2 = inflater.inflate(R.layout.survey_layout2, null);
-        View view3 = inflater.inflate(R.layout.survey_layout3, null);
+//        第一页中的数据
         tv_B = (TextView) view1.findViewById(R.id.tv_B);
         tv_L = (TextView) view1.findViewById(R.id.tv_L);
         tv_H = (TextView) view1.findViewById(R.id.tv_H);
         tv_solution = (TextView) view1.findViewById(R.id.tv_solution);
-        tv_N = (TextView) view2.findViewById(R.id.tv_N);
-        tv_E = (TextView) view2.findViewById(R.id.tv_E);
-        tv_Z = (TextView) view2.findViewById(R.id.tv_Z);
-        tv_time = (TextView) view2.findViewById(R.id.tv_time);
-        tv_date = (TextView) view2.findViewById(R.id.tv_date);
-        tv_satellite = (TextView) view3.findViewById(R.id.tv_satellite);
-        tv_HDOP = (TextView) view3.findViewById(R.id.tv_HDOP);
-        tv_age = (TextView) view3.findViewById(R.id.tv_age);
+        tv_N = (TextView) view1.findViewById(R.id.tv_N);
+        tv_E = (TextView) view1.findViewById(R.id.tv_E);
+        tv_Z = (TextView) view1.findViewById(R.id.tv_Z);
+        tv_time = (TextView) view1.findViewById(R.id.tv_time);
+        tv_date = (TextView) view1.findViewById(R.id.tv_date);
+        ll_layout1 = (LinearLayout) view1.findViewById(R.id.ll_layout1);
+        ll_layout1.setOnClickListener(this);
+        ll_part1 = (LinearLayout) view1.findViewById(R.id.ll_part1);
+        ll_part2 = (LinearLayout) view1.findViewById(R.id.ll_part2);
+//        第二页中的数据
+        tv_satellite = (TextView) view2.findViewById(R.id.tv_satellite);
+        tv_PDOP = (TextView) view2.findViewById(R.id.tv_PDOP);
+        tv_age = (TextView) view2.findViewById(R.id.tv_age);
+        tv_usesate= (TextView) view2.findViewById(R.id.tv_usesate);
         mViews.add(view1);
         mViews.add(view2);
-        mViews.add(view3);
         //设置填充内容，以及页面改变的监听
         viewPager.setAdapter(mAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -394,7 +410,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
     protected void onDestroy() {
         if (mListener != null)
             mSensorManager.unregisterListener(mListener);
-        surveyView.setMyLocation(null);
+        if (surveyView != null)
+            surveyView.setMyLocation(null);
         Infomation.setHandler(null);
         InnerGPSConnect.setmHandler(null);
         super.onDestroy();
@@ -444,6 +461,20 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 surveyView.setmOffsets(0, 0);
                 surveyView.setmScale(1);
                 surveyView.invalidate();
+                break;
+            case R.id.ll_layout1:
+                if (ll_part1.getVisibility() == View.GONE) {
+                    ll_part1.setVisibility(View.VISIBLE);
+                    ll_part2.setVisibility(View.GONE);
+                } else {
+                    ll_part1.setVisibility(View.GONE);
+                    ll_part2.setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.image_baidumap:
+                Intent intent=new Intent("com.zhd.baidumap.START");
+                startActivity(intent);
+                break;
         }
     }
 }

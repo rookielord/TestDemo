@@ -221,7 +221,7 @@ public class SurveyView extends View {
         canvas.drawLine(startx, starty, startx - 20, starty, mPaint);//第二条线
         canvas.drawLine(startx - 20, starty, startx - 20, starty - 5, mPaint);//第三条线
         DecimalFormat df = new DecimalFormat("0.00");
-        canvas.drawText(df.format(mScale) + "m", startx - 8, starty - 6, mPaint);
+        canvas.drawText(df.format(mScale) + "m", startx - 15, starty - 6, mPaint);
     }
 
     private void DrawMypoint(Canvas canvas) {

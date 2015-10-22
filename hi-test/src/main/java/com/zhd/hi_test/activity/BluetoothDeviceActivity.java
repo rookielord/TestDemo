@@ -91,6 +91,7 @@ public class BluetoothDeviceActivity extends Activity {
                 //搜索完毕后按钮消失
                 v.setVisibility(GONE);
                 mNewAdapter.clear();
+                mNewDevices.clear();
                 btn_close.setVisibility(VISIBLE);
             }
         });
@@ -104,6 +105,7 @@ public class BluetoothDeviceActivity extends Activity {
                 btn_search.setVisibility(VISIBLE);
             }
         });
+
 
     }
 

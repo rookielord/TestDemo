@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +23,7 @@ import com.zhd.hi_test.util.TrimbleOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.InvalidPropertiesFormatException;
 import java.util.UUID;
 
 /**
@@ -35,10 +41,22 @@ public class BluetoothConnect implements IConnect {
     private BluetoothAdapter mAdapter;
     private String mAddress;
     private Activity mActivity;
-    private static final String TAG="BlueTooth_TEST";
+    private static final String TAG = "BlueTooth_TEST";
 
     //设置一个量用于维护读取操作
     private boolean isRead = false;
+    //消息类
+    private Handler mHandler=new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what){
+                case 1:
+                    Toast.makeText(mActivity,"仪器断开连接",Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return false;
+        }
+    });
 
     /**
      * 为了在Connect上面显示toast需要传入Activity
@@ -71,9 +89,11 @@ public class BluetoothConnect implements IConnect {
             Const.setmConnectType(Const.BlueToothConncet);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
+            //获取连接对象的名称
             Const.setmInfo(mDevice.getName());
             Toast.makeText(mActivity, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
+            Const.setmInfo("设备未连接");
             e.printStackTrace();
             Toast.makeText(mActivity, "连接失败", Toast.LENGTH_SHORT).show();
         }
@@ -106,12 +126,15 @@ public class BluetoothConnect implements IConnect {
             return;
         try {
             out.write(TrimbleOrder.CLOSE_COM1);
-            Thread.sleep(200);
+            Thread.sleep(300);
+            out.write(TrimbleOrder.GPGSA);
+            Thread.sleep(300);
             out.write(TrimbleOrder.GPGSV);
-            Thread.sleep(200);
-            out.write(TrimbleOrder.GGA);
-            Thread.sleep(200);
+            Thread.sleep(300);
+            out.write(TrimbleOrder.GPGGA);
+            Thread.sleep(300);
             out.write(TrimbleOrder.GPZDA);
+            Thread.sleep(300);
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,6 +179,9 @@ public class BluetoothConnect implements IConnect {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Const.setIsConnected(false);
+                    Const.setmConnectType(0);
+                    mHandler.sendEmptyMessage(1);
                 }
             }
         }).start();

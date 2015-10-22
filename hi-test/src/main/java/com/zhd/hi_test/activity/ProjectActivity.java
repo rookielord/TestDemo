@@ -184,7 +184,7 @@ public class ProjectActivity extends Activity {
                             public void onClick(DialogInterface dialog, int which) {
                                 EditText et1 = (EditText) finalView.findViewById(R.id.et_pro_name);
                                 String pro_name = et1.getText().toString();
-                                boolean isRight = FileUtil.checkMsg(pro_name, mPath);
+                                boolean isRight = FileUtil.checkMsg(pro_name, mPath,1);
                                 String[] mConfigs = new String[6];
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称

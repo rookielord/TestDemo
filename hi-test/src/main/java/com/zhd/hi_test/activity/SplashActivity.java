@@ -61,11 +61,7 @@ public class SplashActivity extends Activity {
                 }
             }).start();
         }
-
-
-
     }
-
     @Override
     protected void onDestroy() {
         LoginHelper.getInstance(this).destory();

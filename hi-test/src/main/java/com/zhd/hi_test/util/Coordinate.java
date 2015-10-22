@@ -29,7 +29,7 @@ public class Coordinate {
      * @param ddmm 传过来的数据
      * @return
      */
-    public static double getDegree(String ddmm) {
+    public static double getDegreeFromRTK(String ddmm) {
         if (ddmm.equals("")) {
             return 0.0;
         } else {
@@ -38,6 +38,21 @@ public class Coordinate {
             double m = (value - degree * 100) / 60;
             return degree + m;
         }
+    }
+
+    /**
+     * 将dd:mm:ss.ssss的形式转化为dd.dddd的形式
+     *
+     * @param ddmmss
+     * @return
+     */
+    public static double getDegreeFromSQL(String ddmmss,String Dire) {
+        String[] value = ddmmss.split(":");
+        double res=Integer.valueOf(value[0]) + Double.valueOf(value[1]) / 60 + Double.valueOf(value[2]) / 3600;
+        if (Dire.equals("N")|| Dire.equals("E"))
+            return res;
+        else
+            return -res;
     }
 
     /**
