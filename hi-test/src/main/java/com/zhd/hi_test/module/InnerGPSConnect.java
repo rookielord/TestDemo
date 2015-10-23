@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -85,7 +86,7 @@ public class InnerGPSConnect implements IConnect {
         mLocListener = new LocationListener() {
             //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
             @Override
-            public void onLocationChanged(android.location.Location location) {
+            public void onLocationChanged(Location location) {
                 String longitude = String.valueOf(location.getLongitude());
                 String altitude = String.valueOf(location.getAltitude());
                 String latitude = String.valueOf(location.getLatitude());
@@ -141,7 +142,7 @@ public class InnerGPSConnect implements IConnect {
                         int maxSatellite = status.getMaxSatellites();
                         int SatelliteNum = 0;
                         //这里创建需要进行传递的对象
-                        ArrayList<GpsSatellite> satelliteList = new ArrayList<GpsSatellite>();
+                        ArrayList<GpsSatellite> satelliteList = new ArrayList<>();
                         while (it.hasNext() && SatelliteNum <= maxSatellite) {//判断条件1.有卫星数据2.小于最大卫星接收数
                             GpsSatellite s = it.next();
                             satelliteList.add(s);

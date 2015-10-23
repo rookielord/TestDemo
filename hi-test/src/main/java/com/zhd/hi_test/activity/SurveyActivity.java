@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,6 +16,7 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.renderscript.Allocation;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -178,7 +182,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         image_compass = (ImageView) findViewById(R.id.image_compass);
 
-
         if (Const.getmProject() == null) {
             Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
             return;
@@ -249,7 +252,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
      */
     private void refreshPoints() {
         myPoints.clear();
-        mCursor = mCurd.queryData(new String[]{"*"}, "id desc", null);
+        mCursor = mCurd.queryData(new String[]{"*"}, "id desc");
         if (mCursor.getCount() != 0) {
             while (mCursor.moveToNext()) {
                 //获取数据存入其中

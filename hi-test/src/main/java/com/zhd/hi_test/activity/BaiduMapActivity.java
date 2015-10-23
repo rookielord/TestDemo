@@ -2,9 +2,7 @@ package com.zhd.hi_test.activity;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -16,15 +14,16 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.CircleOptions;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.baidu.mapapi.map.MyLocationConfiguration.*;
+import static com.baidu.mapapi.utils.CoordinateConverter.*;
 
 /**
  * Created by 2015032501 on 2015/10/22.
@@ -56,12 +56,17 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
     boolean isFirstLoc = true;// 是否首次定位，每次打开时都应该是当前点
     //存放用来画点的集合
     private List<LatLng> points = new ArrayList<>();
+    //在图上用的mark
+    private BitmapDescriptor mMarkicon;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SDKInitializer.initialize(getApplicationContext());//加载jar类型包，不然xml中的标签不会被识别
         setContentView(R.layout.activity_baidumap);
+        //获取在屏幕上需要画圆的内容
+        mMarkicon= BitmapDescriptorFactory.fromResource(R.mipmap.ic_solution_rtki);
+
         init();
         //
         drawMap();
@@ -72,13 +77,23 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
      * 每次画图后会清空所有的点
      */
     private void drawMap() {
-        //注意画图大小应该随着比例尺变化
-
+        //注意画圆大小应该随着比例尺变化
+        //如果是画线段的话？
+        //根据图形化一个
         for (LatLng point : points) {
-            OverlayOptions ooCircle = new CircleOptions().fillColor(Color.parseColor("#2C000000"))
-                    .center(point).stroke(new Stroke(2, Color.BLUE))
-                    .radius(10);
-            mBaiduMap.addOverlay(ooCircle);
+
+
+//            OverlayOptions ooCircle = new CircleOptions().fillColor(Color.parseColor("#2C000000"))
+//                    .center(point).stroke(new Stroke(2, Color.BLUE))
+//                    .radius(10);
+//            mBaiduMap.addOverlay(ooCircle);
+//            OverlayOptions ooDot = new DotOptions().center(point).radius(6)
+//                    .color(0xFF0000FF);
+//            mBaiduMap.addOverlay(ooDot);
+            OverlayOptions ooA = new MarkerOptions().position(point).icon(mMarkicon)
+                    .zIndex(9).draggable(true);
+            mBaiduMap.addOverlay(ooA);
+
         }
 
     }
@@ -100,7 +115,7 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
         LocationClientOption option = new LocationClientOption();
         option.setOpenGps(true);// 打开gps
         option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(1000);//扫描间隔
+        option.setScanSpan(1000);//设置定位间隔时间
         mLocClient.setLocOption(option);
         mLocClient.start();
         queryPoints();
@@ -111,7 +126,7 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
      */
     private void queryPoints() {
         Curd curd = new Curd(Const.getmProject().getmTableName(), this);
-        Cursor cursor = curd.queryData(new String[]{"B", "L","DireB","DireL"}, null, null);
+        Cursor cursor = curd.queryData(new String[]{"B", "L","DireB","DireL"});
         if (cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
                 //获得B,L进行转化
@@ -119,10 +134,13 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
                         , cursor.getString(cursor.getColumnIndex("DireB")));
                 double l = Coordinate.getDegreeFromSQL(cursor.getString(cursor.getColumnIndex("L"))
                         , cursor.getString(cursor.getColumnIndex("DireL")));
-                Log.d("BD", "纬度大小" + b);
-                Log.d("BD", "经度大小" + l);
+                //将GPS坐标转化为BD09ll
+                CoordinateConverter converter  = new CoordinateConverter();
+                converter.from(CoordType.GPS);
                 LatLng lng = new LatLng(b, l);
-                points.add(lng);
+                converter.coord(lng);
+                LatLng desLatLng = converter.convert();
+                points.add(desLatLng);
             }
             cursor.close();
         }
@@ -208,6 +226,8 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
         mBaiduMap.setMyLocationEnabled(false);
         mapview.onDestroy();
         mapview = null;
+        //回收图片资源
+        mMarkicon.recycle();
         super.onDestroy();
     }
 }

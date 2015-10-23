@@ -177,7 +177,6 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
      */
     private String getName() {
         String name = et_out_name.getText().toString();
-        Log.d("EXCHANGE", mCurfile.getPath());
         if (FileUtil.checkMsg(name, mCurfile.getPath(), 2)) {
             return name;
         }
@@ -191,7 +190,7 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
     private void OutPutCass() {
         try {
             Curd curd = new Curd(Const.getmProject().getmTableName(), this);
-            Cursor cursor = curd.queryData(new String[]{"id,N,E,Z"}, null, null);
+            Cursor cursor = curd.queryData(new String[]{"id,N,E,Z"});
             StringBuilder sb = new StringBuilder();
             if (cursor.getCount() != 0) {
                 while (cursor.moveToNext()) {

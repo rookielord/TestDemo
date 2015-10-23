@@ -47,7 +47,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.IconActivity">
+        <activity android:name=".activity.GridActivity">
             <intent-filter>
                 <action android:name="com.zhd.grid.START" />
                 <category android:name="android.intent.category.DEFAULT" />

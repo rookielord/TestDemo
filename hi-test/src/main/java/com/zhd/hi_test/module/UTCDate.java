@@ -54,7 +54,7 @@ public class UTCDate {
      * @return
      */
     private static String getDate(long mTime) {
-        Date date = new Date(mTime);//GPSneizhi
+        Date date = new Date(mTime);//GPS时间
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         return (format.format(date));
     }

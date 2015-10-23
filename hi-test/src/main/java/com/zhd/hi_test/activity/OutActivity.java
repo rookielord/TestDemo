@@ -49,7 +49,7 @@ public class OutActivity extends Activity implements View.OnClickListener {
         btn_out = (Button) findViewById(R.id.btn_out);
         //进行数据库中字段的查询，动态向linearlayout中添加checkbox
         mCurd = new Curd(Const.getmProject().getmTableName(), this);
-        Cursor cursor = mCurd.queryData(new String[]{"*"}, null, null);
+        Cursor cursor = mCurd.queryData(new String[]{"*"});
         btn_out.setOnClickListener(this);
         String[] columnNames = cursor.getColumnNames();
         //动态生成checkbox
@@ -100,7 +100,7 @@ public class OutActivity extends Activity implements View.OnClickListener {
             }
             String[] selected_item = columns.toArray(new String[columns.size()]);
             //查询内容
-            Cursor cursor = mCurd.queryData(selected_item, null, null);
+            Cursor cursor = mCurd.queryData(selected_item);
             StringBuilder sb = new StringBuilder();
             if (cursor.getCount() != 0) {
                 while (cursor.moveToNext()) {

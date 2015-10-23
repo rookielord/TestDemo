@@ -172,7 +172,7 @@ public class BluetoothConnect implements IConnect {
                             if (useInfo != null) {
                                 String msg1 = new String(useInfo);
                                 //注意，显示数据是不完善的，经过调试后发现是完整拼接
-//                                Log.d(TAG, msg1);
+                                Log.d(TAG, msg1);
                                 Infomation.setmInputMsg(msg1);
                             }
                         }

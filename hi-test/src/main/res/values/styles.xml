@@ -127,6 +127,9 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
     </style>
-    <!-- 所有项目的所有Activity的title-->
+    <!-- 自定义title的内容-->
+    <style name="custom_title_text">
+        <item name="android:gravity">center</item>
+    </style>
 
 </resources>

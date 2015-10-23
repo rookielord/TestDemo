@@ -2,6 +2,7 @@ package com.zhd.hi_test;
 
 
 
+import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.MyProject;
 
 
@@ -38,6 +39,15 @@ public class Const {
     public static final String ISUPDATA = "updata";//是否检查版本更新
     public static final String SAFEPASSWORD = "password";//设置我的手机防盗密码
 
+    public static IConnect mConnect;
+
+    public static IConnect getmConnect() {
+        return mConnect;
+    }
+
+    public static void setmConnect(IConnect mConnect) {
+        Const.mConnect = mConnect;
+    }
 
     public static String getmInfo() {
         return mInfo;

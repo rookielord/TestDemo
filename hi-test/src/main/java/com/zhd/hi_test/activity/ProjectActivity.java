@@ -89,6 +89,9 @@ public class ProjectActivity extends Activity {
         } else {
             Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_SHORT).show();
         }
+        //进行数据库中脏数据表删除
+        Curd curd=new Curd("sqlite_master",this);
+        curd.removeDirtyTable(mMyProjects);
     }
 
     private void showProjectInfo(MyProject myProject) {

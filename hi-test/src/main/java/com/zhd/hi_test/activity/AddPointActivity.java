@@ -115,7 +115,7 @@ public class AddPointActivity extends Activity {
         } else {//修改
             tv_add.setText("修改");
             et_name.setText("pt" + id);
-            Cursor cursor = curd.queryData(new String[]{"*"}, "id=?", new String[]{id}, null, null, null);
+            Cursor cursor = curd.queryData(new String[]{"*"}, "id=?", new String[]{id});
             while (cursor.moveToNext()) {
                 tv_B.setText(cursor.getString(cursor.getColumnIndex("B")));
                 tv_L.setText(cursor.getString(cursor.getColumnIndex("L")));

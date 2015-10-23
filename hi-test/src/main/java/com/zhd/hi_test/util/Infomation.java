@@ -28,7 +28,7 @@ public class Infomation {
     private static Pattern GGA_pattern = Pattern.compile("\\$GPGGA.*?(?=\\*)");
     private static Pattern Satellite_pattern = Pattern.compile("(\\$GPGSV|\\$GLGSV|\\$BDGSV).*?(?=\\*)");
     private static Pattern GPZDA_pattern = Pattern.compile("\\$GPZDA.*?(?=\\*)");
-    private static Pattern GPGSA_pattern = Pattern.compile("\\$GNGSA.*?(?=\\*)");
+    private static Pattern GPGSA_pattern = Pattern.compile("(\\$GNGSA|\\$GPGSA).*?(?=\\*)");
 
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();

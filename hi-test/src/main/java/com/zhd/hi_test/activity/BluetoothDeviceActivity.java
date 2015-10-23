@@ -56,6 +56,7 @@ public class BluetoothDeviceActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //显示进度条
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_bluetooth_device);
         //默认设置是没有找到的

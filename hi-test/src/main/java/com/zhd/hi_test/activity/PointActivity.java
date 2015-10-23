@@ -98,7 +98,7 @@ public class PointActivity extends Activity {
      */
     private void refreshData() {
         points.clear();
-        Cursor cursor = curd.queryData(new String[]{"*"}, null, null, null, null, null);
+        Cursor cursor = curd.queryData(new String[]{"*"});
         //创建Data来填充数据
         while (cursor.moveToNext()) {
             Map<String, String> point = new HashMap<>();
@@ -124,7 +124,7 @@ public class PointActivity extends Activity {
         //准备数据
         //数据库中
         curd = new Curd(mTableName, this);
-        Cursor cursor = curd.queryData(new String[]{"*"}, null, null, null, null, null);
+        Cursor cursor = curd.queryData(new String[]{"*"});
         //创建Data来填充数据
         points = new ArrayList<>();
         while (cursor.moveToNext()) {

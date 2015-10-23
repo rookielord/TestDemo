@@ -55,7 +55,7 @@
                     android:layout_width="80dip"
                     android:layout_height="fill_parent"
                     android:gravity="center"
-                    android:text="天线高" />
+                    android:text="仪器高" />
                 <TextView
                     style="@style/ManageInfo"
                     android:layout_width="90dip"

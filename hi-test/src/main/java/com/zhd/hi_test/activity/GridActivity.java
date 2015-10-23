@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Created by 2015032501 on 2015/9/19.
  * 这里是显示滑动的页面，每个页面包括图标信息和跳转的intent
  */
-public class IconActivity extends Activity {
+public class GridActivity extends Activity {
 
     //这里创建所有的图标资源，然后通过传入的PageID来决定传入使用哪些进行进行填充
     private static ArrayList<Icon> AllSource = new ArrayList<Icon>(){{

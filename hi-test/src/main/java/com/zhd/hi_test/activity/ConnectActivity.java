@@ -62,6 +62,7 @@ public class ConnectActivity extends Activity {
                     btn_connect.setText("连接");
                     Const.setIsConnected(false);
                     Const.setmConnectType(0);
+                    Const.setmInfo("设备未连接");
                     tv_content.setText("设备未连接");
                     sp_way.setEnabled(true);
                     sp_device.setEnabled(true);
@@ -171,6 +172,7 @@ public class ConnectActivity extends Activity {
             }
         } else if (mConnectWay == Const.InnerGPSConnect) {
             mConnect = new InnerGPSConnect(this);
+            Const.setmConnect(mConnect);
             startConnecting();
             getDefaultInfo();
         }
@@ -196,6 +198,7 @@ public class ConnectActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
                     mConnect = new BluetoothConnect(address, mAdapter, this);
+                    Const.setmConnect(mConnect);
                     startConnecting();
                     getDefaultInfo();
 //                    mConnect.startConnect();
@@ -216,6 +219,7 @@ public class ConnectActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     mConnect = new InnerGPSConnect(this);
                     mConnect.startConnect();
+                    Const.setmConnect(mConnect);
                     sp_way.setEnabled(false);
                     sp_device.setEnabled(false);
                 } else {

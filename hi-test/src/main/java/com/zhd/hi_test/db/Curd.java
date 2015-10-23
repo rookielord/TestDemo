@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.zhd.hi_test.module.MyProject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,14 +16,15 @@ import java.util.List;
 public class Curd {
     private String mTablename;
     private MySqliteOpenHelper mSQoh;
-    private SQLiteDatabase mDb;
+    private SQLiteDatabase mWB, mRB;
     private Cursor mCursor;
 
     public Curd(String tablename, Context context) {
         mTablename = tablename;
         mSQoh = new MySqliteOpenHelper(context, 1);
         //获得可以操作的数据库对象
-        mDb = mSQoh.getWritableDatabase();
+        mWB = mSQoh.getWritableDatabase();
+        mRB = mSQoh.getReadableDatabase();
     }
 
     //创建项目对应的表
@@ -39,20 +43,20 @@ public class Curd {
                 "DireL char(1)," +
                 "height char(5)," +
                 "DES text);";
-        mDb.execSQL(create_table);
+        mWB.execSQL(create_table);
     }
 
     //删除项目时，需要读取其配置文件中的表名，先删除表然后再删除项目文件
     public void dropTable(String Tablename) {
         String drop_table = "DROP TABLE IF EXISTS " + Tablename;
-        mDb.execSQL(drop_table);
+        mWB.execSQL(drop_table);
     }
 
     //插入操作
     public boolean insertData(List<ContentValues> cvList) {
         long res;
         for (ContentValues cv : cvList) {
-            res = mDb.insert(mTablename, null, cv);
+            res = mWB.insert(mTablename, null, cv);
             if (res == -1)
                 return false;
         }
@@ -61,8 +65,7 @@ public class Curd {
 
     //删除操作
     public Boolean deleteData(String id) {
-        //SQLiteDatabase sd = mSQoh.getWritableDatabase();
-        int res = mDb.delete(mTablename, "id=?", new String[]{id});
+        int res = mWB.delete(mTablename, "id=?", new String[]{id});
         if (res != 1) {
             return false;
         }
@@ -71,8 +74,7 @@ public class Curd {
 
     //修改操作
     public Boolean UpdateData(String id, ContentValues cv) {
-//        SQLiteDatabase sd = mSQoh.getWritableDatabase();
-        int res = mDb.update(mTablename, cv, "id=?", new String[]{id});
+        int res = mWB.update(mTablename, cv, "id=?", new String[]{id});
         if (res == 0) {
             return false;
         } else {
@@ -80,39 +82,75 @@ public class Curd {
         }
     }
 
-    //查询操作
+    //查询操作，涉及全部的操作
     public Cursor queryData(String[] columns, String selection,
                             String[] selectionArgs, String groupBy, String having,
                             String orderBy) {
-        SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        mCursor = sd.query(mTablename, columns, selection, selectionArgs,
+        mCursor = mRB.query(mTablename, columns, selection, selectionArgs,
                 groupBy, having, orderBy);
         return mCursor;
     }
 
-    public Cursor queryData(String[] columns, String orderby, String limit) {
-        SQLiteDatabase sd = mSQoh.getReadableDatabase();
-        mCursor = sd.query(mTablename, columns, null, null, null, null, orderby, limit);
+    //添加order_by
+    public Cursor queryData(String[] columns, String orderby) {
+        mCursor = mRB.query(mTablename, columns, null, null, null, null, orderby, null);
+        return mCursor;
+    }
+
+    //添加where条件
+    public Cursor queryData(String[] columns, String selection,
+                            String[] selectionArgs) {
+        mCursor = mRB.query(mTablename, columns, selection, selectionArgs, null, null, null, null);
+        return mCursor;
+    }
+
+    //直接查询字段
+    public Cursor queryData(String[] columns) {
+        mCursor = mRB.query(mTablename, columns, null, null, null, null, null, null);
         return mCursor;
     }
 
     //获得所有的id的最大的值,考虑其中没有值的情况
     public int getLastID() {
-        SQLiteDatabase sd = mSQoh.getReadableDatabase();
         int strid = 0;
         int row = 0;
         //查询其中的数量
-        Cursor mCursor = sd.rawQuery("select count(*) as num from " + mTablename, null);
+        mCursor = mRB.rawQuery("select count(*) as num from " + mTablename, null);
         if (mCursor.moveToFirst())
             row = mCursor.getInt(0);
-        mCursor.close();
         if (row != 0) {
-            mCursor = sd.rawQuery("select max(id) from " + mTablename, null);
+            mCursor = mRB.rawQuery("select max(id) from " + mTablename, null);
             if (mCursor.moveToFirst()) {
                 strid = mCursor.getInt(0);
             }
             mCursor.close();
         }
         return strid;
+    }
+
+    /**
+     * 1.获取当前已有项目的表名，如果为空则所有的表都需要删除
+     * 2.将数据中的所有project%表获得
+     * 3.如果
+     */
+    public void removeDirtyTable(List<MyProject> projects) {
+        List<String> delete_table = new ArrayList<>();//删除的表
+        List<String> tables = new ArrayList<>();//项目中的表
+        for (MyProject p : projects) {
+            tables.add(p.getmTableName());
+        }
+//        使用API进行查询的时候会把关键字给替换掉，所以反而不用加''来取消关键字
+        mCursor = this.queryData(new String[]{"*"}, " name like ? and type=?", new String[]{"project%", "table"});
+        while (mCursor.moveToNext()) {
+            String table_name = mCursor.getString(mCursor.getColumnIndex("name"));
+            if (!(tables.contains(table_name)))
+                delete_table.add(table_name);
+        }
+        mCursor.close();
+        if (delete_table.size() > 0) {
+            for (String table : delete_table) {
+                dropTable(table);
+            }
+        }
     }
 }
