@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/19.
- * 在这里根据穿过来的数据进行内容的填充
+ * 这是根据传过来的MyFile文件进行填充
  */
 public class FileAdapter extends BaseAdapter {
     //设置所有的显示数据

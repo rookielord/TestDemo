@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.location.GpsStatus.*;
+
 /**
  * Created by 2015032501 on 2015/10/17.
  * 用于内置GPS的连接状态
@@ -37,8 +39,9 @@ public class InnerGPSConnect implements IConnect {
     private int minTime = 1000;
     private int minDistance = 0;
     private static Handler mHandler;
+    //    private static List<Handler> mHanderList = new ArrayList<>();
     private Activity mActivity;
-    private static final String TAG="GPS_TEST";
+    private static final String TAG = "GPS_TEST";
 
     /**
      * 内置GPS的位置监听字段
@@ -48,13 +51,23 @@ public class InnerGPSConnect implements IConnect {
     /**
      * 卫星状态的监听字段
      */
-    private GpsStatus.Listener mListener;
+    private Listener mListener;
+
+
+//    public static void regiserHandler(Handler handler) {
+//        mHanderList.add(handler);
+//    }
+//
+//    public static void unRegisterHandler(Handler handler) {
+//        mHanderList.remove(handler);
+//    }
 
 
     public InnerGPSConnect(Activity activity) {
         mActivity = activity;
         mManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
     }
+
 
     public static void setmHandler(Handler mHandler) {
         InnerGPSConnect.mHandler = mHandler;
@@ -81,7 +94,7 @@ public class InnerGPSConnect implements IConnect {
      */
     @Override
     public void readMessage() {
-        if (!Const.isConnected())
+        if (!Const.IsConnected)
             return;
         mLocListener = new LocationListener() {
             //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
@@ -91,18 +104,25 @@ public class InnerGPSConnect implements IConnect {
                 String altitude = String.valueOf(location.getAltitude());
                 String latitude = String.valueOf(location.getLatitude());
                 long time = location.getTime();
+                //先判断Bundle是否存在
+                String fixnum = "0";
+                if (location.getExtras() != null) {
+                    fixnum = location.getExtras().get("satellites").toString();
+                }
                 //在有handler的情况下才进行数据传输
                 if (mHandler != null) {
-                    MyLocation loc = new MyLocation(latitude, longitude, altitude, time);
+                    MyLocation loc = new MyLocation(latitude, longitude, altitude, time, fixnum);
                     Message m1 = Message.obtain();
                     m1.what = 1;
                     m1.obj = loc;
+//                    sendMsg(m1);
                     mHandler.sendMessage(m1);
 
                     UTCDate t = new UTCDate(time);
                     Message m2 = Message.obtain();
                     m2.what = 3;
                     m2.obj = t;
+//                    sendMsg(m2);
                     mHandler.sendMessage(m2);
                 }
             }
@@ -123,14 +143,14 @@ public class InnerGPSConnect implements IConnect {
             }
         };
 
-        mListener = new GpsStatus.Listener() {
+        mListener = new Listener() {
             @Override
             public void onGpsStatusChanged(int event) {
                 switch (event) {
-                    case GpsStatus.GPS_EVENT_FIRST_FIX:
+                    case GPS_EVENT_FIRST_FIX:
                         Log.d(TAG, "卫星第一次锁定");
                         break;
-                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                    case GPS_EVENT_SATELLITE_STATUS:
                         Log.d(TAG, "卫星的状态");
                         //获取当前接收到的卫星情况
                         GpsStatus status = mManager.getGpsStatus(null);
@@ -159,10 +179,10 @@ public class InnerGPSConnect implements IConnect {
                         }
                         break;
                     //GPS定位启动
-                    case GpsStatus.GPS_EVENT_STARTED:
+                    case GPS_EVENT_STARTED:
                         Log.d(TAG, "定位启动");
                         break;
-                    case GpsStatus.GPS_EVENT_STOPPED:
+                    case GPS_EVENT_STOPPED:
                         Log.d(TAG, "定位结束");
                         break;
                 }
@@ -170,19 +190,20 @@ public class InnerGPSConnect implements IConnect {
         };
         mManager.requestLocationUpdates(mProvider, minTime, minDistance, mLocListener);
         mManager.addGpsStatusListener(mListener);
-        //这里才能算上GPS连上了
     }
 
     @Override
     public void breakConnect() {
-        if (!Const.isConnected())
+        if (!Const.IsConnected)
             return;
         if (mListener != null)
             mManager.removeGpsStatusListener(mListener);
         if (mLocListener != null)
             mManager.removeUpdates(mLocListener);
-        Const.setIsConnected(false);
-
+        Const.IsConnected = false;
+        Const.setmInfo("设备未连接");
+        Const.HasDataInfo=false;
+        Const.HasPDOP=false;
     }
 
     /**
@@ -196,7 +217,7 @@ public class InnerGPSConnect implements IConnect {
             Const.setmConnectType(Const.InnerGPSConnect);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText("内置GPS");
-            Const.setIsConnected(true);
+            Const.IsConnected = true;
             Const.setmInfo("内置GPS");
         } else {//这里是对ConnectActivity进行操作
             Toast.makeText(mActivity, "请打开GPS服务", Toast.LENGTH_SHORT).show();
@@ -204,4 +225,10 @@ public class InnerGPSConnect implements IConnect {
             mActivity.startActivityForResult(intent, Const.GPS_REQUEST);
         }
     }
+
+//    private static void sendMsg(Message msg) {
+//        for (Handler handler : mHanderList) {
+//            handler.sendMessage(msg);
+//        }
+//    }
 }

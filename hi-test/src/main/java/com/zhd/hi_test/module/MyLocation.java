@@ -96,7 +96,7 @@ public class MyLocation {
 
 
     //内置GPS传过来的数据
-    public MyLocation(String mB, String mL, String mH, long time) {
+    public MyLocation(String mB, String mL, String mH, long time,String UseSate) {
         this.mProgressB = mB;
         this.mProgressL = mL;
         this.mB = Coordinate.getDmsString(Double.valueOf(mB));
@@ -106,6 +106,7 @@ public class MyLocation {
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针
         double B = Double.valueOf(mB);
         double L = Double.valueOf(mL);
+        this.mUseSate=UseSate;
         this.mQuality = "GPS单点定位";
         if (B > 0)
             this.mDireB = "N";

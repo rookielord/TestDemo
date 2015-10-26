@@ -121,6 +121,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_Z.setText(myLocation.getmH());
                     if (!Const.HasDataInfo)
                         tv_date.setText(UTCDate.getDefaultTime());
+                    if (!Const.HasPDOP)
+                        tv_PDOP.setText("0.0");
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
                     myPoint = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
                     surveyView.setMyLocation(myPoint);
@@ -145,6 +147,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_date.setText(time.getmCurrentDate());
                     break;
                 case 4:
+                    Const.HasPDOP=true;
                     tv_PDOP.setText(msg.obj.toString());
                     break;
             }
@@ -408,15 +411,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
      * 1.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
      * 2.不再解析数据
      * 3.不再接收内置GPS的数据
+     *
+     * 注意问题：如果是在OnDestroy的情况下，在返回到MainActivity的时候不会立刻执行OnDestroy
+     * 在过一段时候才会执行，这样会导致Activity
      */
     @Override
     protected void onDestroy() {
         if (mListener != null)
             mSensorManager.unregisterListener(mListener);
-        if (surveyView != null)
-            surveyView.setMyLocation(null);
-        Infomation.setHandler(null);
-        InnerGPSConnect.setmHandler(null);
         super.onDestroy();
     }
 
@@ -424,14 +426,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image_add://直接进行数据采集
-                if (Const.isConnected()) {
+                if (Const.IsConnected) {
                     addPoint();
                     refreshPoints();
                     surveyView.invalidate();
                 }
                 break;
             case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
-                if (Const.isConnected()) {
+                if (Const.IsConnected) {
                     Intent intent = new Intent("com.zhd.addPoint.START");
                     intent.putExtra("B", tv_B.getText().toString());
                     intent.putExtra("L", tv_L.getText().toString());

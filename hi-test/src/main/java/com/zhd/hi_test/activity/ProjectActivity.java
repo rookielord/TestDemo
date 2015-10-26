@@ -258,7 +258,8 @@ public class ProjectActivity extends Activity {
         //如果名称相同则当前项目为空
         if (Const.getmProject() != null) {
             if (Const.getmProject().getmName().equals(mProject.getmName())) {
-                Const.setmProject(null);
+                Toast.makeText(this,"当前项目打开，不能删除",Toast.LENGTH_SHORT).show();
+                return;
             }
         }
         MyProject p = FileUtil.getLastProject(this);

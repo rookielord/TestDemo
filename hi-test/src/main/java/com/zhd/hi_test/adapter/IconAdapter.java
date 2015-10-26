@@ -70,7 +70,7 @@ public class IconAdapter extends BaseAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mIicon.Onclick(icon);
+                mIicon.OnIconclick(icon);
             }
         });
         return convertView;

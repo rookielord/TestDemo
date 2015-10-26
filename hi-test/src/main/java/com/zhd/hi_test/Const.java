@@ -21,7 +21,7 @@ public class Const {
     private static String mPath;
     //0为未连接;1为蓝牙连接;2为内置GPS
     private static int mConnectType = 0;
-    private static boolean IsConnected = false;
+    public static boolean IsConnected = false;
     private static double mheight = 0;
     //设置返回是否允许启动蓝牙
     public static final int REQUEST_CODE = 1;
@@ -37,7 +37,8 @@ public class Const {
     public static boolean HasDataInfo=false;
     public static final String PFNAME = "config";//SharePreference文件名
     public static final String ISUPDATA = "updata";//是否检查版本更新
-    public static final String SAFEPASSWORD = "password";//设置我的手机防盗密码
+    //判断当前是否有PDOP数据
+    public static boolean HasPDOP=false;
 
     public static IConnect mConnect;
 
@@ -79,14 +80,6 @@ public class Const {
 
     public static void setmConnectType(int mConnectType) {
         Const.mConnectType = mConnectType;
-    }
-
-    public static boolean isConnected() {
-        return IsConnected;
-    }
-
-    public static void setIsConnected(boolean isConnected) {
-        IsConnected = isConnected;
     }
 
     public static double getMheight() {

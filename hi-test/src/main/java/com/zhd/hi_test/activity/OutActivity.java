@@ -108,7 +108,7 @@ public class OutActivity extends Activity implements View.OnClickListener {
                     for (int k = 0; k < cursor.getColumnCount(); k++) {
                         sb.append(cursor.getString(k) + ",");
                     }
-                    sb.substring(0,sb.length()-2);//把“，”删除
+                    sb.substring(0,sb.length()-3);//把“，”删除
                     sb.append("\n");
                 }
             }

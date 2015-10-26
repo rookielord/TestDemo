@@ -15,33 +15,45 @@ import com.zhd.hi_test.activity.MainActivity;
 import com.zhd.hi_test.module.UpdateBean;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by 2015032501 on 2015/10/20.
  */
 public class LoginHelper {
-    private static LoginHelper login;//单例模式
-    private Activity context;
-    private UpdateBean bean;
+    private static final int NETWORKERROR = 1;
+    private static final int CONNETERROR = 2;
+    private static final int UPDATA = 3;//更新
+    private static final int URLERROR = 4;//URL地址解析出错
+    private static final int SERVICEERROR = 5;//服务器或资源没有找到
+    private static final int DOWNLOADERROR = 6;//下载失败
+    private static final int XmlERROR = 7;
+    private static final int ENTER_MAIN = 8;
+    private static LoginHelper mLogin;//单例模式
+    //主要是用于弹出Toast
+    private Activity mContext;
+    //升级对象
+    private UpdateBean mBean;
 
-    private final int UPDATA = 11;//更新
-    private final int CONNECTERROR = 12;//连接服务器失败
-    private final int SERVICEERROR = 13;//服务器出错
-    private final int DOWNLOADERROR = 14;//下载失败
+
+    //弹出的升级对话框
     private ProgressDialog pd;
 
     private LoginHelper(Activity context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     //获得单例
     public static LoginHelper getInstance(Activity context) {
-        if (login == null) {
-            login = new LoginHelper(context);
+        if (mLogin == null) {
+            mLogin = new LoginHelper(context);
         }
-        return login;
+        return mLogin;
     }
 
     /**
@@ -57,62 +69,80 @@ public class LoginHelper {
     }
 
     /**
-     * 访问服务器
+     * 访问服务器，并让连接过程最少保持2s,如果不满2s则增加到2s,超过2s则不管
      */
     protected void connect() {
-        String apkurl = context.getResources().getString(R.string.apkurl);
-        Message msg = new Message();
+        String urlsource = mContext.getResources().getString(R.string.apkurl);
+        Message msg = Message.obtain();
+        long starttime = System.currentTimeMillis();
         try {
-            URL url = new URL(apkurl);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setConnectTimeout(5000);
-            if (con.getResponseCode() == 200) {
-                //连接成功
-                bean = XmlParseUtil.getUpdataInfo(con.getInputStream());
-                if (bean != null) {
-                    if (bean.getVersion().equals(ViewHelper.getVersion(context))) {
-                        //无需更新,已经是最新版本,进入主界面
-                        enterMain();
-                    } else {
-                        //有新版本,需要更新,弹开提示
-                        msg.what = UPDATA;
-                        handler.sendMessage(msg);
+            URL url = new URL(urlsource);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setRequestMethod("GET");
+            int resultCode = conn.getResponseCode();
+            if (resultCode == 200) {//有返回值
+                InputStream is = conn.getInputStream();
+                mBean = XmlParseUtil.getUpdataInfo(is);
+                if (mBean != null) {//版本相同，进入主界面
+                    if (ViewHelper.getVersion(mContext).equals(mBean.getVersion())) {
+                        msg.what = ENTER_MAIN;
+                    } else {//不相同，弹出升级窗口
+
                     }
+                } else {//XML解析错误
+                    msg.what = XmlERROR;
                 }
-            } else {
-                //连接失败,服务器出错
-                msg.what = SERVICEERROR;
-                handler.sendMessage(msg);
+            } else {//连接错误
+                msg.what = CONNETERROR;
             }
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {//URL地址错误
             e.printStackTrace();
-            //服务器连不上
-            msg.what = CONNECTERROR;
-            handler.sendMessage(msg);
+            msg.what = URLERROR;
+
+        } catch (IOException e) {//网络错误
+            e.printStackTrace();
+            msg.what = NETWORKERROR;
+        } finally {
+            mHandler.sendMessage(msg);
         }
     }
 
-
-    private Handler handler = new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
+                case ENTER_MAIN:
+                    enterMain();
+                    break;
+                case NETWORKERROR:
+                    Toast.makeText(mContext, "网络错误", Toast.LENGTH_SHORT).show();
+                    enterMain();
+                    break;
+                case CONNETERROR:
+                    Toast.makeText(mContext, "互联网连接错误", Toast.LENGTH_SHORT).show();
+                    enterMain();
+                    break;
                 case UPDATA://进行更新提示
                     updateTipDialog();
                     break;
-                case CONNECTERROR:
-                    Toast.makeText(context, "连接服务器失败", Toast.LENGTH_SHORT).show();
+                case URLERROR:
+                    Toast.makeText(mContext, "地址错误", Toast.LENGTH_SHORT).show();
                     enterMain();
                     break;
                 case SERVICEERROR:
-                    Toast.makeText(context, "服务器出错", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "服务器出错", Toast.LENGTH_SHORT).show();
                     enterMain();
                     break;
                 case DOWNLOADERROR:
-                    Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "下载失败", Toast.LENGTH_SHORT).show();
                     break;
+                case XmlERROR:
+                    Toast.makeText(mContext, "文档解析错误", Toast.LENGTH_SHORT).show();
+                    enterMain();
+                    break;
+
             }
             super.handleMessage(msg);
         }
@@ -122,18 +152,18 @@ public class LoginHelper {
      * 进入主界面
      */
     private void enterMain() {
-        Intent intent = new Intent(context, MainActivity.class);
-        context.startActivity(intent);
-        context.finish();
+        Intent intent = new Intent(mContext, MainActivity.class);
+        mContext.startActivity(intent);
+        mContext.finish();
     }
 
     /**
      * 提示用户升级
      */
     protected void updateTipDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle("升级提示");
-        builder.setMessage(bean.getDes());
+        builder.setMessage(mBean.getDes());
         builder.setPositiveButton("升级", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -155,7 +185,7 @@ public class LoginHelper {
      */
     protected void updateApk() {
         //在下载的时候,显示一个进度条:动画  下载了多少
-        pd = new ProgressDialog(context);
+        pd = new ProgressDialog(mContext);
         pd.setTitle("正在下载...");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.show();
@@ -164,14 +194,14 @@ public class LoginHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                File file = DownloadHelper.getApkFile(bean.getURL(), pd);
+                File file = DownloadHelper.getApkFile(mBean.getURL(), pd);
                 //如果当前获取文件显示下载出错
                 pd.dismiss();
                 if (file == null) {
                     //下载失败
                     Message msg = new Message();
                     msg.what = DOWNLOADERROR;
-                    handler.sendMessage(msg);
+                    mHandler.sendMessage(msg);
 
                 } else {
                     //进行安装
@@ -188,8 +218,8 @@ public class LoginHelper {
                     intent.setAction("android.intent.action.VIEW");
                     intent.addCategory("android.intent.category.DEFAULT");
                     intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-                    context.startActivity(intent);
-                    context.finish();
+                    mContext.startActivity(intent);
+                    mContext.finish();
                 }
             }
         }).start();
@@ -198,7 +228,7 @@ public class LoginHelper {
     }
 
     public void destory() {
-        login = null;
+        mLogin = null;
     }
 
 }

@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.MyPagerAdapter;
 import com.zhd.hi_test.interfaces.IConnect;
+import com.zhd.hi_test.module.BluetoothConnect;
 import com.zhd.hi_test.module.InnerGPSConnect;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyProject;
@@ -29,6 +31,7 @@ import com.zhd.hi_test.util.FileUtil;
 import com.zhd.hi_test.util.Infomation;
 
 import java.util.ArrayList;
+import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 
 import static android.support.v4.view.ViewPager.*;
@@ -52,11 +55,13 @@ public class MainActivity extends Activity {
     //include上面的内容
     TextView tv_name, tv_sate, tv_use_sate, tv_result, tv_age_time, tv_connect, tv_PDOP;
     ImageView image_solution;
-    private List<TextView> tv_list;
+    List<TextView> tv_list;
+    LinearLayout ll_satellite;
     //连点两次退出
     private long mFirsttime = 0;
     private static final int INTERVAL = 2000;
 
+    //在其它地方退出后，会将对应中清除，所以在bluetooth中是没有handler中
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -67,6 +72,8 @@ public class MainActivity extends Activity {
                     tv_result.setText(myLocation.getmQuality());
                     tv_use_sate.setText(myLocation.getmUseSate());
                     tv_age_time.setText(myLocation.getmAge());
+                    if (!Const.HasPDOP)
+                        tv_PDOP.setText("0.0");
                     setSolutionImage(myLocation.getmQuality());
                     break;
                 case 2:
@@ -82,6 +89,7 @@ public class MainActivity extends Activity {
                     }
                     break;
                 case 4:
+                    Const.HasPDOP = true;
                     tv_PDOP.setText(msg.obj.toString());
                     break;
             }
@@ -131,7 +139,6 @@ public class MainActivity extends Activity {
         initTextView();
         initPagerViewer();
         initInfo();
-
     }
 
     /**
@@ -144,7 +151,7 @@ public class MainActivity extends Activity {
         } else {
             tv_name.setText("未选择项目");
         }
-        if (Const.isConnected()) {//只有当前是连接状态才发送hanlder
+        if (Const.IsConnected) {//只有当前是连接状态才发送hanlder
             if (Const.getmConnectType() == Const.BlueToothConncet) {
                 Infomation.setHandler(mHandler);
                 tv_connect.setText("蓝牙连接");
@@ -153,11 +160,13 @@ public class MainActivity extends Activity {
                 tv_connect.setText("内置GPS连接");
             }
         } else {
+            tv_result.setText("无解");
             tv_connect.setText("仪器未连接");
             image_solution.setImageResource(R.mipmap.ic_solution_none);
             tv_age_time.setText("0.0");
             tv_use_sate.setText("0");
             tv_sate.setText("0");
+            tv_PDOP.setText("0.0");
         }
     }
 
@@ -178,8 +187,16 @@ public class MainActivity extends Activity {
         tv_use_sate = (TextView) findViewById(R.id.tv_use_sate);
         tv_age_time = (TextView) findViewById(R.id.tv_age_time);
         tv_connect = (TextView) findViewById(R.id.tv_connect);
-        tv_PDOP= (TextView) findViewById(R.id.tv_PDOP);
+        tv_PDOP = (TextView) findViewById(R.id.tv_PDOP);
         image_solution = (ImageView) findViewById(R.id.image_solution);
+        ll_satellite = (LinearLayout) findViewById(R.id.ll_satellite);
+        ll_satellite.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, GPSActivity.class);
+                startActivity(intent);
+            }
+        });
         t1 = (TextView) findViewById(R.id.text1);
         t2 = (TextView) findViewById(R.id.text2);
         t3 = (TextView) findViewById(R.id.text3);
@@ -232,7 +249,6 @@ public class MainActivity extends Activity {
      */
     public class MyOnPageChangeListener implements OnPageChangeListener {
 
-
         @Override
         public void onPageSelected(int arg0) {
             setTextBackgroundColor();
@@ -257,11 +273,9 @@ public class MainActivity extends Activity {
      */
     public class MyOnClickListener implements OnClickListener {
         private int index = 0;
-
         public MyOnClickListener(int i) {
             index = i;
         }
-
         @Override
         public void onClick(View v) {
             setTextBackgroundColor();
@@ -297,7 +311,6 @@ public class MainActivity extends Activity {
      */
     @Override
     protected void onResume() {
-        Log.d("MainActivity", "onResume");
         super.onResume();
         initInfo();
     }

@@ -10,12 +10,16 @@ import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.UTCDate;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by 2015032501 on 2015/9/23.
  * 对所获得的字符串进行进行解析并将值传给接口
+ * <p/>
+ * 会遇到的问题：1.如果项目mhanler已经为空，还在解析的数据通过handler发送就会出现问题。
+ * 解决：添加同步锁
  */
 public class Infomation {
 
@@ -39,6 +43,11 @@ public class Infomation {
     //用来获取对应的字段
     private static Matcher mMacher;
 
+    /**
+     * 加
+     *
+     * @param mInputMsg
+     */
     public static void setmInputMsg(String mInputMsg) {
         if (mHandler == null)
             return;
@@ -57,8 +66,8 @@ public class Infomation {
         while (mMacher.find()) {
             getTimeInfo(mMacher.group());
         }
-        mMacher=GPGSA_pattern.matcher(mInputMsg);
-        while (mMacher.find()){
+        mMacher = GPGSA_pattern.matcher(mInputMsg);
+        while (mMacher.find()) {
             getPDOP(mMacher.group());
         }
     }
@@ -67,10 +76,10 @@ public class Infomation {
         String[] info = group.split(",");
         if (info.length == 1 || info[1].equals(""))
             return;
-        String PDOP=info[info.length-2];
-        Message m=Message.obtain();
-        m.obj=PDOP;
-        m.what=4;
+        String PDOP = info[info.length - 2];
+        Message m = Message.obtain();
+        m.obj = PDOP;
+        m.what = 4;
         mHandler.sendMessage(m);
     }
 
@@ -126,7 +135,7 @@ public class Infomation {
         else if (str_type.equals("$BDGSV"))
             type = Satellite.BD;
         //4.获取对应数据创建卫星对象,注意空值。需要对空值进行判断
-        Satellite s = null;
+        Satellite s;
         for (int i = 0; i < num; i++) {
             int loc = 4 * (i + 1);
             //1.4创建卫星数据传入list集合中
@@ -148,7 +157,6 @@ public class Infomation {
             m.arg1 = 2;//表示是IRTK的卫星数据
             mHandler.sendMessage(m);
             mSatellites.clear();
-            //然后清空其中的东西
         }
     }
 

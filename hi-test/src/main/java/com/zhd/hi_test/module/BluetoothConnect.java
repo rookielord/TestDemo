@@ -85,7 +85,7 @@ public class BluetoothConnect implements IConnect {
             in = mSocket.getInputStream();
             out = mSocket.getOutputStream();
             Const.setmInfo(mAddress);
-            Const.setIsConnected(true);
+            Const.IsConnected=true;
             Const.setmConnectType(Const.BlueToothConncet);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
@@ -94,6 +94,8 @@ public class BluetoothConnect implements IConnect {
             Toast.makeText(mActivity, "连接成功", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Const.setmInfo("设备未连接");
+            //清空之前得到的mDevice
+            mDevice=null;
             e.printStackTrace();
             Toast.makeText(mActivity, "连接失败", Toast.LENGTH_SHORT).show();
         }
@@ -122,7 +124,7 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void sendMessage() {
-        if (!Const.isConnected())
+        if (!Const.IsConnected)
             return;
         try {
             out.write(TrimbleOrder.CLOSE_COM1);
@@ -147,7 +149,7 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void readMessage() {
-        if (!Const.isConnected())
+        if (!Const.IsConnected)
             return;
         new Thread(new Runnable() {
             @Override
@@ -179,8 +181,9 @@ public class BluetoothConnect implements IConnect {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Const.setIsConnected(false);
+                    Const.IsConnected=false;
                     Const.setmConnectType(0);
+                    Const.setmInfo("设备未连接");
                     mHandler.sendEmptyMessage(1);
                 }
             }
@@ -192,8 +195,10 @@ public class BluetoothConnect implements IConnect {
      */
     @Override
     public void breakConnect() {
-        if (!Const.isConnected())
+        if (!Const.IsConnected)
             return;
+        Const.HasDataInfo=false;
+        Const.HasPDOP=false;
         isRead = false;
         if (in != null)
             try {

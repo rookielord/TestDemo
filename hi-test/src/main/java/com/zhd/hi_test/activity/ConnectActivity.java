@@ -54,13 +54,13 @@ public class ConnectActivity extends Activity {
         btn_connect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean IsConnected = Const.isConnected();
-                if (!IsConnected) {
+                if (!
+                        Const.IsConnected) {
                     startConnect();
                 } else {
                     mConnect.breakConnect();
                     btn_connect.setText("连接");
-                    Const.setIsConnected(false);
+                    Const.IsConnected=false;
                     Const.setmConnectType(0);
                     Const.setmInfo("设备未连接");
                     tv_content.setText("设备未连接");
@@ -132,8 +132,7 @@ public class ConnectActivity extends Activity {
 
     private void getDefaultInfo() {
         int ConnectType = Const.getmConnectType();
-        boolean IsConnected = Const.isConnected();
-        if (IsConnected) {
+        if (Const.IsConnected) {
             btn_connect.setText("断开");
             sp_way.setEnabled(false);
             sp_device.setEnabled(false);

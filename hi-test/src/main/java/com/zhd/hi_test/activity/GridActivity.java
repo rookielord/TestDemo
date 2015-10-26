@@ -69,7 +69,7 @@ public class GridActivity extends Activity {
         }
         myAdapter.setmIicon(new OnIconChangeListener() {
             @Override
-            public void Onclick(Icon icon) {
+            public void OnIconclick(Icon icon) {
                 startActivity(icon.getIcon_intent());
             }
         });

@@ -93,20 +93,15 @@ public class GPSActivity extends Activity {
         }
     }
 
-    //
     @Override
     protected void onStop() {
-        Log.d(TAG,"设置为空");
-        InnerGPSConnect.setmHandler(null);
         super.onStop();
     }
 
     private void GPSinit() {
         mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mProviders = mManager.getProviders(true);
-        if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(this, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
-        } else {
+        if (!mProviders.contains(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent("com.zhd.connect.START");
             startActivity(intent);
