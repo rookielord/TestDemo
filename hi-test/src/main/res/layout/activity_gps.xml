@@ -3,111 +3,171 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/gpsmapshape">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="当前连接状态"
-            style="@style/GPSinfo"/>
-        <TextView
-            android:id="@+id/tv_connect"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gpsmapshape"
+        android:orientation="vertical">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:text="仪器尚未连接"
-            android:gravity="center"/>
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/GPSinfo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="当前连接状态" />
+
+            <TextView
+                android:id="@+id/tv_connect"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="仪器尚未连接" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
     <com.zhd.hi_test.ui.StarView
         android:id="@+id/my_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#ffc4c4c4"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="#ffc4c4c4" />
 
     <LinearLayout
-
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/gpsmapshape">
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:background="@drawable/gpsmapshape"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
             android:orientation="horizontal">
 
             <TextView
+                style="@style/GPSinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="卫星数量:"
-                style="@style/GPSinfo"/>
-
-            <TextView
-                android:id="@+id/tv_satellite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="当前位置坐标B:"
-                style="@style/GPSinfo"/>
+                android:text="B:" />
 
             <TextView
                 android:id="@+id/tv_LocB"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp" />
 
             <TextView
+                style="@style/GPSinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前位置坐标L:"
-                style="@style/GPSinfo"/>
+                android:text="L:" />
 
             <TextView
                 android:id="@+id/tv_LocL"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp" />
 
             <TextView
+                style="@style/GPSinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前位置坐标H:"
-                style="@style/GPSinfo"/>
+                android:text="H:" />
 
             <TextView
                 android:id="@+id/tv_locH"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/ll_satellite"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/GPSinfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="卫星数量:" />
+
+                <TextView
+                    android:id="@+id/tv_satellite"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/GPSinfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="PDOP" />
+
+                <TextView
+                    android:id="@+id/tv_PDOP"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <Button
+                    android:id="@+id/btn_set_angle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:text="设置" />
+
+                <TextView
+                    android:id="@+id/tv_elec"
+                    style="@style/GPSinfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="截止高度角(°)" />
+
+                <EditText
+                    android:id="@+id/et_elva_angel"
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_elec"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/edit_style"
+                    android:inputType="number" />
+
+
+            </RelativeLayout>
+
+
         </LinearLayout>
     </LinearLayout>
 

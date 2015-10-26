@@ -37,6 +37,8 @@ public class StarView extends View {
     //画卫星图的中心位置
     private int mX;
     private int mY;
+    //画信号的颜色集合
+    int[] colors = new int[]{Color.RED, Color.YELLOW, Color.parseColor("#FFCDBE3F")};
 
     public StarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -203,6 +205,11 @@ public class StarView extends View {
         }
     }
 
+    /**
+     * 包括整个黑色的圆球和图示
+     *
+     * @param canvas
+     */
     private void drawStarbackground(Canvas canvas) {
         mPaint.setColor(Color.BLACK);
         mPaint.setStyle(Paint.Style.FILL);
