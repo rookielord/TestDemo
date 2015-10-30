@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/BluetoothText"
-        android:text="@string/titile_item"
+        android:text="@string/title_item"
        />
 
     <LinearLayout

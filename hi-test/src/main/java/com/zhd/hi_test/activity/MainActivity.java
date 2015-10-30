@@ -5,12 +5,10 @@ import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.GpsSatellite;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,17 +19,14 @@ import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.MyPagerAdapter;
 import com.zhd.hi_test.interfaces.IConnect;
-import com.zhd.hi_test.module.BluetoothConnect;
 import com.zhd.hi_test.module.InnerGPSConnect;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyProject;
 import com.zhd.hi_test.module.Satellite;
-import com.zhd.hi_test.module.UTCDate;
 import com.zhd.hi_test.util.FileUtil;
 import com.zhd.hi_test.util.Infomation;
 
 import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 
 import static android.support.v4.view.ViewPager.*;
@@ -77,16 +72,8 @@ public class MainActivity extends Activity {
                     setSolutionImage(myLocation.getmQuality());
                     break;
                 case 2:
-                    switch (msg.arg1) {
-                        case 1://内置GPS的数据
-                            List<GpsSatellite> satellites = (ArrayList<GpsSatellite>) msg.obj;
-                            tv_sate.setText(String.valueOf(satellites.size()));
-                            break;
-                        case 2://IRTK的数据
-                            List<Satellite> satellites1 = (List<Satellite>) msg.obj;
-                            tv_sate.setText(String.valueOf(satellites1.size()));
-                            break;
-                    }
+                    List<Satellite> satellites = (List<Satellite>) msg.obj;
+                    tv_sate.setText(String.valueOf(satellites.size()));
                     break;
                 case 4:
                     Const.HasPDOP = true;
@@ -269,7 +256,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * 头标点击监听
+     * 点击更改paper中的值
      */
     public class MyOnClickListener implements OnClickListener {
         private int index = 0;

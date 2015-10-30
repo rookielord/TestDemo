@@ -27,29 +27,20 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:textSize="12sp"
                 android:text="仪器尚未连接" />
         </LinearLayout>
     </LinearLayout>
-
-    <com.zhd.hi_test.ui.StarView
-        android:id="@+id/my_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_weight="1"
-        android:background="#ffc4c4c4" />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_height="wrap_content"
         android:background="@drawable/gpsmapshape"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -62,7 +53,8 @@
                 android:id="@+id/tv_LocB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp" />
+                android:layout_weight="1"
+                android:textSize="12sp" />
 
             <TextView
                 style="@style/GPSinfo"
@@ -74,7 +66,8 @@
                 android:id="@+id/tv_LocL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp" />
+                android:layout_weight="1"
+                android:textSize="12sp" />
 
             <TextView
                 style="@style/GPSinfo"
@@ -85,13 +78,14 @@
             <TextView
                 android:id="@+id/tv_locH"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="40dp">
 
             <LinearLayout
                 android:id="@+id/ll_satellite"
@@ -110,7 +104,8 @@
                 <TextView
                     android:id="@+id/tv_satellite"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:gravity="center"/>
             </LinearLayout>
 
             <LinearLayout
@@ -130,7 +125,7 @@
                     android:id="@+id/tv_PDOP"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center" />
+                    android:gravity="center"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -138,16 +133,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
 
-                <Button
-                    android:id="@+id/btn_set_angle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:text="设置" />
-
                 <TextView
-                    android:id="@+id/tv_elec"
+                    android:id="@+id/tv_ele_mask"
                     style="@style/GPSinfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -155,15 +142,25 @@
                     android:text="截止高度角(°)" />
 
                 <EditText
-                    android:id="@+id/et_elva_angel"
-                    android:layout_width="70dp"
+                    android:id="@+id/et_ele_angel"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_elec"
+                    android:layout_below="@id/tv_ele_mask"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="5dp"
                     android:background="@drawable/edit_style"
-                    android:inputType="number" />
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:textSize="12sp"
+                    android:layout_alignParentBottom="true"/>
 
+                <TextView
+                    android:id="@+id/tv_set_angle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/et_ele_angel"
+                    android:text="设置"
+                    style="@style/GPSLayout1_Click"
+                    android:layout_alignParentBottom="true"/>
 
             </RelativeLayout>
 
@@ -171,4 +168,38 @@
         </LinearLayout>
     </LinearLayout>
 
+    <com.zhd.hi_test.ui.MyViewPaper
+        android:id="@+id/vp_satellite"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/ll_gps_title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            style="@style/GPSTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="#FFFFB265"
+            android:background="#FFA3A3A3"
+            android:text="星空图" />
+
+        <TextView
+            style="@style/GPSTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="状态" />
+
+        <TextView
+            style="@style/GPSTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="卫星信息" />
+    </LinearLayout>
 </LinearLayout>

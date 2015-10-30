@@ -64,11 +64,10 @@ import java.util.List;
 public class SurveyActivity extends Activity implements OnClickListener {
 
     //控件
-    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_PDOP, tv_age, tv_solution,tv_usesate;
+    TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_PDOP, tv_age, tv_solution, tv_usesate;
     Button btn_add;
     ImageView image_add, image_zoom_in, image_zoom_out,
-            image_zoom_center, image_zoom_all, image_compass
-            ,image_baidumap;
+            image_zoom_center, image_zoom_all, image_compass, image_baidumap;
     LinearLayout ll_part1, ll_part2, ll_layout1;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
@@ -130,16 +129,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     surveyView.invalidate();
                     break;
                 case 2:
-                    switch (msg.arg1) {
-                        case 1://内置GPS的数据
-                            List<GpsSatellite> satellites = (ArrayList<GpsSatellite>) msg.obj;
-                            tv_satellite.setText(String.valueOf(satellites.size()));
-                            break;
-                        case 2://IRTK的数据
-                            List<Satellite> satellites1 = (List<Satellite>) msg.obj;
-                            tv_satellite.setText(String.valueOf(satellites1.size()));
-                            break;
-                    }
+                    List<Satellite> satellites1 = (List<Satellite>) msg.obj;
+                    tv_satellite.setText(String.valueOf(satellites1.size()));
                     break;
                 case 3://如果没有日期过来的话，如果没有解析蓝牙的GPZDA数据时，其仍然不会有更新
                     Const.HasDataInfo = true;
@@ -147,7 +138,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     tv_date.setText(time.getmCurrentDate());
                     break;
                 case 4:
-                    Const.HasPDOP=true;
+                    Const.HasPDOP = true;
                     tv_PDOP.setText(msg.obj.toString());
                     break;
             }
@@ -280,10 +271,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
         image_zoom_in = (ImageView) findViewById(R.id.image_zoom_in);
         image_zoom_out = (ImageView) findViewById(R.id.image_zoom_out);
         image_zoom_all = (ImageView) findViewById(R.id.image_zoom_all);
-        image_baidumap= (ImageView) findViewById(R.id.image_baidumap);
+        image_baidumap = (ImageView) findViewById(R.id.image_baidumap);
         image_baidumap.setOnClickListener(this);
-        //保证画面不会黑屏
-//        image_compass.setKeepScreenOn(true);
         btn_add = (Button) findViewById(R.id.btn_add_point);
         image_add.setOnClickListener(this);
         image_zoom_in.setOnClickListener(this);
@@ -313,17 +302,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
         tv_satellite = (TextView) view2.findViewById(R.id.tv_satellite);
         tv_PDOP = (TextView) view2.findViewById(R.id.tv_PDOP);
         tv_age = (TextView) view2.findViewById(R.id.tv_age);
-        tv_usesate= (TextView) view2.findViewById(R.id.tv_usesate);
+        tv_usesate = (TextView) view2.findViewById(R.id.tv_usesate);
         mViews.add(view1);
         mViews.add(view2);
         //设置填充内容，以及页面改变的监听
         viewPager.setAdapter(mAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
             //选中页面时，改变下面点
             @Override
             public void onPageSelected(int position) {
@@ -332,7 +318,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
             }
         });
     }
@@ -411,7 +396,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
      * 1.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
      * 2.不再解析数据
      * 3.不再接收内置GPS的数据
-     *
+     * <p>
      * 注意问题：如果是在OnDestroy的情况下，在返回到MainActivity的时候不会立刻执行OnDestroy
      * 在过一段时候才会执行，这样会导致Activity
      */
@@ -477,7 +462,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 }
                 break;
             case R.id.image_baidumap:
-                Intent intent=new Intent("com.zhd.baidumap.START");
+                Intent intent = new Intent("com.zhd.baidumap.START");
                 startActivity(intent);
                 break;
         }

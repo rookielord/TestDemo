@@ -34,6 +34,7 @@ public class Infomation {
     private static Pattern GPZDA_pattern = Pattern.compile("\\$GPZDA.*?(?=\\*)");
     private static Pattern GPGSA_pattern = Pattern.compile("(\\$GNGSA|\\$GPGSA).*?(?=\\*)");
 
+
     //存放对应的数据
     private static ArrayList<Satellite> mSatellites = new ArrayList<>();
     private static MyLocation myLocation;
@@ -42,10 +43,7 @@ public class Infomation {
     private static Object mTemps;
     //用来获取对应的字段
     private static Matcher mMacher;
-
     /**
-     * 加
-     *
      * @param mInputMsg
      */
     public static void setmInputMsg(String mInputMsg) {
@@ -154,7 +152,6 @@ public class Infomation {
             Message m = Message.obtain();
             m.obj = mTemps;
             m.what = 2;
-            m.arg1 = 2;//表示是IRTK的卫星数据
             mHandler.sendMessage(m);
             mSatellites.clear();
         }

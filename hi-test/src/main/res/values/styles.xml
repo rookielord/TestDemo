@@ -54,10 +54,24 @@
     </style>
     <!-- GPS地图显示-->
     <style name="GPSinfo">
-        <item name="android:textSize">15sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">10sp</item>
         <item name="android:textColor">#000</item>
-        <item name="android:padding">5dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+    <style name="GPSTitle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/gps_title</item>
+    </style>
+    <!-- GPS layout2-->
+    <style name="GPSLayout2_Text" parent="ManagePointItem">
+        <item name="android:minHeight">30dp</item>
+    </style>
+    <!-- GPS layout1-->
+    <style name="GPSLayout1_Click" parent="AddPointTitle">
+        <item name="android:background">@drawable/gps_layout1_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_marginLeft">4dp</item>
     </style>
     <!-- 点位信息显示-->
     <style name="ManageTitle">
@@ -69,6 +83,7 @@
     <style name="ManageInfo">
         <item name="android:textColor">#FFF</item>
         <item name="android:background">@drawable/manage_title_item</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="ManagePointItem">
@@ -130,5 +145,6 @@
     <style name="custom_title_text">
         <item name="android:gravity">center</item>
     </style>
+
 
 </resources>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.zhd.hi_test.ui.StarView
+            android:id="@+id/my_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffc4c4c4" />
+
+        <com.zhd.hi_test.ui.LegendView
+            android:layout_width="100dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            />
+        <SeekBar
+            android:id="@+id/sb_ele_angel"
+            android:layout_width="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_height="wrap_content"
+            android:thumb="@mipmap/thum"
+            android:progressDrawable="@drawable/seekbar_img"
+            android:max="90"
+            android:progress="90"
+            android:minHeight="10dp"
+            android:maxHeight="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/sb_ele_angel"
+            android:layout_alignParentBottom="true"
+            android:text="设置高度角"
+            android:textSize="12sp"
+            android:textColor="#000"
+            android:layout_marginBottom="15dp"/>
+    </RelativeLayout>
+</LinearLayout>

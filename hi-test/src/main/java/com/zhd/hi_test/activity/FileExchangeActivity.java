@@ -41,7 +41,6 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
     EditText et_out_name;
     Button btn_confirm;
     GridView gv_file_list;
-    RadioGroup rg_type;
     //当前的路径
     private static File mCurfile;
     //用于填充gridview的数据源

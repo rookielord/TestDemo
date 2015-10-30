@@ -11,10 +11,13 @@ import android.util.AttributeSet;
 import android.view.View;
 
 
+import com.zhd.hi_test.Const;
 import com.zhd.hi_test.module.Satellite;
 import com.zhd.hi_test.module.StarPoint;
 import com.zhd.hi_test.util.Coordinate;
+import com.zhd.hi_test.util.ViewUtil;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +30,7 @@ public class StarView extends View {
     private Paint mPaint = new Paint();
     //设置需要画的点的集合,用一个listView就可以了，每次画完后清空
     List<StarPoint> mPoints = new ArrayList<>();
+    //
     //画背景的圆的大小,这里是写死的需要重新弄
     private static int mRadius;
     //屏幕的宽和高
@@ -37,8 +41,15 @@ public class StarView extends View {
     //画卫星图的中心位置
     private int mX;
     private int mY;
-    //画信号的颜色集合
-    int[] colors = new int[]{Color.RED, Color.YELLOW, Color.parseColor("#FFCDBE3F")};
+    //卫星的高度角，默认为整个平面即90
+    private float mElev_mask = 90;
+    //符合高度角的卫星集合
+    List<Satellite> satellites = new ArrayList<>();
+    //GPS和GLONASS和BD和SBAS的值
+    int GPS_NUM = 0;
+    int GLONASS_NUM = 0;
+    int BD_NUM = 0;
+    int SBAS_NUM = 0;
 
     public StarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,93 +67,41 @@ public class StarView extends View {
      * 传入的卫星的信息数据，转化为屏幕上坐标点的数据
      *
      * @param Satellites 传入的卫星数据，因为分为内置GPS和IRTK传过来的自定义类型的卫星
-     * @param infoType   传入卫星数据的种类，1:内置GPS的数据，2:IRTK自定义类的数据
      */
-    public void SetSatetllite(List<? extends Object> Satellites, int infoType) {
-        //如果是内置GPS的数据类型
-        if (infoType == 1) {
-            for (Object sa : Satellites) {
-                //转化对象
-                GpsSatellite satellite = (GpsSatellite) sa;
-                //获得高度角
-                float elevation = satellite.getElevation();
-                //获得方位角
-                float azimuth = satellite.getAzimuth();
-                //计算当前位置距离圆心的距离,根据平分获得
-                float r2 = mRadius * ((90.0f - elevation) / 90.0f);
-                //以(mRadius,mRadius)为参考点，然后根据方位角位置进行判断所在象限，然后对X,Y进行修改
-                //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
-                double radian = Coordinate.degreeToRadian(360 - azimuth + 90);
-                //这个就是转换坐标,就以第一象限作为参考
-                double x = mX + Math.cos(radian) * r2;//x方向上的增量
-                double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
-                //获得x,y方向上的变化后的值
-                //获得卫星的信噪比，并分级绘制
-                int snr = (int) satellite.getSnr();
-                int level = snrToSignalLevel(snr);
-                //卫星编号
-                int prn = satellite.getPrn();
-                //卫星种类
-                int type = getSatelliteType(prn);
+    public void SetSatetllite(List<Satellite> Satellites) {
+        satellites.clear();
+        for (Satellite satellite : Satellites) {
+            //获得高度角
+            float elevation = satellite.getElevation();
+            //高度截止角
+            float eleva_mask = 90 - elevation;
+            //获得方位角
+            float azimuth = satellite.getAzimuth();
+            //计算当前位置距离圆心的距离,根据平分获得
+            double r2 = mRadius * ((90.0f - elevation) / 90.0f);
+            //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
+            double radian = Coordinate.degreeToRadian(360 - azimuth + 90);
+            //这个就是转换坐标,就以第一象限作为参考
+            double x = mX + Math.cos(radian) * r2;//x方向上的增量
+            double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
+            //获得x,y方向上的变化后的值
+            //获得卫星的信噪比，并分级绘制
+            float snr = satellite.getSnr();
+            int level = ViewUtil.snrToSignalLevel(snr);
+            //卫星编号
+            int prn = satellite.getPrn();
+            //这里获得卫星的种类
+            int type = satellite.getType();
+            //只有小于高度截止角才能被添加进去
+            if (eleva_mask < mElev_mask) {
+                satellites.add(satellite);
                 StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, prn, level, type);
                 mPoints.add(p);
             }
-        } else if (infoType == 2) {//从IRTK那里传来的数据
-            for (Object sa : Satellites) {
-                //转化对象
-                Satellite satellite = (Satellite) sa;
-                //获得高度角
-                float elevation = Float.valueOf(satellite.getmElevation());
-                //获得方位角
-                float azimuth = Float.valueOf(satellite.getmAzimuth());
-                //计算当前位置距离圆心的距离,根据平分获得
-                double r2 = mRadius * ((90.0f - elevation) / 90.0f);
-                //以(mRadius,mRadius)为参考点，然后根据方位角位置进行判断所在象限，然后对X,Y进行修改
-                //需要进行修改为平面直角坐标系的角度进行转化,转化为弧度
-                double radian = Coordinate.degreeToRadian(360 - azimuth + 90);
-                //这个就是转换坐标,就以第一象限作为参考
-                double x = mX + Math.cos(radian) * r2;//x方向上的增量
-                double y = mY - Math.sin(radian) * r2;//为什么是减去，这不是第一现象的做法吗
-                //获得x,y方向上的变化后的值
-                //获得卫星的信噪比，并分级绘制
-                int snr = Integer.valueOf(satellite.getmSnr());
-                int level = snrToSignalLevel(snr);
-                //卫星编号
-                int prn = Integer.valueOf(satellite.getmPrn());
-                //这里获得卫星的种类
-                int type = satellite.getmType();
-                StarPoint p = new StarPoint(x - msRadius / 2, y - msRadius / 2, prn, level, type);
-                mPoints.add(p);
-            }
+            Const.satellites = satellites;
         }
-    }
 
-    private int getSatelliteType(int prn) {
-        int type = -1;
-        if (prn >= 1 && prn < 33) {
-            type = Satellite.GPS;
-        } else if (prn >= 120 && prn < 152) {
-            type = Satellite.SBAS;
-        } else if (prn >= 65 && prn < 97) {
-            type = Satellite.GLONASS;
-        } else if (prn >= 161) {
-            type = Satellite.BD;
-        }
-        return type;
     }
-
-    private int snrToSignalLevel(float snr) {
-        int level = 0;
-        if (snr >= 0 && snr < 16) {
-            level = 0;
-        } else if (snr >= 16 && snr < 36) {
-            level = 1;
-        } else if (snr >= 36) {
-            level = 2;
-        }
-        return level;
-    }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -163,9 +122,15 @@ public class StarView extends View {
                     mPaint.setColor(Color.RED);
                     break;
                 case 1:
-                    mPaint.setColor(Color.parseColor("#FFCDBE3F"));
+                    mPaint.setColor(Color.parseColor("#FFE4D668"));
                     break;
                 case 2:
+                    mPaint.setColor(Color.parseColor("#FF99C867"));
+                    break;
+                case 3:
+                    mPaint.setColor(Color.parseColor("#FFC4FFB9"));
+                    break;
+                case 4:
                     mPaint.setColor(Color.GREEN);
                     break;
             }
@@ -176,23 +141,27 @@ public class StarView extends View {
             switch (point.getmType()) {
                 case Satellite.GPS://gps圆形
                     canvas.drawCircle(x, y, msRadius, mPaint);
+                    GPS_NUM++;
                     break;
-                case Satellite.GLONASS://glonass三角形
+                case Satellite.GLONASS://glonass
+                    GLONASS_NUM++;
+                    canvas.drawRect(x - msRadius, y - msRadius, x + msRadius, y + msRadius, mPaint);
+                    break;
+                case Satellite.BD://bd矩形
                     Path path = new Path();
                     path.moveTo(x, y - msRadius * 2);// 此点为多边形的起点
                     path.lineTo(x - msRadius, y + msRadius / 2);
                     path.lineTo(x + msRadius, y + msRadius / 2);
                     path.close(); // 使这些点构成封闭的多边形
                     canvas.drawPath(path, mPaint);
-                    break;
-                case Satellite.BD://bd矩形
-                    canvas.drawRect(x - msRadius, y - msRadius, x + msRadius, y + msRadius, mPaint);
+                    BD_NUM++;
                     break;
                 case Satellite.SBAS://SBAS画红圈
+                    SBAS_NUM++;
                     Paint paint = new Paint();
                     paint.setColor(Color.RED);
                     paint.setStyle(Paint.Style.STROKE);
-                    canvas.drawCircle(x, y, msRadius + 4, paint);
+                    canvas.drawCircle(x, y, msRadius, paint);
                     canvas.drawCircle(x, y, msRadius, mPaint);
                     break;
             }
@@ -211,10 +180,51 @@ public class StarView extends View {
      * @param canvas
      */
     private void drawStarbackground(Canvas canvas) {
+        //横着画==
+        //GPS
+        float space = 20;
+        mPaint.setColor(Color.BLUE);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(10 + msRadius, 10 + msRadius, msRadius, mPaint);
+        mPaint.setTextSize(10);
+        canvas.drawText("GPS:" + GPS_NUM, 10 + msRadius, 10 + 2 * msRadius + 10 + 5, mPaint);
+        //每次用完清零
+        GPS_NUM = 0;
+        //GLONASS
+        mPaint.setColor(Color.BLUE);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawRect(10 + msRadius + space, 10, 10 + space + msRadius * 3, 10 + 2 * msRadius, mPaint);
+        mPaint.setTextSize(10);
+        canvas.drawText("GLO:" + GLONASS_NUM, 10 + msRadius + space + msRadius * 2 - 10, 10 + 2 * msRadius + 10 + 5, mPaint);
+        GLONASS_NUM = 0;
+        //BD
+        mPaint.setColor(Color.BLUE);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        Path path = new Path();
+        path.moveTo(10 + space * 2 + msRadius * 4 - 10, 10);// 此点为多边形的起点
+        path.lineTo(10 + space * 2 + msRadius * 3 - 10, 10 + msRadius * 2);
+        path.lineTo(10 + space * 2 + msRadius * 5 - 10, 10 + msRadius * 2);
+        path.close(); // 使这些点构成封闭的多边形
+        canvas.drawPath(path, mPaint);
+        mPaint.setTextSize(10);
+        canvas.drawText("BD:" + BD_NUM, 10 + space * 2 + msRadius * 5 - 25, 10 + 2 * msRadius + 10 + 5, mPaint);
+        BD_NUM = 0;
+        //SABA
+        mPaint.setColor(Color.BLUE);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawCircle(10 + space * 3 + msRadius * 5 - 10, 10 + msRadius, msRadius, paint);
+        canvas.drawCircle(10 + space * 3 + msRadius * 5 - 10, 10 + msRadius, msRadius, mPaint);
+        mPaint.setTextSize(10);
+        canvas.drawText("SBAS:" + SBAS_NUM, 10 + space * 3 + msRadius * 5 - 12, 10 + 2 * msRadius + 10 + 5, mPaint);
+        SBAS_NUM = 0;
+
         mPaint.setColor(Color.BLACK);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setAntiAlias(true);
-        //这里绘制星空的圆形
         canvas.drawCircle(mX, mY, mRadius, mPaint);
         //画圆圈和分割线
         int r;//画圆的半径，根据高度角来获得对应的边长
@@ -228,6 +238,7 @@ public class StarView extends View {
                 mPaint.setColor(Color.parseColor("#FF0044"));
                 canvas.drawText("N", mX, mY - r + 10, mPaint);
             }
+            mPaint.setTextSize(15);
             canvas.drawText(String.valueOf(30 * i), mX, mY - r, mPaint);
         }
         //画线,根据极坐标画线
@@ -253,7 +264,7 @@ public class StarView extends View {
             ptr[4 * i + 3] = (float) y;
             //这里画字
             mPaint.setColor(Color.WHITE);
-            mPaint.setTextSize(20);
+            mPaint.setTextSize(15);
             mPaint.setTextAlign(Paint.Align.CENTER);
             if (i < 4)//0-3
                 canvas.drawText(String.valueOf(90 - divideAngel * i), (float) x, (float) y, mPaint);
@@ -321,4 +332,12 @@ public class StarView extends View {
         msRadius = (float) 0.06d * mRadius;
     }
 
+    /**
+     * 设置高度角
+     *
+     * @param mElev_mask
+     */
+    public void setmElev_mask(float mElev_mask) {
+        this.mElev_mask = mElev_mask;
+    }
 }

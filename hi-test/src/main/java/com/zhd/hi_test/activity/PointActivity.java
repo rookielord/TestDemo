@@ -43,7 +43,7 @@ public class PointActivity extends Activity {
     //找到自定义控件
     public HorizontalScrollView mTouchView;
     //装入所有的自定义控件的集合
-    protected List<MyScrollView> mHScrollViews = new ArrayList<MyScrollView>();
+    protected List<MyScrollView> mHScrollViews = new ArrayList<>();
     //进行数据填充时的内容
     private String mTableName;
     private ScrollAdapter adapter;
@@ -157,7 +157,6 @@ public class PointActivity extends Activity {
     /**
      * 添加自定义的view
      *
-     * @param hScrollView
      */
     public void addHViews(final MyScrollView hScrollView) {
         if (!mHScrollViews.isEmpty()) {//如果自定义控件集合不为空
@@ -177,7 +176,6 @@ public class PointActivity extends Activity {
                 });
             }
         }
-
         mHScrollViews.add(hScrollView);
     }
 
@@ -186,11 +184,6 @@ public class PointActivity extends Activity {
      * 遍历mHScrollViews中的元素，然后把新的l,r传给它
      * 即实现联动效果
      * 遍历每个
-     *
-     * @param l
-     * @param t
-     * @param oldl
-     * @param oldt
      */
     public void onScrollChanged(int l, int t, int oldl, int oldt) {
         for (MyScrollView scrollView : mHScrollViews) {

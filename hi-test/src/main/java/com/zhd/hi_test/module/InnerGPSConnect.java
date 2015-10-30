@@ -106,7 +106,7 @@ public class InnerGPSConnect implements IConnect {
                 long time = location.getTime();
                 //先判断Bundle是否存在
                 String fixnum = "0";
-                if (location.getExtras() != null) {
+                if (location.getExtras().get("satellites") != null) {
                     fixnum = location.getExtras().get("satellites").toString();
                 }
                 //在有handler的情况下才进行数据传输
@@ -162,10 +162,12 @@ public class InnerGPSConnect implements IConnect {
                         int maxSatellite = status.getMaxSatellites();
                         int SatelliteNum = 0;
                         //这里创建需要进行传递的对象
-                        ArrayList<GpsSatellite> satelliteList = new ArrayList<>();
+                        ArrayList<Satellite> satelliteList = new ArrayList<>();
+                        //
                         while (it.hasNext() && SatelliteNum <= maxSatellite) {//判断条件1.有卫星数据2.小于最大卫星接收数
                             GpsSatellite s = it.next();
-                            satelliteList.add(s);
+                            Satellite sate = ConvertToSatellite(s);
+                            satelliteList.add(sate);
                             SatelliteNum++;
                         }
                         //只有在有handler的情况下才进行数据传输，因为卫星数据分两套解析所以，需要对mesaage携带的数据进行赋值
@@ -174,7 +176,6 @@ public class InnerGPSConnect implements IConnect {
                             Message message = Message.obtain();
                             message.what = 2;
                             message.obj = satellitesInfo;
-                            message.arg1 = 1;//确保是内置GPS的卫星数据
                             mHandler.sendMessage(message);
                         }
                         break;
@@ -192,6 +193,24 @@ public class InnerGPSConnect implements IConnect {
         mManager.addGpsStatusListener(mListener);
     }
 
+    /**
+     * 将GpsSatellite对象转化为Satellite
+     *
+     * @param s
+     * @return
+     */
+    private Satellite ConvertToSatellite(GpsSatellite s) {
+        String elevation = String.valueOf(s.getElevation());
+        String azimuth = String.valueOf(s.getAzimuth());
+        String snr = String.valueOf(s.getSnr());
+        String prn = String.valueOf(s.getPrn());
+        //创建Satellite对象
+        int type = getSatelliteType(s.getPrn());
+        Satellite con_s = new Satellite(prn, elevation, azimuth, snr, type);
+        return con_s;
+    }
+
+
     @Override
     public void breakConnect() {
         if (!Const.IsConnected)
@@ -202,8 +221,9 @@ public class InnerGPSConnect implements IConnect {
             mManager.removeUpdates(mLocListener);
         Const.IsConnected = false;
         Const.setmInfo("设备未连接");
-        Const.HasDataInfo=false;
-        Const.HasPDOP=false;
+        Const.HasDataInfo = false;
+        Const.HasPDOP = false;
+        Const.satellites.clear();
     }
 
     /**
@@ -224,6 +244,20 @@ public class InnerGPSConnect implements IConnect {
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             mActivity.startActivityForResult(intent, Const.GPS_REQUEST);
         }
+    }
+
+    private int getSatelliteType(int prn) {
+        int type = -1;
+        if (prn >= 1 && prn < 33) {
+            type = Satellite.GPS;
+        } else if (prn >= 120 && prn < 152) {
+            type = Satellite.SBAS;
+        } else if (prn >= 65 && prn < 97) {
+            type = Satellite.GLONASS;
+        } else if (prn >= 161) {
+            type = Satellite.BD;
+        }
+        return type;
     }
 
 //    private static void sendMsg(Message msg) {

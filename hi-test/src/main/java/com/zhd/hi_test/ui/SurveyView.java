@@ -16,22 +16,23 @@ import java.util.List;
 
 /**
  * Created by 2015032501 on 2015/9/22.
- * 1.传入偏移量
+ * 1.主要是将当前点的坐标转化成屏幕上的坐标
+ * 2.在画图时：
+ * 1)有已采集点，就会以最早采集点为中心点，画出其它的点
+ * 2)没有其它点，会以当前点为屏幕中心
  */
 public class SurveyView extends View {
-
-    //控件的属性
+    //自定义控件的宽和高
     private int mHeight;
     private int mWidth;
-    //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高
-    List<MyPoint> temp;
+    //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高，当前控件还没有获得宽和高
+    List<MyPoint> mPoints;
     //需要画的点集合
     List<DrawPoint> drawPoints = new ArrayList<>();
     //我的位置
     DrawPoint Mypoint;
     MyPoint myPoint;
     //作为基准的点的N,E坐标和控件中心位置的坐标
-
     private MyPoint mREFpoint;
     //屏幕中心
     private static float mCenterX;
@@ -66,26 +67,28 @@ public class SurveyView extends View {
         super(context, attrs, defStyleAttr);
     }
 
-
     /**
      * 主要用于当前点的居中
+     * 计算参考点与当前点的距离差值，从参考点到当前点的平移量，从参考点平移到当前点，并更新其它点的坐标
+     * 注意：需要处理没有参考点的情况，虽然一开始就是居中的情况。
      *
-     * @param myPoint
+     * @param point 当前位置点的坐标
      */
-    public void SetCurrentLocation(MyPoint myPoint) {
-        mOffsetx = (float) (mREFpoint.getmN() - myPoint.getmN()) * mScale;
-        mOffsety = (float) (mREFpoint.getmE() - myPoint.getmE()) * mScale;
+    public void SetCurrentLocation(MyPoint point) {
+        if (mPoints != null) {
+            mOffsetx = (float) (mREFpoint.getmN() - point.getmN()) * mScale;
+            mOffsety = (float) (mREFpoint.getmE() - point.getmE()) * mScale;
+        }
     }
 
     /**
-     * 以最开始的点进行画图
-     *
-     * @param myPoints 根据数据库倒序查询出来的点
+     * 将采集到的点集传送过来，并以最开始的点作为参考点
+     * @param points 根据数据库倒序查询出来的点
      */
-    public void setPoints(List<MyPoint> myPoints) {
-        if (myPoints != null) {
-            setCenterValue(myPoints.get(myPoints.size() - 1));
-            temp = myPoints;
+    public void setPoints(List<MyPoint> points) {
+        if (points != null) {
+            setCenterValue(points.get(points.size() - 1));
+            mPoints = points;
         }
     }
 
@@ -115,8 +118,11 @@ public class SurveyView extends View {
     }
 
     /**
+     * 主要功能，将大地坐标N,E,转化为屏幕坐标x,y.
+     *
      * 每次在更新画布点集合之前需要对画布点集合进行清空
      * 这样就不会累加
+     * 这
      * 就算是进行缩放的时候也会涉及到平移
      * 1.更新所有点的坐标，包括现在点也要进行重绘
      * 2.在更新的时候会牵扯到上一次的平移，我在进行放大的时候会重新加载这个
@@ -124,7 +130,7 @@ public class SurveyView extends View {
     private void updatePoints() {
         //1.当前有位置才会绘制当前点
         if (myPoint != null) {
-            if (temp == null) {//如果没有参考点的情况，即没有已知点的情况
+            if (mPoints == null) {//如果没有参考点的情况，即没有已知点的情况
                 Mypoint = new DrawPoint(mCenterX, mCenterY);
             } else {//根据根据传进来的当前位置，获得在屏幕上的对应坐标
                 float myX = (float) (mCenterX + (myPoint.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
@@ -136,10 +142,10 @@ public class SurveyView extends View {
         //3.更新数据库中点在屏幕上的坐标
         //3.1清除所有的画在图上的点
         //2.更新已有点的位置
-        if (temp == null)
+        if (mPoints == null)
             return;
         drawPoints.clear();
-        for (MyPoint myPoint : temp) {
+        for (MyPoint myPoint : mPoints) {
             //要在自定义控件上画图的集合
             float x = (float) (mCenterX + (myPoint.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
             float y = (float) (mCenterY + (myPoint.getmE() - mREFpoint.getmE()) * mScale) + mOffsety;
@@ -190,12 +196,12 @@ public class SurveyView extends View {
     private int measureWidth(int widthMeasureSpec) {
         int WspeMode = MeasureSpec.getMode(widthMeasureSpec);
         int WspeSize = MeasureSpec.getSize(widthMeasureSpec);
-        if (WspeMode == MeasureSpec.EXACTLY) {//具体的宽和高
+        if (WspeMode == MeasureSpec.EXACTLY) {//具体的宽和高,match_parent
             return WspeSize;
         } else if (WspeMode == MeasureSpec.AT_MOST) {//wrap_content
             return WspeSize;
         } else {
-            return WspeSize;//match_parent
+            return WspeSize;
         }
     }
 
@@ -212,19 +218,34 @@ public class SurveyView extends View {
         DrawScale(canvas);
     }
 
+    /**
+     * 以比例尺右下点的坐标，为startx和starty
+     * 宽度为40像素
+     *
+     * @param canvas
+     */
     private void DrawScale(Canvas canvas) {
-        int startx = canvas.getWidth() - 20;
-        int starty = canvas.getHeight() - 5;
+        int startx = mWidth - 30;
+        int starty = mHeight - 5;
         mPaint.setColor(Color.BLACK);
         mPaint.setStrokeWidth(3);
         canvas.drawLine(startx, starty, startx, starty - 5, mPaint);//第一条线
-        canvas.drawLine(startx, starty, startx - 20, starty, mPaint);//第二条线
-        canvas.drawLine(startx - 20, starty, startx - 20, starty - 5, mPaint);//第三条线
-        DecimalFormat df = new DecimalFormat("0.00");
+        canvas.drawLine(startx, starty, startx - 30, starty, mPaint);//第二条线
+        canvas.drawLine(startx - 30, starty, startx - 30, starty - 5, mPaint);//第三条线
+        DecimalFormat df = new DecimalFormat("0.00");//保留小数位
         canvas.drawText(df.format(mScale) + "m", startx - 15, starty - 6, mPaint);
     }
 
+
+    /**
+     * 1.画出当前点的位置
+     * 2.画出当前点和上一个点的连线
+     * 判断条件，当前位置点不为空，拥有上一个点
+     *
+     * @param canvas
+     */
     private void DrawMypoint(Canvas canvas) {
+        mPaint.setAntiAlias(true);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.RED);
         mPaint.setStrokeWidth(1);
@@ -240,21 +261,21 @@ public class SurveyView extends View {
      * 遍历DrawPoints中的元素，然后将其画在图片上
      * 以当前点为中心画两条线交叉
      * 这里需要对传输过来的点集合进行处理，并绘制在地图上
-     *
      * @param canvas
      */
     private void DrawPoints(Canvas canvas) {
         float x;
         float y;
-        if (temp == null)
+        if (mPoints == null)
             return;
         for (DrawPoint point : drawPoints) {
             mPaint.setColor(Color.BLACK);
+            mPaint.setAntiAlias(true);
             //画图的点的集合
             x = point.getmX();
             y = point.getmY();
             float[] points = new float[]{x, y - 10, x, y + 10, x - 10, y, x + 10, y};
-            mPaint.setStrokeWidth(1);
+            mPaint.setStrokeWidth(2);
             canvas.drawLines(points, mPaint);
             //字体居中
             mPaint.setTextAlign(Paint.Align.CENTER);

@@ -200,6 +200,7 @@ public class BluetoothConnect implements IConnect {
         Const.HasDataInfo=false;
         Const.HasPDOP=false;
         isRead = false;
+        Const.satellites.clear();
         if (in != null)
             try {
                 in.close();

@@ -4,6 +4,10 @@ package com.zhd.hi_test;
 
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.MyProject;
+import com.zhd.hi_test.module.Satellite;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -39,6 +43,8 @@ public class Const {
     public static final String ISUPDATA = "updata";//是否检查版本更新
     //判断当前是否有PDOP数据
     public static boolean HasPDOP=false;
+    //当前的卫星数据
+    public static List<Satellite> satellites=new ArrayList<>();
 
     public static IConnect mConnect;
 
@@ -89,5 +95,7 @@ public class Const {
     public static void setMheight(double mheight) {
         Const.mheight = mheight;
     }
+
+
 
 }

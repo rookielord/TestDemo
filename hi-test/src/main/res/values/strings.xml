@@ -22,6 +22,19 @@
     <string name="way">方式</string>
     <string name="connect">连接</string>
     <string name="disconnect">断开</string>
-    <string name="titile_item">配置</string>
+    <string name="title_item">配置</string>
     <string name="innergps">内置GPS</string>
+    <!-- SplashActivity的资源-->
+    <string name="version">版本号:</string>
+    <!-- LoginHelper的资源-->
+    <string name="network_error">自身网络问题</string>
+    <string name="connect_error">网络连接错误</string>
+    <string name="url_error">URL地址错误</string>
+    <string name="server_error">服务器出错</string>
+    <string name="download_error">下载出错</string>
+    <string name="xml_error">XML文档解析错误</string>
+    <string name="update_title">升级提示</string>
+    <string name="update_confirm">升级</string>
+    <string name="update_cancel">取消</string>
+    <string name="download_title">正在下载……</string>
 </resources>
