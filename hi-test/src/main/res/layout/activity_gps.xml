@@ -151,6 +151,7 @@
                     android:gravity="center"
                     android:inputType="number"
                     android:textSize="12sp"
+                    android:text="@string/default_ele"
                     android:layout_alignParentBottom="true"/>
 
                 <TextView
@@ -158,13 +159,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@id/et_ele_angel"
-                    android:text="设置"
+                    android:text="@string/confirm_ele"
                     style="@style/GPSLayout1_Click"
                     android:layout_alignParentBottom="true"/>
 
             </RelativeLayout>
-
-
         </LinearLayout>
     </LinearLayout>
 

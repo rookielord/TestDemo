@@ -1,6 +1,7 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -188,9 +189,11 @@ public class BluetoothDeviceActivity extends Activity {
                 address=mPairedDevices.get(position);
             else
                 address=mNewDevices.get(position);
+
             intent.putExtra(ADDRESS, address);
             setResult(RESULT_OK, intent);
             finish();
+
         }
     };
 

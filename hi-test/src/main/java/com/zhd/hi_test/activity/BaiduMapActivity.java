@@ -39,7 +39,7 @@ import static com.baidu.mapapi.utils.CoordinateConverter.*;
  * Created by 2015032501 on 2015/10/22.
  * 1.将采集点中的数据读取出来
  * 2.将dd:mm:ss.ssss的格式转化为dd.ddddd的格式
- * 3.将点集合数据放进去，然后话点的数据
+ * 3.将点集合数据放进去，然后转化为百度地图坐标点的数据
  */
 public class BaiduMapActivity extends Activity implements OnClickListener {
 

@@ -195,6 +195,7 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
             float elevation = Float.valueOf(et_ele_angel.getText().toString());
             if (elevation >= 0 && elevation <= 90) {
                 my_view.setmElev_mask(elevation);
+                my_view.invalidate();
             } else {
                 Toast.makeText(this, getString(R.string.ele_range), Toast.LENGTH_SHORT).show();
             }

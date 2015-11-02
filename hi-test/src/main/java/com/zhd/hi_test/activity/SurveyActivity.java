@@ -49,7 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by 2015032501 on 2015/9/22.
+ * Created by 李家吉 on 2015/9/22.
  * 一、开始画图的时候
  * 1.开始画图时的点位：以数据点库为中心，然后绘制其它的点
  * 2.点击整体居中：以数据库点为中心，将平移量和缩放量都设为初始值
@@ -94,8 +94,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
     //指南针的控件相关
     private Sensor mSensor;
     private SensorManager mSensorManager;
-    //方向向量数组
-
     //线程通信
     private Handler mHandler = new Handler() {
         @Override
@@ -121,7 +119,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
                     if (!Const.HasDataInfo)
                         tv_date.setText(UTCDate.getDefaultTime());
                     if (!Const.HasPDOP)
-                        tv_PDOP.setText("0.0");
+                        tv_PDOP.setText(R.string.default_PDOP);
                     //需要将当前点的数据传过去,当前点没有名称，因为是现在的位置
                     myPoint = new MyPoint("", Double.valueOf(info.get("n")), Double.valueOf(info.get("e")));
                     surveyView.setMyLocation(myPoint);

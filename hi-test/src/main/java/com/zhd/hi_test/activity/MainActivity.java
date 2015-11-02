@@ -220,13 +220,7 @@ public class MainActivity extends Activity {
         pager.setOnPageChangeListener(new MyOnPageChangeListener());
     }
 
-    /**
-     * 通过activity获取视图
-     *
-     * @param id
-     * @param intent
-     * @return
-     */
+
     private View getView(String id, Intent intent) {
         return manager.startActivity(id, intent).getDecorView();
     }

@@ -221,19 +221,20 @@ public class SurveyView extends View {
     /**
      * 以比例尺右下点的坐标，为startx和starty
      * 宽度为40像素
-     *
+     * 添加了点之后
      * @param canvas
      */
     private void DrawScale(Canvas canvas) {
         int startx = mWidth - 30;
         int starty = mHeight - 5;
+        mPaint.reset();
         mPaint.setColor(Color.BLACK);
         mPaint.setStrokeWidth(3);
         canvas.drawLine(startx, starty, startx, starty - 5, mPaint);//第一条线
         canvas.drawLine(startx, starty, startx - 30, starty, mPaint);//第二条线
         canvas.drawLine(startx - 30, starty, startx - 30, starty - 5, mPaint);//第三条线
         DecimalFormat df = new DecimalFormat("0.00");//保留小数位
-        canvas.drawText(df.format(mScale) + "m", startx - 15, starty - 6, mPaint);
+        canvas.drawText(df.format(mScale) + "m", startx - 30, starty - 6, mPaint);
     }
 
 
@@ -245,6 +246,7 @@ public class SurveyView extends View {
      * @param canvas
      */
     private void DrawMypoint(Canvas canvas) {
+        mPaint.reset();
         mPaint.setAntiAlias(true);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.RED);
@@ -264,6 +266,7 @@ public class SurveyView extends View {
      * @param canvas
      */
     private void DrawPoints(Canvas canvas) {
+        mPaint.reset();
         float x;
         float y;
         if (mPoints == null)

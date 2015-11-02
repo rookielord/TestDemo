@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -29,7 +27,7 @@ public class SplashActivity extends Activity {
         tv_splash_version.setText(getString(R.string.version) + ViewHelper.getVersion(this));
 
         RelativeLayout rl_splash_bg = (RelativeLayout) findViewById(R.id.rl_splash_bg);
-        rl_splash_bg.setBackgroundResource(R.drawable.log);
+        rl_splash_bg.setBackgroundResource(R.drawable.logo);
         //启动动画
         AnimationDrawable animation = (AnimationDrawable) rl_splash_bg.getBackground();
         animation.start();

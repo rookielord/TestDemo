@@ -44,7 +44,7 @@ public class ProjectActivity extends Activity {
 
     //加载过来的项目，判断是否有项目
     private String mPath;
-    private List<MyProject> mMyProjects;
+    private List<MyProject> mProjects;
     private boolean mHasProject;
 
     //当前选中的项目，是用来显示当前选中的project的
@@ -74,13 +74,13 @@ public class ProjectActivity extends Activity {
         //判断是否有项目内容
         if (mHasProject) {
             //获得当前的Project目录下所有的project对象
-            mMyProjects = getProjectInstance(mPath);
+            mProjects = getProjectInstance(mPath);
             //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示,当点击后就将当前项目显示到上面去
-            mpa = new ProjectAdapter(mMyProjects, this);
+            mpa = new ProjectAdapter(mProjects, this);
             mpa.setmP(new OnProjectListener() {
                 @Override
                 public void getItemPosition(int position) {
-                    mProject = mMyProjects.get(position);
+                    mProject = mProjects.get(position);
                     showProjectInfo(mProject);
                 }
             });
@@ -91,7 +91,7 @@ public class ProjectActivity extends Activity {
         }
         //进行数据库中脏数据表删除
         Curd curd = new Curd("sqlite_master", this);
-        curd.removeDirtyTable(mMyProjects);
+        curd.removeDirtyTable(mProjects);
     }
 
     private void showProjectInfo(MyProject myProject) {

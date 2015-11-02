@@ -54,14 +54,6 @@ public class InnerGPSConnect implements IConnect {
     private Listener mListener;
 
 
-//    public static void regiserHandler(Handler handler) {
-//        mHanderList.add(handler);
-//    }
-//
-//    public static void unRegisterHandler(Handler handler) {
-//        mHanderList.remove(handler);
-//    }
-
 
     public InnerGPSConnect(Activity activity) {
         mActivity = activity;
@@ -220,7 +212,7 @@ public class InnerGPSConnect implements IConnect {
         if (mLocListener != null)
             mManager.removeUpdates(mLocListener);
         Const.IsConnected = false;
-        Const.setmInfo("设备未连接");
+        Const.setmInfo(mActivity.getString(R.string.unconnect));
         Const.HasDataInfo = false;
         Const.HasPDOP = false;
         Const.satellites.clear();
@@ -232,15 +224,15 @@ public class InnerGPSConnect implements IConnect {
     private void GPSinit() {
         mProviders = mManager.getProviders(true);
         if (mProviders.contains(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(mActivity, "GPS服务已经打开", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, R.string.GPS_confirm, Toast.LENGTH_SHORT).show();
             mProvider = LocationManager.GPS_PROVIDER;
             Const.setmConnectType(Const.InnerGPSConnect);
-            ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
-            ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText("内置GPS");
+            ((Button) mActivity.findViewById(R.id.btn_connect)).setText(R.string.disconnect);
+            ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(R.string.innergps);
             Const.IsConnected = true;
-            Const.setmInfo("内置GPS");
+            Const.setmInfo(mActivity.getString(R.string.innergps));
         } else {//这里是对ConnectActivity进行操作
-            Toast.makeText(mActivity, "请打开GPS服务", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, R.string.open_GPS, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             mActivity.startActivityForResult(intent, Const.GPS_REQUEST);
         }

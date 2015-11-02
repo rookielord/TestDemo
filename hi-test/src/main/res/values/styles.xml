@@ -1,11 +1,13 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
     </style>
-    <style name="MyTheme" parent="AppTheme">
+    <style name="MyTheme" parent="Theme.AppCompat.Light">
         <item name="android:theme">@android:style/Theme.NoTitleBar</item>
+    </style>
+    <style name="TitleBar" parent="Base.Theme.AppCompat.Light">
     </style>
 <!--蓝牙连接列表，引用了Connect-->
     <style name="BluetoothText">

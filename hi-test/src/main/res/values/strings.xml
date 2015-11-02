@@ -84,6 +84,7 @@
     <string name="searching">正在搜索中……</string>
     <!-- GPSActivity-->
     <string name="open_GPS">请打开GPS服务</string>
+    <string name="GPS_confirm">GPS服务已打开</string>
     <string name="default_PDOP">0.0</string>
     <string name="ele_range">请输入0到90度的高度角</string>
     <string name="ele_length">"请输入高度角"</string>
@@ -93,6 +94,7 @@
     <string name="azi">Azi</string>
     <string name="ele">Ele</string>
     <string name="snr">Snr</string>
+    <string name="default_ele">90</string>
     <!-- FileExchangeActivity-->
     <string name="open_project_request">请打开项目</string>
     <string name="cass_success">导出cass成功</string>
@@ -139,4 +141,8 @@
     <string name="project_create">项目创建</string>
     <string name="project_delete">项目删除</string>
     <string name="project_open">打开项目</string>
+    <!-- IConnect-->
+    <string name="device_disconnect">仪器断开连接</string>
+    <string name="connect_success">连接成功</string>
+    <string name="connect_failure">连接失败</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.IConnect;
 import com.zhd.hi_test.module.BluetoothConnect;
 import com.zhd.hi_test.module.InnerGPSConnect;
+
 
 
 /**
@@ -133,7 +135,7 @@ public class ConnectActivity extends Activity {
     private void getDefaultInfo() {
         int ConnectType = Const.getmConnectType();
         if (Const.IsConnected) {
-            btn_connect.setText(R.string.unconnect);
+            btn_connect.setText(R.string.disconnect);
             sp_way.setEnabled(false);
             sp_device.setEnabled(false);
         } else {
@@ -197,6 +199,7 @@ public class ConnectActivity extends Activity {
             case Const.DEVICE_MESSAGE://建立蓝牙连接的选项
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
+
                     mConnect = new BluetoothConnect(address, mAdapter, this);
                     Const.setmConnect(mConnect);
                     startConnecting();

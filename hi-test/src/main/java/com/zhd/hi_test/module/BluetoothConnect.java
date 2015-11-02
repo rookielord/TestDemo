@@ -51,7 +51,7 @@ public class BluetoothConnect implements IConnect {
         public boolean handleMessage(Message msg) {
             switch (msg.what){
                 case 1:
-                    Toast.makeText(mActivity,"仪器断开连接",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity,R.string.device_disconnect,Toast.LENGTH_SHORT).show();
                     break;
             }
             return false;
@@ -87,17 +87,17 @@ public class BluetoothConnect implements IConnect {
             Const.setmInfo(mAddress);
             Const.IsConnected=true;
             Const.setmConnectType(Const.BlueToothConncet);
-            ((Button) mActivity.findViewById(R.id.btn_connect)).setText("断开");
+            ((Button) mActivity.findViewById(R.id.btn_connect)).setText(R.string.disconnect);
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
             //获取连接对象的名称
             Const.setmInfo(mDevice.getName());
-            Toast.makeText(mActivity, "连接成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, R.string.connect_success, Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
-            Const.setmInfo("设备未连接");
+            Const.setmInfo(mActivity.getString(R.string.unconnect));
             //清空之前得到的mDevice
             mDevice=null;
             e.printStackTrace();
-            Toast.makeText(mActivity, "连接失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, R.string.connect_failure, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -183,7 +183,7 @@ public class BluetoothConnect implements IConnect {
                     e.printStackTrace();
                     Const.IsConnected=false;
                     Const.setmConnectType(0);
-                    Const.setmInfo("设备未连接");
+                    Const.setmInfo(mActivity.getString(R.string.unconnect));
                     mHandler.sendEmptyMessage(1);
                 }
             }

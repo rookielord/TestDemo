@@ -1,6 +1,7 @@
 package com.zhd.hi_test.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,16 +36,15 @@ public class ProjectAdapter extends BaseAdapter {
 
     //闯过来所有Project对象
     private List<MyProject> mMyProjects;
+
     private Context mContext;
     //用来存放所有的Radio状态
     Map<String, Boolean> states = new HashMap<>();
     //让当前项目打开项目的名称和列表中项目进行比较，然后选中项目背景变色
-    private MyProject mMyProject;
 
     public ProjectAdapter(List<MyProject> myProjects, Context context) {
         this.mMyProjects = myProjects;
         this.mContext = context;
-        mMyProject = Const.getmProject();
     }
 
     //定义一个Viewholder,用来存放layout上面的控件对象
@@ -127,9 +127,10 @@ public class ProjectAdapter extends BaseAdapter {
         } else
             res = true;//如果为里面有选中的则一直为true,第一次肯定是都不选中的
         holder.radio.setChecked(res);
-        //在这里进行判断当前的mProject是否等于convertview的project
-        if (mMyProject !=null){
-            if (p.getmName().equals(mMyProject.getmName())){
+        //在这里进行判断当前的mProject是否等于convertview的project,但是在滑动的时候未销毁的convertview会影响
+        convertView.setBackgroundColor(Color.TRANSPARENT);
+        if (Const.getmProject() !=null){
+            if (p.getmName().equals(Const.getmProject().getmName())){
                 convertView.setBackgroundResource(R.drawable.project_selected);
             }
         }

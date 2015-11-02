@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.zhd.hi_test.Const;
@@ -17,11 +16,8 @@ import com.zhd.hi_test.R;
 import com.zhd.hi_test.db.Curd;
 import com.zhd.hi_test.util.FileUtil;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.jar.Attributes;
 
 /**
  * Created by 2015032501 on 2015/10/21.
@@ -86,7 +82,6 @@ public class OutActivity extends Activity implements View.OnClickListener {
      * 4.拼接字符串
      * 5.写入内容
      *
-     * @return
      */
     private boolean WriteFile() {
         try {
