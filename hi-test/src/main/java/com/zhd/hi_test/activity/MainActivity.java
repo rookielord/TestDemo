@@ -262,6 +262,8 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View v) {
             setTextBackgroundColor();
+            tv_list.get(index).setBackgroundColor(Color.parseColor("#FF35E6F6"));
+            tv_list.get(index).setTextColor(Color.BLACK);
             pager.setCurrentItem(index);
         }
     }

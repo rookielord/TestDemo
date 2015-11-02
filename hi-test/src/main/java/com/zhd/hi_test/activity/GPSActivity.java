@@ -172,8 +172,7 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
     }
 
     private void setCurrentText(int position) {
-        if (position < 0 || position > mViews.size() - 1
-                || mCurrentIndex == position) {
+        if (position < 0 || position > mViews.size() - 1) {
             return;
         }
         //设置当前选中页的颜色
