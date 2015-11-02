@@ -107,7 +107,7 @@ public class MyLocation {
         double B = Double.valueOf(mB);
         double L = Double.valueOf(mL);
         this.mUseSate=UseSate;
-        this.mQuality = "GPS单点定位";
+        this.mQuality = "内置GPS定位";
         if (B > 0)
             this.mDireB = "N";
         else

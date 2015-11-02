@@ -102,18 +102,18 @@ public class AddPointActivity extends Activity {
                     Const.setMheight(Double.parseDouble(et_height.getText().toString()));
                     boolean res = curd.insertData(values);
                     if (res) {
-                        Toast.makeText(AddPointActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.update_success, Toast.LENGTH_SHORT).show();
                         //添加成功后关闭该页面
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(AddPointActivity.this, "添加失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.update_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
         } else {//修改
-            tv_add.setText("修改");
+            tv_add.setText(R.string.update);
             et_name.setText("pt" + id);
             Cursor cursor = curd.queryData(new String[]{"*"}, "id=?", new String[]{id});
             while (cursor.moveToNext()) {
@@ -135,25 +135,16 @@ public class AddPointActivity extends Activity {
                 @Override
                 public void onClick(View v) {
                     ContentValues cv = new ContentValues();
-//                    cv.put("id", et_name.getText().toString().substring(2));
-//                    cv.put("B", tv_B.getText().toString());
-//                    cv.put("L", tv_L.getText().toString());
-//                    cv.put("H", tv_H.getText().toString());
-//                    cv.put("N", tv_N.getText().toString());
-//                    cv.put("E", tv_E.getText().toString());
-//                    cv.put("Z", tv_Z.getText().toString());
                     cv.put("DES", et_des.getText().toString());
                     cv.put("height", et_height.getText().toString());
-//                    cv.put("DireB", tv_DireB.getText().toString());
-//                    cv.put("DireL", tv_DireL.getText().toString());
                     boolean res = curd.UpdateData(id, cv);
                     if (res) {
-                        Toast.makeText(AddPointActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.add_success, Toast.LENGTH_SHORT).show();
                         //添加成功设置修改成功，并关闭当前页面
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(AddPointActivity.this, "修改失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
             });

@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:clickable="true"
-            android:text="返回" />
+            android:text="@string/back" />
 
         <TextView
             android:id="@+id/tv_add"
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="添加" />
+            android:text="@string/add" />
     </RelativeLayout>
     <!--第二部分-->
     <LinearLayout
@@ -43,14 +43,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="点名" />
+                android:text="@string/point_name" />
 
             <EditText
                 android:id="@+id/et_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:editable="false" />
+                android:inputType="none" />
         </LinearLayout>
 
         <LinearLayout
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="仪器高" />
+                android:text="@string/height" />
 
             <EditText
                 android:id="@+id/et_height"
@@ -83,9 +83,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="描述" />
+                android:text="@string/des" />
 
             <EditText
+                android:inputType="text"
                 android:id="@+id/et_des"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -100,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="描述" />
+        android:text="@string/info" />
 
     <!-- 第三部分,用scrollview来显示里面的大部分数据，而且其中的类型高度被设置为固定-->
     <ScrollView
@@ -123,7 +124,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="B" />
+                    android:text="@string/B" />
 
                 <TextView
                     android:id="@+id/tv_B"
@@ -137,7 +138,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="L" />
+                    android:text="@string/L" />
 
                 <TextView
                     android:id="@+id/tv_L"
@@ -151,7 +152,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="H" />
+                    android:text="@string/H" />
 
                 <TextView
                     android:id="@+id/tv_H"
@@ -165,7 +166,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="N" />
+                    android:text="@string/N" />
 
                 <TextView
                     android:id="@+id/tv_N"
@@ -179,7 +180,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="E" />
+                    android:text="@string/E" />
 
                 <TextView
                     android:id="@+id/tv_E"
@@ -193,7 +194,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="Z" />
+                    android:text="@string/Z" />
 
                 <TextView
                     android:id="@+id/tv_Z"
@@ -207,7 +208,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="位于南北半球" />
+                    android:text="@string/location_SN" />
 
                 <TextView
                     android:id="@+id/tv_DireB"
@@ -221,7 +222,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="位于东西半球" />
+                    android:text="@string/location_EW" />
 
                 <TextView
                     android:id="@+id/tv_DireL"
@@ -234,7 +235,7 @@
 
                 <TextView
                     style="@style/AddPointInfo"
-                    android:text="添加时间" />
+                    android:text="@string/add_time" />
 
                 <TextView
                     android:id="@+id/tv_time"

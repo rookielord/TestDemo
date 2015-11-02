@@ -138,9 +138,9 @@ public class ProjectAdapter extends BaseAdapter {
         convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                menu.setHeaderTitle("项目操作");
-                menu.add(0, 0, 0, "打开项目");
-                menu.add(0, 1, 0, "删除项目");
+                menu.setHeaderTitle(R.string.project_create);
+                menu.add(0, 0, 0, R.string.project_open);
+                menu.add(0, 1, 0, R.string.project_delete);
             }
         });
         return convertView;

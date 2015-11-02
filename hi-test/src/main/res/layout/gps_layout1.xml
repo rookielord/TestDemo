@@ -19,27 +19,31 @@
             android:layout_height="80dp"
             android:layout_alignParentBottom="true"
             />
-        <SeekBar
-            android:id="@+id/sb_ele_angel"
-            android:layout_width="100dp"
-            android:layout_centerHorizontal="true"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:thumb="@mipmap/thum"
-            android:progressDrawable="@drawable/seekbar_img"
-            android:max="90"
-            android:progress="90"
-            android:minHeight="10dp"
-            android:maxHeight="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/sb_ele_angel"
-            android:layout_alignParentBottom="true"
-            android:text="设置高度角"
-            android:textSize="12sp"
-            android:textColor="#000"
-            android:layout_marginBottom="15dp"/>
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/set_ele"
+                android:textSize="12sp"
+                android:textColor="#000" />
+            <SeekBar
+                android:id="@+id/sb_ele_angel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:thumb="@mipmap/thum"
+                android:progressDrawable="@drawable/seekbar_img"
+                android:max="90"
+                android:progress="90"
+                android:minHeight="10dp"
+                android:maxHeight="10dp"
+                />
+
+        </LinearLayout>
+
     </RelativeLayout>
 </LinearLayout>

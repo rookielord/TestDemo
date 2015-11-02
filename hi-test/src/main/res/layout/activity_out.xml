@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:text="请选择需要导出的字段" />
+        android:text="@string/choose_columns" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -30,5 +30,5 @@
         style="@style/ConnectButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="导出" />
+        android:text="@string/out_confirm" />
 </LinearLayout>

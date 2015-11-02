@@ -4,18 +4,23 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <!--蓝牙设备配置-->
-    <string name="pairedlist">已配对的设备</string>
-    <string name="newlist">找到的设备</string>
-    <string name="search">搜索</string>
-    <string name="device_title">请选择对应的设备</string>
-    <string name="way_title">请选择连接方式</string>
+
     <!--主界面的String资源-->
     <string name="main_item1">管理</string>
     <string name="main_item2">功能</string>
     <string name="main_item3">采集</string>
+    <string name="project_name">项目名称</string>
+    <string name="solution_none">无解</string>
+    <string name="solution_single">GPS固定解</string>
+    <string name="solution_fix">不同GPS固定解</string>
+    <string name="solution_rtd">实时差分固定解</string>
+    <string name="solution_rtkf">实时差分浮动解</string>
+    <string name="none_project">未选择项目</string>
+    <string name="android_position">内置GPS定位</string>
+    <string name="default_none">0</string>
+    <string name="exit_app">再按一次退出程序</string>
     <!--ConnectActivity的资源-->
     <string name="unconnect">设备未连接</string>
     <string name="factory">厂商</string>
@@ -24,6 +29,7 @@
     <string name="disconnect">断开</string>
     <string name="title_item">配置</string>
     <string name="innergps">内置GPS</string>
+    <string name="bluetooth">蓝牙</string>
     <!-- SplashActivity的资源-->
     <string name="version">版本号:</string>
     <!-- LoginHelper的资源-->
@@ -37,4 +43,100 @@
     <string name="update_confirm">升级</string>
     <string name="update_cancel">取消</string>
     <string name="download_title">正在下载……</string>
+    <!-- AddPointActivity的资源-->
+    <string name="point_name">点名</string>
+    <string name="B">B</string>
+    <string name="L">L</string>
+    <string name="H">H</string>
+    <string name="add_time">添加时间</string>
+    <string name="height">仪器高</string>
+    <string name="N">N</string>
+    <string name="E">E</string>
+    <string name="Z">Z</string>
+    <string name="location_SN">位于南北半球</string>
+    <string name="location_EW">位于东西半球</string>
+    <string name="des">描述</string>
+    <string name="info">点位信息</string>
+
+    <!-- 添加的toast-->
+    <string name="add_success">添加成功</string>
+    <string name="add_failure">添加失败</string>
+    <string name="back">返回</string>
+    <string name="add">添加</string>
+    <string name="update">修改</string>
+    <string name="update_success">修改成功</string>
+    <string name="update_failure">修改失败</string>
+    <!-- BaiduMapActivity-->
+    <string name="normal">普通</string>
+    <string name="follow">跟随</string>
+    <string name="compass">罗盘</string>
+    <!--BlueToothDeviceActivity-->
+    <string name="open_bluetooth">请打开蓝牙</string>
+    <string name="bluetooth_open_success">蓝牙打开成功</string>
+    <string name="none_match">当前没有配对的数据</string>
+    <string name="none_device">当前没有设备</string>
+    <string name="stop_search">停止搜索</string>
+    <string name="pairedlist">已配对的设备</string>
+    <string name="newlist">找到的设备</string>
+    <string name="search">搜索</string>
+    <string name="device_title">请选择对应的设备</string>
+    <string name="way_title">请选择连接方式</string>
+    <string name="searching">正在搜索中……</string>
+    <!-- GPSActivity-->
+    <string name="open_GPS">请打开GPS服务</string>
+    <string name="default_PDOP">0.0</string>
+    <string name="ele_range">请输入0到90度的高度角</string>
+    <string name="ele_length">"请输入高度角"</string>
+    <string name="set_ele">设置高度角</string>
+    <string name="confirm_ele">设置</string>
+    <string name="pnr">Pnr</string>
+    <string name="azi">Azi</string>
+    <string name="ele">Ele</string>
+    <string name="snr">Snr</string>
+    <!-- FileExchangeActivity-->
+    <string name="open_project_request">请打开项目</string>
+    <string name="cass_success">导出cass成功</string>
+    <string name="output_failure">导出失败</string>
+    <string name="output_success">导出成功</string>
+    <string name="input_hint">请输入正确的名称</string>
+    <string name="data_type">数据类型</string>
+    <string name="current_path">当前路径</string>
+    <string name="file_name">文件名称</string>
+    <string name="output_type">导出类型</string>
+    <string name="confirm">确定</string>
+    <!-- OutActivity-->
+    <string name="choose_columns">请选择需要导出的字段</string>
+    <string name="out_confirm">导出</string>
+    <!-- GridActivity-->
+    <string name="project_manage">项目管理</string>
+    <string name="data_manage">数据管理</string>
+    <string name="data_exchange">数据交换</string>
+    <string name="device_connect">仪器连接</string>
+    <string name="star_map">星图展示</string>
+    <string name="data_acquisition">数据采集</string>
+    <!-- PointActivity-->
+    <string name="confirm_delete">确认删除吗</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="delete_info">删除信息</string>
+    <string name="update_info">修改信息</string>
+    <!-- ProjectActivity-->
+    <string name="create_success">创建成功</string>
+    <string name="create_failure">创建失败</string>
+    <string name="create">创建</string>
+    <string name="select_project">请选择项目</string>
+    <string name="project_open_success">项目打开成功</string>
+    <string name="delete_warning">当前项目打开，不能删除</string>
+    <string name="delete_success">删除成功</string>
+    <string name="current_project">当前项目信息</string>
+    <string name="created_project">已创建项目</string>
+    <string name="projection">项目投影</string>
+    <string name="guass">高斯投影带</string>
+    <string name="lasttime">最后使用时间</string>
+    <string name="proname_hint">请输入正确的项目名称</string>
+    <string name="project_none">当前没有项目</string>
+    <string name="project_conduct">项目操作</string>
+    <string name="project_create">项目创建</string>
+    <string name="project_delete">项目删除</string>
+    <string name="project_open">打开项目</string>
 </resources>

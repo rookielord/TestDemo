@@ -59,7 +59,7 @@ public class PointActivity extends Activity {
         setContentView(R.layout.activity_point);
         //这里来进行判断是否打开项目不然就不做操作
         if (Const.getmProject() == null) {
-            Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.open_project_request, Toast.LENGTH_SHORT).show();
             return;
         }
         mTableName = Const.getmProject().getmTableName();
@@ -71,15 +71,15 @@ public class PointActivity extends Activity {
         switch (item.getItemId()) {
             case 0://删除
                 AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                        .setTitle("确定删除吗")
-                        .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                        .setTitle(R.string.confirm_delete)
+                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 curd.deleteData(id);
                                 refreshData();
                             }
                         })
-                        .setNegativeButton("取消", null);
+                        .setNegativeButton(R.string.cancel, null);
                 builder.show();
                 break;
             case 1://修改
@@ -231,20 +231,6 @@ public class PointActivity extends Activity {
             if (convertView == null) {
                 //根据xml来创建view对象
                 convertView = LayoutInflater.from(context).inflate(res, null,false);
-                MyScrollView view= (MyScrollView) convertView.findViewById(R.id.item_scroll);
-                view.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        v.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-                            @Override
-                            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                                menu.add(0, 0, 0, "删除信息");
-                                menu.add(0, 1, 1, "修改信息");
-                            }
-                        });
-                        return false;
-                    }
-                });
                 //这里找到的是自定义控件的HorizonscrollView，然后加入到集合里面，滑动时处理里面的自定义控件集合
                 addHViews((MyScrollView) convertView.findViewById(R.id.item_scroll));
                 //根据插入对应数据的长度来创建views，
@@ -268,8 +254,8 @@ public class PointActivity extends Activity {
             convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                 @Override
                 public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                    menu.add(0, 0, 0, "删除信息");
-                    menu.add(0, 1, 1, "修改信息");
+                    menu.add(0, 0, 0, R.string.delete_info);
+                    menu.add(0, 1, 1, R.string.update_info);
                 }
             });
 

@@ -72,7 +72,7 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
                     tv_locL.setText(String.valueOf(myLocation.getmL()));
                     tv_locH.setText(String.valueOf(myLocation.getmH()));
                     if (!Const.HasPDOP)
-                        tv_PDOP.setText("0.0");
+                        tv_PDOP.setText(getString(R.string.default_PDOP));
                     break;
                 case 2:
                     ArrayList<Satellite> satellites = (ArrayList<Satellite>) msg.obj;
@@ -115,14 +115,14 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
         int connect = Const.getmConnectType();
         if (connect == Const.InnerGPSConnect) {
             GPSinit();
-            tv_connect.setText("内置GPS");
+            tv_connect.setText(getString(R.string.innergps));
             InnerGPSConnect.setmHandler(mHandler);
         } else if (connect == Const.BlueToothConncet) {
-            tv_connect.setText("蓝牙");
+            tv_connect.setText(R.string.bluetooth);
             Infomation.setHandler(mHandler);
             //进行从IRTK中获得数据进行处理
         } else {
-            tv_connect.setText("仪器尚未连接");
+            tv_connect.setText(getString(R.string.unconnect));
         }
     }
 
@@ -171,7 +171,6 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
         my_sate_view.setOnTouchListener(new OffsetListener());
     }
 
-
     private void setCurrentText(int position) {
         if (position < 0 || position > mViews.size() - 1
                 || mCurrentIndex == position) {
@@ -197,10 +196,10 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
             if (elevation >= 0 && elevation <= 90) {
                 my_view.setmElev_mask(elevation);
             } else {
-                Toast.makeText(this, "请输入0-90度的高度角", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ele_range), Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "请输入高度角", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.ele_length), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -226,7 +225,6 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
         public MyOnClickListener(int i) {
             index = i;
         }
-
         @Override
         public void onClick(View v) {
             setTextBackgroundColor();
@@ -249,7 +247,7 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
         mManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mProviders = mManager.getProviders(true);
         if (!mProviders.contains(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(getApplicationContext(), "请打开GPS服务", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.open_GPS), Toast.LENGTH_SHORT).show();
             Intent intent = new Intent("com.zhd.connect.START");
             startActivity(intent);
         }

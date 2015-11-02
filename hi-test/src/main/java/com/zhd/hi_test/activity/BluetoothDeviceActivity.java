@@ -114,10 +114,10 @@ public class BluetoothDeviceActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == BLUETOOTH_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.bluetooth_open_success), Toast.LENGTH_SHORT).show();
                 btn_search.setEnabled(true);
             } else {
-                Toast.makeText(this, "请打开蓝牙", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.open_bluetooth), Toast.LENGTH_SHORT).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -137,7 +137,7 @@ public class BluetoothDeviceActivity extends Activity {
             }
             //在接下来添加没有适配过的仪器
         } else {
-            mPairedAdapter.add("当前没有配对的数据");
+            mPairedAdapter.add(getString(R.string.none_match));
         }
     }
 
@@ -147,7 +147,7 @@ public class BluetoothDeviceActivity extends Activity {
     private void startDiscovery() {
         //显示搜索条
         setProgressBarIndeterminateVisibility(true);
-        setTitle("正在搜索中……");
+        setTitle(getString(R.string.searching));
         //将新蓝牙设备的listview找到并设为可见
         findViewById(R.id.tv_newlist_title).setVisibility(VISIBLE);
         if (mAdapter.isDiscovering())
@@ -178,7 +178,7 @@ public class BluetoothDeviceActivity extends Activity {
             mAdapter.cancelDiscovery();
             String name=((TextView)view).getText().toString();
             //如果没有数据则不会进行下去
-            if (name.equals("当前没有配对的数据")||name.equals("当前没有设备")){
+            if (name.equals(getString(R.string.none_match))||name.equals(R.string.none_device)){
                 return;
             }
             Intent intent = new Intent();//创建一个空intent来存放数据
@@ -206,7 +206,7 @@ public class BluetoothDeviceActivity extends Activity {
             switch (action) {//当搜索结束时
                 case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
                     if (mNewAdapter.getCount() == 0 && isSearch) {
-                        mNewAdapter.add("当前没有设备");
+                        mNewAdapter.add(getString(R.string.none_device));
                     }
                     break;
                 case BluetoothDevice.ACTION_FOUND:

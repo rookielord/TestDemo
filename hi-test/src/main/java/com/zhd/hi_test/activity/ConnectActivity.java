@@ -59,11 +59,11 @@ public class ConnectActivity extends Activity {
                     startConnect();
                 } else {
                     mConnect.breakConnect();
-                    btn_connect.setText("连接");
-                    Const.IsConnected=false;
+                    btn_connect.setText(R.string.connect);
+                    Const.IsConnected = false;
                     Const.setmConnectType(0);
-                    Const.setmInfo("设备未连接");
-                    tv_content.setText("设备未连接");
+                    Const.setmInfo(getString(R.string.unconnect));
+                    tv_content.setText(R.string.unconnect);
                     sp_way.setEnabled(true);
                     sp_device.setEnabled(true);
                 }
@@ -115,9 +115,9 @@ public class ConnectActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String way = parent.getItemAtPosition(position).toString();
-                if (way.equals("蓝牙"))
+                if (way.equals(getString(R.string.bluetooth)))
                     mConnectWay = Const.BlueToothConncet;
-                else if (way.equals("内置GPS"))
+                else if (way.equals(getString(R.string.innergps)))
                     mConnectWay = Const.InnerGPSConnect;
             }
 
@@ -133,11 +133,11 @@ public class ConnectActivity extends Activity {
     private void getDefaultInfo() {
         int ConnectType = Const.getmConnectType();
         if (Const.IsConnected) {
-            btn_connect.setText("断开");
+            btn_connect.setText(R.string.unconnect);
             sp_way.setEnabled(false);
             sp_device.setEnabled(false);
         } else {
-            btn_connect.setText("连接");
+            btn_connect.setText(R.string.connect);
             sp_way.setEnabled(true);
             sp_device.setEnabled(true);
         }
@@ -155,6 +155,7 @@ public class ConnectActivity extends Activity {
         }
         tv_content.setText(Const.getmInfo());
     }
+
     /**
      * 1.首先判断连接方式
      * 2.打开蓝牙连接
@@ -222,7 +223,7 @@ public class ConnectActivity extends Activity {
                     sp_way.setEnabled(false);
                     sp_device.setEnabled(false);
                 } else {
-                    Toast.makeText(this, "请打开GPS服务", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.open_GPS, Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -246,7 +247,7 @@ public class ConnectActivity extends Activity {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(intent, Const.REQUEST_CODE);
         } else {
-            Toast.makeText(this, "开启蓝牙", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.open_bluetooth, Toast.LENGTH_SHORT).show();
         }
     }
 }

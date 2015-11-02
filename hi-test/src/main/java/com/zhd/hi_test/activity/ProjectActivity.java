@@ -87,10 +87,10 @@ public class ProjectActivity extends Activity {
             //第三步通过适配器，将项目显示到ListView上
             lv.setAdapter(mpa);
         } else {
-            Toast.makeText(ProjectActivity.this, "当前没有项目", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ProjectActivity.this, R.string.project_none, Toast.LENGTH_SHORT).show();
         }
         //进行数据库中脏数据表删除
-        Curd curd=new Curd("sqlite_master",this);
+        Curd curd = new Curd("sqlite_master", this);
         curd.removeDirtyTable(mMyProjects);
     }
 
@@ -106,11 +106,7 @@ public class ProjectActivity extends Activity {
         File files = new File(mPath);
         //将project对象中的配置文件进行读取，并创建Project对象
         File[] contents = files.listFiles();
-        if (contents.length > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return contents.length > 0;
     }
 
     /**
@@ -182,17 +178,17 @@ public class ProjectActivity extends Activity {
                 final View finalView = view;
                 AlertDialog dialog = new AlertDialog.Builder(this)
                         .setView(view)
-                        .setPositiveButton("创建", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 EditText et1 = (EditText) finalView.findViewById(R.id.et_pro_name);
                                 String pro_name = et1.getText().toString();
-                                boolean isRight = FileUtil.checkMsg(pro_name, mPath,1);
+                                boolean isRight = FileUtil.checkMsg(pro_name, mPath, 1);
                                 String[] mConfigs = new String[6];
                                 if (isRight) {
                                     mConfigs[0] = pro_name;//获得项目名称
                                 } else {
-                                    Toast.makeText(ProjectActivity.this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, R.string.proname_hint, Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 EditText et2 = (EditText) finalView.findViewById(R.id.et_pro_back);
@@ -207,15 +203,15 @@ public class ProjectActivity extends Activity {
                                 mConfigs[5] = String.valueOf(sp_guass.getSelectedItem().toString());
                                 boolean res = FileUtil.createProject(mPath, mConfigs, ProjectActivity.this);
                                 if (res) {
-                                    Toast.makeText(ProjectActivity.this, "创建成功", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, R.string.create_success, Toast.LENGTH_SHORT).show();
                                     //刷新
                                     refresh();
                                     //创建的时候会赋给全局变量
                                 } else
-                                    Toast.makeText(ProjectActivity.this, "创建失败", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProjectActivity.this, R.string.create_failure, Toast.LENGTH_SHORT).show();
                             }
                         })
-                        .setNegativeButton("取消", null).create();
+                        .setNegativeButton(R.string.cancel, null).create();
                 dialog.show();
                 break;
             case R.id.item_delte:
@@ -223,7 +219,7 @@ public class ProjectActivity extends Activity {
                     //OptionItem进行删除，会删除当前radioButton选中的
                     deleteProject();
                 } else {
-                    Toast.makeText(ProjectActivity.this, "请选择项目", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectActivity.this, R.string.select_project, Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -236,18 +232,18 @@ public class ProjectActivity extends Activity {
         switch (item.getItemId()) {
             case 0:
                 //如果当前有打开项目，则更新最后的时间
-                if (Const.getmProject()!=null){
+                if (Const.getmProject() != null) {
                     FileUtil.updateProject(Const.getmProject());
                 }
                 Const.setmProject(mProject);
-                Toast.makeText(this, "打开成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.project_open_success, Toast.LENGTH_SHORT).show();
                 refresh();
                 break;
             case 1:
                 if (mProject != null)
                     deleteProject();
                 else
-                    Toast.makeText(this, "请选择项目", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.select_project, Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onContextItemSelected(item);
@@ -258,7 +254,7 @@ public class ProjectActivity extends Activity {
         //如果名称相同则当前项目为空
         if (Const.getmProject() != null) {
             if (Const.getmProject().getmName().equals(mProject.getmName())) {
-                Toast.makeText(this,"当前项目打开，不能删除",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.delete_warning, Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -276,7 +272,7 @@ public class ProjectActivity extends Activity {
         File file = new File(mPath + "/" + mProject.getmName());
         FileUtil.deleteDirectory(file);
         //提示
-        Toast.makeText(ProjectActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(ProjectActivity.this, R.string.delete_success, Toast.LENGTH_SHORT).show();
         //这里刷新只会重读ProjectAdapter，但Adapter中projects对象的数量没有变化，可以在这里对
         //删除Adapter里面的mProjects数据
         refresh();

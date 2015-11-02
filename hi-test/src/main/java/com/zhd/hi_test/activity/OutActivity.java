@@ -71,9 +71,9 @@ public class OutActivity extends Activity implements View.OnClickListener {
             case R.id.btn_out:
                 boolean res = WriteFile();
                 if (res) {
-                    Toast.makeText(this, "导出成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.output_success, Toast.LENGTH_SHORT).show();
                 } else
-                    Toast.makeText(this, "导出失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.output_failure, Toast.LENGTH_SHORT).show();
                 break;
         }
         finish();

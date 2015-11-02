@@ -10,25 +10,25 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             style="@style/ManageInfo"
-            android:text="Pnr"/>
+            android:text="@string/pnr"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             style="@style/ManageInfo"
-            android:text="Azi"/>
+            android:text="@string/azi"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             style="@style/ManageInfo"
-            android:text="Ele"/>
+            android:text="@string/ele"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             style="@style/ManageInfo"
-            android:text="Snr"
+            android:text="@string/snr"
             />
     </LinearLayout>
     <ListView

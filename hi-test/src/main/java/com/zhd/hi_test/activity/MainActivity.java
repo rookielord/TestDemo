@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
                     tv_use_sate.setText(myLocation.getmUseSate());
                     tv_age_time.setText(myLocation.getmAge());
                     if (!Const.HasPDOP)
-                        tv_PDOP.setText("0.0");
+                        tv_PDOP.setText(R.string.default_PDOP);
                     setSolutionImage(myLocation.getmQuality());
                     break;
                 case 2:
@@ -90,10 +90,10 @@ public class MainActivity extends Activity {
                 image_solution.setImageResource(R.mipmap.ic_solution_none);
                 break;
             case "GPS固定解":
-                image_solution.setImageResource(R.mipmap.ic_solution_fix);
+                image_solution.setImageResource(R.mipmap.ic_solution_single);
                 break;
             case "不同GPS固定解":
-                image_solution.setImageResource(R.mipmap.ic_solution_rtd);
+                image_solution.setImageResource(R.mipmap.ic_solution_fix);
                 break;
             case "实时差分固定解":
                 image_solution.setImageResource(R.mipmap.ic_solution_rtd);
@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
             case "实时差分浮动解":
                 image_solution.setImageResource(R.mipmap.ic_solution_rtkf);
                 break;
-            case "GPS单点定位":
+            case "内置GPS定位":
                 image_solution.setImageResource(R.mipmap.ic_android);
                 break;
         }
@@ -136,24 +136,24 @@ public class MainActivity extends Activity {
             String name = setProjectName(Const.getmProject().getmName());
             tv_name.setText(name);
         } else {
-            tv_name.setText("未选择项目");
+            tv_name.setText(R.string.open_project_request);
         }
         if (Const.IsConnected) {//只有当前是连接状态才发送hanlder
             if (Const.getmConnectType() == Const.BlueToothConncet) {
                 Infomation.setHandler(mHandler);
-                tv_connect.setText("蓝牙连接");
+                tv_connect.setText(R.string.bluetooth);
             } else {
                 InnerGPSConnect.setmHandler(mHandler);
-                tv_connect.setText("内置GPS连接");
+                tv_connect.setText(R.string.innergps);
             }
         } else {
-            tv_result.setText("无解");
-            tv_connect.setText("仪器未连接");
+            tv_result.setText(R.string.solution_none);
+            tv_connect.setText(R.string.unconnect);
             image_solution.setImageResource(R.mipmap.ic_solution_none);
-            tv_age_time.setText("0.0");
-            tv_use_sate.setText("0");
-            tv_sate.setText("0");
-            tv_PDOP.setText("0.0");
+            tv_age_time.setText(R.string.default_none);
+            tv_use_sate.setText(R.string.default_none);
+            tv_sate.setText(R.string.default_none);
+            tv_PDOP.setText(R.string.default_PDOP);
         }
     }
 
@@ -260,9 +260,11 @@ public class MainActivity extends Activity {
      */
     public class MyOnClickListener implements OnClickListener {
         private int index = 0;
+
         public MyOnClickListener(int i) {
             index = i;
         }
+
         @Override
         public void onClick(View v) {
             setTextBackgroundColor();
@@ -287,7 +289,7 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if (System.currentTimeMillis() - mFirsttime > INTERVAL) {
             mFirsttime = System.currentTimeMillis();
-            Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.exit_app, Toast.LENGTH_SHORT).show();
         } else {
             finish();
         }

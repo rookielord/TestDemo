@@ -58,7 +58,7 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
         setContentView(R.layout.activity_file_exchange);
         //判断是否打开项目
         if (Const.getmProject() == null) {
-            Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.open_project_request, Toast.LENGTH_SHORT).show();
             return;
         }
         init();
@@ -179,7 +179,7 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
         if (FileUtil.checkMsg(name, mCurfile.getPath(), 2)) {
             return name;
         }
-        Toast.makeText(this, "请输入正确的项目名称", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.input_hint, Toast.LENGTH_SHORT).show();
         return null;
     }
 
@@ -205,12 +205,12 @@ public class FileExchangeActivity extends Activity implements View.OnClickListen
             //写入当前的路径
             FileUtil.writeFileByString(mCurfile.getPath() + "/" + mFileName + ".txt", sb.toString());
             //刷新当前目录的内容
-            Toast.makeText(this, "导出CASS成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.cass_success, Toast.LENGTH_SHORT).show();
             getAll(mCurfile);
             mAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "导出失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.output_failure, Toast.LENGTH_SHORT).show();
         }
 
     }

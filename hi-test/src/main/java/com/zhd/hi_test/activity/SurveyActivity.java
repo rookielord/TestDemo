@@ -177,7 +177,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         image_compass = (ImageView) findViewById(R.id.image_compass);
 
         if (Const.getmProject() == null) {
-            Toast.makeText(this, "请打开项目", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.open_project_request, Toast.LENGTH_SHORT).show();
             return;
         }
         //初始化页面
@@ -223,7 +223,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         if (res) {
             Toast.makeText(SurveyActivity.this, "pt" + (mid + 1) + "添加成功", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(SurveyActivity.this, "添加失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SurveyActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
         }
     }
 

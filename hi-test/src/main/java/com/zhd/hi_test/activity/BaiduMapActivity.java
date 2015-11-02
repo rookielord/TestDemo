@@ -66,7 +66,6 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
         setContentView(R.layout.activity_baidumap);
         //获取在屏幕上需要画圆的内容
         mMarkicon= BitmapDescriptorFactory.fromResource(R.mipmap.ic_solution_rtki);
-
         init();
         //
         drawMap();
@@ -81,19 +80,9 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
         //如果是画线段的话？
         //根据图形化一个
         for (LatLng point : points) {
-
-
-//            OverlayOptions ooCircle = new CircleOptions().fillColor(Color.parseColor("#2C000000"))
-//                    .center(point).stroke(new Stroke(2, Color.BLUE))
-//                    .radius(10);
-//            mBaiduMap.addOverlay(ooCircle);
-//            OverlayOptions ooDot = new DotOptions().center(point).radius(6)
-//                    .color(0xFF0000FF);
-//            mBaiduMap.addOverlay(ooDot);
             OverlayOptions ooA = new MarkerOptions().position(point).icon(mMarkicon)
                     .zIndex(9).draggable(true);
             mBaiduMap.addOverlay(ooA);
-
         }
 
     }
@@ -105,7 +94,7 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
         mBaiduMap = mapview.getMap();
         //使用的当前定位模式
         mCurrentMode = LocationMode.NORMAL;
-        btn_location.setText("普通");
+        btn_location.setText(getString(R.string.normal));
         //启动定位图层
         mBaiduMap.setMyLocationEnabled(true);
         //创建定位客户端
@@ -152,21 +141,21 @@ public class BaiduMapActivity extends Activity implements OnClickListener {
             case R.id.btn_location:
                 switch (mCurrentMode) {
                     case NORMAL:
-                        btn_location.setText("跟随");
+                        btn_location.setText(getString(R.string.follow));
                         mCurrentMode = LocationMode.FOLLOWING;
                         mBaiduMap
                                 .setMyLocationConfigeration(new MyLocationConfiguration(
                                         mCurrentMode, true, null));
                         break;
                     case COMPASS:
-                        btn_location.setText("普通");
+                        btn_location.setText(getString(R.string.normal));
                         mCurrentMode = LocationMode.NORMAL;
                         mBaiduMap
                                 .setMyLocationConfigeration(new MyLocationConfiguration(
                                         mCurrentMode, true, null));
                         break;
                     case FOLLOWING:
-                        btn_location.setText("罗盘");
+                        btn_location.setText(getString(R.string.compass));
                         mCurrentMode = LocationMode.COMPASS;
                         mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
                                 mCurrentMode, true, null));
