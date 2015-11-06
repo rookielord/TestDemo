@@ -32,7 +32,7 @@ public class DownloadHelper {
                 int num = 0;
                 InputStream is = con.getInputStream();
                 FileOutputStream os = new FileOutputStream(file);
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[1024*5];
                 int len;
                 while ((len = is.read(buffer)) != -1) {
                     os.write(buffer, 0, len);

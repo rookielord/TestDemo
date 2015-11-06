@@ -13,6 +13,7 @@ import com.zhd.hi_test.module.MyPoint;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by 2015032501 on 2015/9/22.
@@ -26,9 +27,9 @@ public class SurveyView extends View {
     private int mHeight;
     private int mWidth;
     //用来存放临时MyPoints的集合，因为在传输过来的时候无法获得宽和高，当前控件还没有获得宽和高
-    List<MyPoint> mPoints;
+    CopyOnWriteArrayList<MyPoint> mPoints = new CopyOnWriteArrayList<>();
     //需要画的点集合
-    List<DrawPoint> drawPoints = new ArrayList<>();
+    CopyOnWriteArrayList<DrawPoint> drawPoints = new CopyOnWriteArrayList<>();
     //我的位置
     DrawPoint Mypoint;
     MyPoint myPoint;
@@ -75,7 +76,7 @@ public class SurveyView extends View {
      * @param point 当前位置点的坐标
      */
     public void SetCurrentLocation(MyPoint point) {
-        if (mPoints != null) {
+        if (mPoints.size() > 0) {
             mOffsetx = (float) (mREFpoint.getmN() - point.getmN()) * mScale;
             mOffsety = (float) (mREFpoint.getmE() - point.getmE()) * mScale;
         }
@@ -83,12 +84,14 @@ public class SurveyView extends View {
 
     /**
      * 将采集到的点集传送过来，并以最开始的点作为参考点
+     *
      * @param points 根据数据库倒序查询出来的点
      */
     public void setPoints(List<MyPoint> points) {
-        if (points != null) {
+        if (points.size() > 0) {
             setCenterValue(points.get(points.size() - 1));
-            mPoints = points;
+            mPoints.clear();
+            mPoints.addAll(points);
         }
     }
 
@@ -119,7 +122,7 @@ public class SurveyView extends View {
 
     /**
      * 主要功能，将大地坐标N,E,转化为屏幕坐标x,y.
-     *
+     * <p/>
      * 每次在更新画布点集合之前需要对画布点集合进行清空
      * 这样就不会累加
      * 这
@@ -130,7 +133,7 @@ public class SurveyView extends View {
     private void updatePoints() {
         //1.当前有位置才会绘制当前点
         if (myPoint != null) {
-            if (mPoints == null) {//如果没有参考点的情况，即没有已知点的情况
+            if (mPoints.size() == 0) {//如果没有参考点的情况，即没有已知点的情况
                 Mypoint = new DrawPoint(mCenterX, mCenterY);
             } else {//根据根据传进来的当前位置，获得在屏幕上的对应坐标
                 float myX = (float) (mCenterX + (myPoint.getmN() - mREFpoint.getmN()) * mScale) + mOffsetx;
@@ -142,7 +145,7 @@ public class SurveyView extends View {
         //3.更新数据库中点在屏幕上的坐标
         //3.1清除所有的画在图上的点
         //2.更新已有点的位置
-        if (mPoints == null)
+        if (mPoints.size() == 0)
             return;
         drawPoints.clear();
         for (MyPoint myPoint : mPoints) {
@@ -152,7 +155,7 @@ public class SurveyView extends View {
             DrawPoint p = new DrawPoint(x, y, myPoint.getName());
             drawPoints.add(p);
         }
-        //4.获得最后一个点在屏幕上的坐标
+        //4.获得最后一个点在屏幕上的坐标,这个有时候怎么会获取不到
         mLastPont = drawPoints.get(0);
     }
 
@@ -222,6 +225,7 @@ public class SurveyView extends View {
      * 以比例尺右下点的坐标，为startx和starty
      * 宽度为40像素
      * 添加了点之后
+     *
      * @param canvas
      */
     private void DrawScale(Canvas canvas) {
@@ -229,7 +233,7 @@ public class SurveyView extends View {
         int starty = mHeight - 5;
         mPaint.reset();
         mPaint.setColor(Color.BLACK);
-        mPaint.setStrokeWidth(3);
+        mPaint.setStrokeWidth(2);
         canvas.drawLine(startx, starty, startx, starty - 5, mPaint);//第一条线
         canvas.drawLine(startx, starty, startx - 30, starty, mPaint);//第二条线
         canvas.drawLine(startx - 30, starty, startx - 30, starty - 5, mPaint);//第三条线
@@ -263,14 +267,15 @@ public class SurveyView extends View {
      * 遍历DrawPoints中的元素，然后将其画在图片上
      * 以当前点为中心画两条线交叉
      * 这里需要对传输过来的点集合进行处理，并绘制在地图上
+     *
      * @param canvas
      */
     private void DrawPoints(Canvas canvas) {
         mPaint.reset();
         float x;
         float y;
-        if (mPoints == null)
-            return;
+//        if (mPoints == null)
+//            return;
         for (DrawPoint point : drawPoints) {
             mPaint.setColor(Color.BLACK);
             mPaint.setAntiAlias(true);

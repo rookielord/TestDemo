@@ -1,11 +1,13 @@
 package com.zhd.hi_test.adapter;
 
 import android.content.Context;
+import android.database.DataSetObservable;
 import android.graphics.Color;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.RadioButton;
@@ -16,7 +18,9 @@ import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.OnProjectListener;
 import com.zhd.hi_test.module.MyProject;
+import com.zhd.hi_test.util.FileUtil;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +41,7 @@ public class ProjectAdapter extends BaseAdapter {
     //闯过来所有Project对象
     private List<MyProject> mMyProjects;
 
+
     private Context mContext;
     //用来存放所有的Radio状态
     Map<String, Boolean> states = new HashMap<>();
@@ -45,6 +50,17 @@ public class ProjectAdapter extends BaseAdapter {
     public ProjectAdapter(List<MyProject> myProjects, Context context) {
         this.mMyProjects = myProjects;
         this.mContext = context;
+    }
+
+    public void setmMyProjects(List<MyProject> projects) {
+        this.mMyProjects = projects;
+        for (String key : states.keySet()) {//点击radioButton按钮时会将触发事件，先将所有的states设为false
+            states.put(key, false);
+        }
+        //获取其位置选中
+        int loc = FileUtil.getDefaultProLoc(projects);
+        states.put(String.valueOf(loc), true);
+        ProjectAdapter.this.notifyDataSetChanged();
     }
 
     //定义一个Viewholder,用来存放layout上面的控件对象
@@ -116,7 +132,7 @@ public class ProjectAdapter extends BaseAdapter {
                 ProjectAdapter.this.notifyDataSetChanged();
             }
         };
-        holder.radio.setOnClickListener(mClick);
+//        holder.radio.setOnClickListener(mClick);
         //第一次将所有的states状态都设为false，以后则会将选中的和未被选中的一起拿进去
         boolean res = false;
         if (states.get(String.valueOf(position)) == null
@@ -129,14 +145,14 @@ public class ProjectAdapter extends BaseAdapter {
         holder.radio.setChecked(res);
         //在这里进行判断当前的mProject是否等于convertview的project,但是在滑动的时候未销毁的convertview会影响
         convertView.setBackgroundColor(Color.TRANSPARENT);
-        if (Const.getmProject() !=null){
-            if (p.getmName().equals(Const.getmProject().getmName())){
+        if (Const.getmProject() != null) {
+            if (p.getmName().equals(Const.getmProject().getmName())) {
                 convertView.setBackgroundResource(R.drawable.project_selected);
             }
         }
         convertView.setOnClickListener(mClick);
         //这里是这里是根据convertView来创建的菜单
-        convertView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+        convertView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                 menu.setHeaderTitle(R.string.project_create);

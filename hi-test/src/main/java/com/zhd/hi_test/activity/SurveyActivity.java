@@ -67,7 +67,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
     TextView tv_B, tv_L, tv_H, tv_N, tv_E, tv_Z, tv_time, tv_date, tv_satellite, tv_PDOP, tv_age, tv_solution, tv_usesate;
     Button btn_add;
     ImageView image_add, image_zoom_in, image_zoom_out,
-            image_zoom_center, image_zoom_all, image_compass, image_baidumap;
+            image_zoom_center, image_zoom_all, image_compass, image_baidumap, image_auto;
     LinearLayout ll_part1, ll_part2, ll_layout1;
     //用来存放当前位置的东西半球和南北半球数据
     private static String mDireB;
@@ -94,6 +94,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
     //指南针的控件相关
     private Sensor mSensor;
     private SensorManager mSensorManager;
+    private boolean mIsAuto = false;
+    private static AutoAddThread mThread;
     //线程通信
     private Handler mHandler = new Handler() {
         @Override
@@ -101,21 +103,21 @@ public class SurveyActivity extends Activity implements OnClickListener {
             switch (msg.what) {
                 case 1:
                     MyLocation myLocation = (MyLocation) msg.obj;
-                    tv_B.setText(myLocation.getmB());
-                    tv_L.setText(myLocation.getmL());
-                    tv_H.setText(myLocation.getmH());
-                    tv_time.setText(myLocation.getmTime());
-                    tv_age.setText(myLocation.getmAge());
-                    tv_solution.setText(myLocation.getmQuality());
-                    tv_usesate.setText(myLocation.getmUseSate());
-                    mDireB = myLocation.getmDireB();
-                    mDireL = myLocation.getmDireL();
-                    double b = Double.valueOf(myLocation.getmProgressB());
-                    double l = Double.valueOf(myLocation.getmProgressL());
+                    tv_B.setText(myLocation.getB());
+                    tv_L.setText(myLocation.getL());
+                    tv_H.setText(String.valueOf(myLocation.getH()));
+                    tv_time.setText(myLocation.getTime());
+                    tv_age.setText(String.valueOf(myLocation.getAge()));
+                    tv_solution.setText(myLocation.getQuality());
+                    tv_usesate.setText(String.valueOf(myLocation.getUseSate()));
+                    mDireB = myLocation.getDireB();
+                    mDireL = myLocation.getDireL();
+                    double b = Double.valueOf(myLocation.getProgressB());
+                    double l = Double.valueOf(myLocation.getProgressL());
                     HashMap<String, String> info = Coordinate.getCoordinateXY(b, l, Const.getmProject());
                     tv_N.setText(info.get("n").toString());
                     tv_E.setText(info.get("e").toString());
-                    tv_Z.setText(myLocation.getmH());
+                    tv_Z.setText(String.valueOf(myLocation.getZ()));
                     if (!Const.HasDataInfo)
                         tv_date.setText(UTCDate.getDefaultTime());
                     if (!Const.HasPDOP)
@@ -138,6 +140,14 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 case 4:
                     Const.HasPDOP = true;
                     tv_PDOP.setText(msg.obj.toString());
+                    break;
+                case 5:
+                    if (res) {
+                        Toast.makeText(SurveyActivity.this, "pt" + (mid + 1) + getString(R.string.add_success), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SurveyActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
+                    }
+                    surveyView.invalidate();
                     break;
             }
         }
@@ -163,6 +173,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
 
         }
     };
+    private boolean res;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,6 +210,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         mSensorManager.registerListener(mListener, mSensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
+    /**
+     * 将当前点的数据添加进数据库中
+     */
     private void addPoint() {
         //每次添加前先获得当前末尾的id
         mid = mCurd.getLastID();
@@ -215,14 +229,10 @@ public class SurveyActivity extends Activity implements OnClickListener {
         cv.put("DireB", mDireB);
         cv.put("DireL", mDireL);
         cv.put("DES", "");
-        cv.put("height", String.valueOf(Const.getMheight()));
+        cv.put("height", String.valueOf(Const.getheight()));
         values.add(cv);
-        boolean res = mCurd.insertData(values);
-        if (res) {
-            Toast.makeText(SurveyActivity.this, "pt" + (mid + 1) + "添加成功", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(SurveyActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
-        }
+        res = mCurd.insertData(values);
+        //直接发送消息进行Toast显示
     }
 
     /**
@@ -234,6 +244,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
         surveyView.setOnTouchListener(new ZoomListener());
         //判断数据库中是否有点和传输数据
         refreshPoints();
+        surveyView.invalidate();
     }
 
     /**
@@ -245,18 +256,17 @@ public class SurveyActivity extends Activity implements OnClickListener {
     private void refreshPoints() {
         myPoints.clear();
         mCursor = mCurd.queryData(new String[]{"*"}, "id desc");
-        if (mCursor.getCount() != 0) {
-            while (mCursor.moveToNext()) {
+        if (mCursor.moveToFirst()) {
+            do {
                 //获取数据存入其中
                 double N = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("N")));
                 double E = Double.valueOf(mCursor.getString(mCursor.getColumnIndex("E")));
                 String name = "pt" + mCursor.getString(mCursor.getColumnIndex("id"));
                 MyPoint p = new MyPoint(name, N, E);
                 myPoints.add(p);
-            }
+            } while (mCursor.moveToNext());
             mCursor.close();
             surveyView.setPoints(myPoints);
-            surveyView.invalidate();
         }
     }
 
@@ -270,7 +280,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         image_zoom_out = (ImageView) findViewById(R.id.image_zoom_out);
         image_zoom_all = (ImageView) findViewById(R.id.image_zoom_all);
         image_baidumap = (ImageView) findViewById(R.id.image_baidumap);
+        image_auto = (ImageView) findViewById(R.id.image_auto);
         image_baidumap.setOnClickListener(this);
+        image_auto.setOnClickListener(this);
         btn_add = (Button) findViewById(R.id.btn_add_point);
         image_add.setOnClickListener(this);
         image_zoom_in.setOnClickListener(this);
@@ -307,7 +319,9 @@ public class SurveyActivity extends Activity implements OnClickListener {
         viewPager.setAdapter(mAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
             //选中页面时，改变下面点
             @Override
             public void onPageSelected(int position) {
@@ -394,7 +408,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
      * 1.surveyView的参考点清空，不然这次的参考点会影响到下次的测量
      * 2.不再解析数据
      * 3.不再接收内置GPS的数据
-     * <p>
+     * <p/>
      * 注意问题：如果是在OnDestroy的情况下，在返回到MainActivity的时候不会立刻执行OnDestroy
      * 在过一段时候才会执行，这样会导致Activity
      */
@@ -402,6 +416,7 @@ public class SurveyActivity extends Activity implements OnClickListener {
     protected void onDestroy() {
         if (mListener != null)
             mSensorManager.unregisterListener(mListener);
+        cancelAutoCollect();
         super.onDestroy();
     }
 
@@ -409,14 +424,16 @@ public class SurveyActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image_add://直接进行数据采集
+                cancelAutoCollect();
                 if (Const.IsConnected) {
                     addPoint();
                     refreshPoints();
-                    surveyView.invalidate();
+                    mHandler.sendEmptyMessage(5);
                 }
                 break;
             case R.id.btn_add_point://将信息获取到，然后跳转到另外一个界面来,采集数据
                 if (Const.IsConnected) {
+                    cancelAutoCollect();
                     Intent intent = new Intent("com.zhd.addPoint.START");
                     intent.putExtra("B", tv_B.getText().toString());
                     intent.putExtra("L", tv_L.getText().toString());
@@ -463,6 +480,53 @@ public class SurveyActivity extends Activity implements OnClickListener {
                 Intent intent = new Intent("com.zhd.baidumap.START");
                 startActivity(intent);
                 break;
+            case R.id.image_auto:
+                if (Const.IsConnected) {
+                    if (mIsAuto)
+                        cancelAutoCollect();
+                    else
+                        startAutoCollect();
+                }
+                break;
         }
     }
+
+    private void startAutoCollect() {
+        mIsAuto = true;
+        mThread = new AutoAddThread();
+        mThread.start();
+        Toast.makeText(this, R.string.auto_start, Toast.LENGTH_SHORT).show();
+        image_auto.setImageResource(R.mipmap.ic_auto_end);
+    }
+
+    private void cancelAutoCollect() {
+        if (mThread != null && !mThread.mExit) {
+            mIsAuto = false;
+            mThread.mExit = true;
+            Toast.makeText(this, R.string.auto_end, Toast.LENGTH_SHORT).show();
+            image_auto.setImageResource(R.mipmap.ic_auto_start);
+        }
+    }
+
+
+    class AutoAddThread extends Thread {
+
+        public boolean mExit = false;
+
+        @Override
+        public void run() {
+            while (!mExit && Const.IsConnected) {
+                try {
+                    Thread.sleep(4000);
+                    addPoint();//添加点
+                    refreshPoints();//刷新点
+                    mHandler.sendEmptyMessage(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            super.run();
+        }
+    }
+
 }

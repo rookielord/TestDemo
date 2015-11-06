@@ -145,4 +145,7 @@
     <string name="device_disconnect">仪器断开连接</string>
     <string name="connect_success">连接成功</string>
     <string name="connect_failure">连接失败</string>
+    <!-- SurveyActivity-->
+    <string name="auto_start">自动采集开始</string>
+    <string name="auto_end">自动采集结束</string>
 </resources>

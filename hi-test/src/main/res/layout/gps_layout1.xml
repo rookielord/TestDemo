@@ -38,6 +38,7 @@
                 android:thumb="@mipmap/thum"
                 android:progressDrawable="@drawable/seekbar_img"
                 android:max="90"
+                android:thumbOffset="0dp"
                 android:progress="90"
                 android:minHeight="10dp"
                 android:maxHeight="10dp"

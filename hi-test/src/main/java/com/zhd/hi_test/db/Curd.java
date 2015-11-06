@@ -33,10 +33,10 @@ public class Curd {
                 "id integer primary key ," +
                 "B varchar(32) ," +
                 "L varchar(32) ," +
-                "H varchar(32) ," +
-                "N varchar(32) ," +
-                "E varchar(32) ," +
-                "Z varchar(32) ," +
+                "H double(20) ," +
+                "N double(32) ," +
+                "E double(32) ," +
+                "Z double(20) ," +
                 "time varchar(32)," +
                 "type tinyint(1)," +
                 "DireB char(1)," +
@@ -66,20 +66,22 @@ public class Curd {
     //删除操作
     public Boolean deleteData(String id) {
         int res = mWB.delete(mTablename, "id=?", new String[]{id});
-        if (res != 1) {
-            return false;
-        }
-        return true;
+//        if (res != 1) {
+//            return false;
+//        }
+//        return true;
+        return res!=0;
     }
 
     //修改操作
     public Boolean UpdateData(String id, ContentValues cv) {
         int res = mWB.update(mTablename, cv, "id=?", new String[]{id});
-        if (res == 0) {
-            return false;
-        } else {
-            return true;
-        }
+//        if (res == 0) {
+//            return false;
+//        } else {
+//            return true;
+//        }
+        return res!=0;
     }
 
     //查询操作，涉及全部的操作

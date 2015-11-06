@@ -23,7 +23,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,8 +50,8 @@ public class FileUtil {
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(msg);
         check2 = m.find();
-        if (type==2)
-            msg+=".txt";
+        if (type == 2)
+            msg += ".txt";
         String[] FileNames = new File(path).list();
         if (FileNames.length > 0) {
             for (String name : FileNames) {
@@ -96,7 +98,7 @@ public class FileUtil {
                 MyProject p = new MyProject(configs[0], configs[1], configs[2], configs[3], configs[4], tableName, config_file, configs[5]);
                 out.writeObject(p);
                 //将其设为全局变量
-                Const.setmProject(p);
+                Const.setProject(p);
                 //并创建对应的数据库表
                 Curd curd = new Curd(tableName, activity);
                 curd.createTable(tableName);
@@ -130,6 +132,7 @@ public class FileUtil {
 
     //删除项目
     public static void deleteDirectory(File del_directory) {
+
         if (del_directory.isDirectory()) {
             File[] files = del_directory.listFiles();
             for (File file : files) {
@@ -181,7 +184,7 @@ public class FileUtil {
     /**
      * [0]:名字;[1]备注;[2]创建时间;[3]最后使用时间;[4]创建的表名
      *
-     * @param myProject
+     * @param project
      */
     public static void updateProject(MyProject project) {
         ObjectOutputStream out = null;
@@ -217,7 +220,7 @@ public class FileUtil {
         boolean isFirst = sp.getBoolean("isFirst", true);
         //获得全局变量的Project路径
         if (isFirst) {
-            String path = Const.getmPath();//path是指Project的位置
+            String path = Const.getPath();//path是指Project的位置
             String time = FileUtil.getCurrentTime();
             String[] configs = new String[]{"default", "默认创建", time, time, "北京54坐标系", "3度带"};
             //创建默认项目
@@ -225,7 +228,7 @@ public class FileUtil {
             //然后读取config.txt来创建项目
             MyProject p = FileUtil.getDefaultProject(path);
             //设置为全局变量
-            Const.setmProject(p);
+            Const.setProject(p);
             //设置其为false，不是第一次启动
             editor.putBoolean("isFirst", false);
             editor.commit();
@@ -260,7 +263,6 @@ public class FileUtil {
     }
 
     /**
-     *
      * @param p
      * @param activity
      */
@@ -287,6 +289,7 @@ public class FileUtil {
 
     /**
      * 得到上一次存储对象后，会去检查该项目是否存在，如果存在则设置，如果不在则不会将其设为全局变量
+     *
      * @param mainActivity
      */
     public static void setLastProject(Activity mainActivity) {
@@ -302,7 +305,7 @@ public class FileUtil {
                 MyProject p = (MyProject) ois.readObject();
                 //设置为全局变量
                 if (p.getmConfig().exists())
-                Const.setmProject(p);
+                    Const.setProject(p);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -389,5 +392,57 @@ public class FileUtil {
             }
         }
     }
+
+    public static int getDefaultProLoc(List<MyProject> projects) {
+        int loc = -1;
+        for (int i = 0; i < projects.size(); i++) {
+            if (projects.get(i).getmName().equals(Const.getmProject().getmName())) {
+                loc = i;
+                break;
+            }
+
+        }
+        return loc;
+    }
+
+    /**
+     * 第二步根据路径来获取对应的配置文件来创建Project对象，并填充进集合
+     *
+     * @param path 配置文件的路径
+     * @return
+     */
+    public static List<MyProject> getProjectInstance(String path) {
+        List<MyProject> myProjectList = new ArrayList<>();
+        //对应路径下的config.txt文件进行读取，并创建project对象
+        String[] proPaths = new File(path).list();//这个只会得到对应的文件夹名，没有路径
+        for (String proName : proPaths) {
+            //拼接config.txt路径
+            File config = new File(path + "/" + proName, "config.txt");
+            //读取存入的project对象
+            ObjectInputStream in = null;
+            try {
+                //设置文件读取流
+                in = new ObjectInputStream(new FileInputStream(config));
+                MyProject p = (MyProject) in.readObject();
+                myProjectList.add(p);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return myProjectList;
+    }
+
 
 }

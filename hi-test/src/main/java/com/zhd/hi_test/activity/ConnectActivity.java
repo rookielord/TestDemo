@@ -18,10 +18,20 @@ import android.widget.Toast;
 
 import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
+import com.zhd.hi_test.interfaces.Connectable;
 import com.zhd.hi_test.interfaces.IConnect;
+import com.zhd.hi_test.interfaces.InformationListener;
 import com.zhd.hi_test.module.BluetoothConnect;
+import com.zhd.hi_test.module.BluetoothConnect2;
+import com.zhd.hi_test.module.ConnectManager;
 import com.zhd.hi_test.module.InnerGPSConnect;
+import com.zhd.hi_test.module.MyLocation;
+import com.zhd.hi_test.module.Satellite;
+import com.zhd.hi_test.module.UTCDate;
+import com.zhd.hi_test.util.TrimbleOrder;
 
+import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -32,7 +42,7 @@ import com.zhd.hi_test.module.InnerGPSConnect;
  * 主要是保证：1.一种连接方式连接2.断开连接后可以重连
  * 如果单论这个页面的话取消监听是没有问题的，但是涉及到其他页面
  */
-public class ConnectActivity extends Activity {
+public class ConnectActivity extends Activity implements InformationListener {
     //控件
     Button btn_connect;
     TextView tv_content;
@@ -46,7 +56,9 @@ public class ConnectActivity extends Activity {
     //获取连接的方式
     private int mConnectWay;
     //当前的连接对象
-    private static IConnect mConnect;
+    private IConnect mConnect;
+    //改进版的连接对象
+    private Connectable mConn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,11 +211,15 @@ public class ConnectActivity extends Activity {
             case Const.DEVICE_MESSAGE://建立蓝牙连接的选项
                 if (resultCode == RESULT_OK) {
                     String address = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
+                    //创建handler时不进行提示
+                    mConn = new BluetoothConnect2(address, mAdapter, this);
+                    ConnectManager manager = new ConnectManager(this, mConn);
+                    manager.registerListener(this);
 
-                    mConnect = new BluetoothConnect(address, mAdapter, this);
-                    Const.setmConnect(mConnect);
-                    startConnecting();
-                    getDefaultInfo();
+//                    mConnect = new BluetoothConnect(address, mAdapter, this);
+//                    Const.setmConnect(mConnect);
+//                    startConnecting();
+//                    getDefaultInfo();
 //                    mConnect.startConnect();
 //                    List<byte[]> orders = new ArrayList<byte[]>() {{
 //                        add(TrimbleOrder.CLOSE_COM1);
@@ -252,5 +268,25 @@ public class ConnectActivity extends Activity {
         } else {
             Toast.makeText(this, R.string.open_bluetooth, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onLocationChange(MyLocation location) {
+
+    }
+
+    @Override
+    public void onSatelliteChange(List<Satellite> satellites) {
+
+    }
+
+    @Override
+    public void onDateChange(UTCDate date) {
+
+    }
+
+    @Override
+    public void clearMessage() {
+
     }
 }

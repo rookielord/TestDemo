@@ -73,6 +73,7 @@ public class InnerGPSConnect implements IConnect {
         GPSinit();
     }
 
+
     /**
      * 因为在实例化私有字段的时候就会传输数据,所以发送数据和读取数据其实是一回事
      * 但是为了区别还是在这里添加位置监听
@@ -92,25 +93,22 @@ public class InnerGPSConnect implements IConnect {
             //这里可以先获得最后的位置信息，再获得当前的位置信息。定位了就不会调用
             @Override
             public void onLocationChanged(Location location) {
-                String longitude = String.valueOf(location.getLongitude());
-                String altitude = String.valueOf(location.getAltitude());
-                String latitude = String.valueOf(location.getLatitude());
-                long time = location.getTime();
                 //先判断Bundle是否存在
-                String fixnum = "0";
+                int fixnum = 0;
                 if (location.getExtras().get("satellites") != null) {
-                    fixnum = location.getExtras().get("satellites").toString();
+                    fixnum = (int)location.getExtras().get("satellites");
                 }
                 //在有handler的情况下才进行数据传输
                 if (mHandler != null) {
-                    MyLocation loc = new MyLocation(latitude, longitude, altitude, time, fixnum);
+                    MyLocation loc = new MyLocation(location.getLatitude(),
+                            location.getLongitude(), location.getAltitude(), location.getTime(), fixnum);
                     Message m1 = Message.obtain();
                     m1.what = 1;
                     m1.obj = loc;
 //                    sendMsg(m1);
                     mHandler.sendMessage(m1);
 
-                    UTCDate t = new UTCDate(time);
+                    UTCDate t = new UTCDate(location.getTime());
                     Message m2 = Message.obtain();
                     m2.what = 3;
                     m2.obj = t;

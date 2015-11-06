@@ -1,5 +1,7 @@
 package com.zhd.hi_test.module;
 
+import android.location.GpsSatellite;
+
 /**
  * 当前类主要是按照系统自带的GPSSatellite类进行封装，以便处理相同的数据
  * Created by 2015032501 on 2015/9/23.

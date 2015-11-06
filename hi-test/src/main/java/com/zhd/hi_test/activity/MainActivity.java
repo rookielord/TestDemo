@@ -64,12 +64,12 @@ public class MainActivity extends Activity {
                 case 1:
                     MyLocation myLocation = (MyLocation) msg.obj;
                     //根据解类型来设置对应的图片
-                    tv_result.setText(myLocation.getmQuality());
-                    tv_use_sate.setText(myLocation.getmUseSate());
-                    tv_age_time.setText(myLocation.getmAge());
+                    tv_result.setText(myLocation.getQuality());
+                    tv_use_sate.setText(String.valueOf(myLocation.getUseSate()));
+                    tv_age_time.setText(String.valueOf(myLocation.getAge()));
                     if (!Const.HasPDOP)
                         tv_PDOP.setText(R.string.default_PDOP);
-                    setSolutionImage(myLocation.getmQuality());
+                    setSolutionImage(myLocation.getQuality());
                     break;
                 case 2:
                     List<Satellite> satellites = (List<Satellite>) msg.obj;
@@ -325,7 +325,7 @@ public class MainActivity extends Activity {
      */
     private void clearAll() {
         Const.setmInfo(null);
-        Const.setmProject(null);
+        Const.setProject(null);
         IConnect connect = Const.getmConnect();
         if (connect != null)
             connect.breakConnect();

@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,7 @@ import java.util.List;
  * Created by 2015032501 on 2015/9/10.
  * 在OnCreate中并没有传输数据进StarView里面
  */
-public class GPSActivity extends Activity implements OnClickListener, SeekBar.OnSeekBarChangeListener {
+public class GPSActivity extends Activity implements OnClickListener, OnSeekBarChangeListener {
     private LocationManager mManager;
     //控件对象
     StarView my_view;
@@ -53,8 +54,6 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
     SeekBar sb_ele_angel;
     //添加进viewpaper中的view
     private List<View> mViews = new ArrayList<>();
-    //当前
-    private int mCurrentIndex = 0;
     private TextView[] textViews;
     //卫星数据的Adapter
     private SatelliteAdapter mAdapter;
@@ -68,9 +67,9 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
                 //位置数据，因为都是用的同一个类型所以不转移
                 case 1:
                     MyLocation myLocation = (MyLocation) msg.obj;
-                    tv_locB.setText(String.valueOf(myLocation.getmB()));
-                    tv_locL.setText(String.valueOf(myLocation.getmL()));
-                    tv_locH.setText(String.valueOf(myLocation.getmH()));
+                    tv_locB.setText(String.valueOf(myLocation.getB()));
+                    tv_locL.setText(String.valueOf(myLocation.getL()));
+                    tv_locH.setText(String.valueOf(myLocation.getH()));
                     if (!Const.HasPDOP)
                         tv_PDOP.setText(getString(R.string.default_PDOP));
                     break;
@@ -152,7 +151,6 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
             @Override
             public void onPageSelected(int position) {
                 setCurrentText(position);
-                mCurrentIndex = position;
             }
 
             @Override
@@ -193,8 +191,10 @@ public class GPSActivity extends Activity implements OnClickListener, SeekBar.On
         if (et_ele_angel.getText().length() > 0) {
             float elevation = Float.valueOf(et_ele_angel.getText().toString());
             if (elevation >= 0 && elevation <= 90) {
+                sb_ele_angel.setProgress((int) elevation);
                 my_view.setmElev_mask(elevation);
                 my_view.invalidate();
+
             } else {
                 Toast.makeText(this, getString(R.string.ele_range), Toast.LENGTH_SHORT).show();
             }

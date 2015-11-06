@@ -3,6 +3,7 @@ package com.zhd.hi_test;
 
 
 import com.zhd.hi_test.interfaces.IConnect;
+import com.zhd.hi_test.module.ConnectInfo;
 import com.zhd.hi_test.module.MyProject;
 import com.zhd.hi_test.module.Satellite;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class Const {
     public static final int BlueToothConncet = 1;
     public static final int InnerGPSConnect = 2;
+    public static final int NoneConnect = 0;
     //当前打开的项目对象
     private static MyProject mMyProject;
     //HI_TEST的路径
@@ -43,6 +45,8 @@ public class Const {
     public static final String ISUPDATA = "updata";//是否检查版本更新
     //判断当前是否有PDOP数据
     public static boolean HasPDOP=false;
+
+    public static ConnectInfo Info=new ConnectInfo();
     //当前的卫星数据
     public static List<Satellite> satellites=new ArrayList<>();
 
@@ -68,11 +72,11 @@ public class Const {
         return mMyProject;
     }
 
-    public static void setmProject(MyProject mMyProject) {
+    public static void setProject(MyProject mMyProject) {
         Const.mMyProject = mMyProject;
     }
 
-    public static String getmPath() {
+    public static String getPath() {
         return mPath;
     }
 
@@ -88,11 +92,11 @@ public class Const {
         Const.mConnectType = mConnectType;
     }
 
-    public static double getMheight() {
+    public static double getheight() {
         return mheight;
     }
 
-    public static void setMheight(double mheight) {
+    public static void setheight(double mheight) {
         Const.mheight = mheight;
     }
 

@@ -4,7 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
     </style>
-    <style name="MyTheme" parent="Theme.AppCompat.Light">
+    <style name="MyTheme" parent="AppTheme">
         <item name="android:theme">@android:style/Theme.NoTitleBar</item>
     </style>
     <style name="TitleBar" parent="Base.Theme.AppCompat.Light">
@@ -72,7 +72,7 @@
     <!-- GPS layout1-->
     <style name="GPSLayout1_Click" parent="AddPointTitle">
         <item name="android:background">@drawable/gps_layout1_text</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:layout_marginLeft">4dp</item>
     </style>
     <!-- 点位信息显示-->

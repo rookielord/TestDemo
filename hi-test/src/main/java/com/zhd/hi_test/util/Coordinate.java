@@ -173,6 +173,7 @@ public class Coordinate {
         double EtaSqure;
         EtaSqure = SndESquare * Math.cos(radB) * Math.cos(radB);
         double DeltaL;
+//        高斯投影的中央经度
         DeltaL = (radL * R2D - 114) * D2R;
         x = X + N * Math.sin(radB) * Math.cos(radB) * DeltaL * DeltaL / 2 +
                 N * Math.sin(radB) * Math.pow(Math.cos(radB), 3) * (5 - t * t + 9 * EtaSqure + 4 * EtaSqure * EtaSqure) * Math.pow(DeltaL, 4) / 24 +

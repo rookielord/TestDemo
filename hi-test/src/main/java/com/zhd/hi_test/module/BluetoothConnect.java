@@ -46,12 +46,12 @@ public class BluetoothConnect implements IConnect {
     //设置一个量用于维护读取操作
     private boolean isRead = false;
     //消息类
-    private Handler mHandler=new Handler(new Handler.Callback() {
+    private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            switch (msg.what){
+            switch (msg.what) {
                 case 1:
-                    Toast.makeText(mActivity,R.string.device_disconnect,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, R.string.device_disconnect, Toast.LENGTH_SHORT).show();
                     break;
             }
             return false;
@@ -85,7 +85,7 @@ public class BluetoothConnect implements IConnect {
             in = mSocket.getInputStream();
             out = mSocket.getOutputStream();
             Const.setmInfo(mAddress);
-            Const.IsConnected=true;
+            Const.IsConnected = true;
             Const.setmConnectType(Const.BlueToothConncet);
             ((Button) mActivity.findViewById(R.id.btn_connect)).setText(R.string.disconnect);
             ((TextView) mActivity.findViewById(R.id.tv_device_info)).setText(mDevice.getName());
@@ -95,11 +95,33 @@ public class BluetoothConnect implements IConnect {
         } catch (IOException e) {
             Const.setmInfo(mActivity.getString(R.string.unconnect));
             //清空之前得到的mDevice
-            mDevice=null;
+            mDevice = null;
             e.printStackTrace();
             Toast.makeText(mActivity, R.string.connect_failure, Toast.LENGTH_SHORT).show();
         }
     }
+
+
+//    @Override
+//    public byte[] readMessage() {
+//        if (!Const.IsConnected)
+//            return null;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                int num;
+//                byte[] buffer = new byte[4 * 1024];
+//                try {
+//                    while ((num = in.read(buffer)) != -1) {
+//                        mBuffer = buffer;
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+//        return mBuffer;
+//    }
 
 //    @Override
 //    public void sendMessage(List<byte[]> orders) {
@@ -167,7 +189,7 @@ public class BluetoothConnect implements IConnect {
                             //获取最后$之前的数据的所有数据
                             completeInfo = ProgressInfo.getComplete(buffer, loc);
                             //拼接之前的不完整的数据，得到的完整的数据
-                            useInfo = ProgressInfo.MergeInfo(completeInfo, incompleteInfo);
+                            useInfo = ProgressInfo.mergeInfo(completeInfo, incompleteInfo);
                             //获取不完整的数据
                             incompleteInfo = ProgressInfo.getUncomplete(buffer, loc, num);
                             //首先要发指令，让其发送位置和卫星信息
@@ -181,7 +203,7 @@ public class BluetoothConnect implements IConnect {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Const.IsConnected=false;
+                    Const.IsConnected = false;
                     Const.setmConnectType(0);
                     Const.setmInfo(mActivity.getString(R.string.unconnect));
                     mHandler.sendEmptyMessage(1);
@@ -197,8 +219,8 @@ public class BluetoothConnect implements IConnect {
     public void breakConnect() {
         if (!Const.IsConnected)
             return;
-        Const.HasDataInfo=false;
-        Const.HasPDOP=false;
+        Const.HasDataInfo = false;
+        Const.HasPDOP = false;
         isRead = false;
         Const.satellites.clear();
         if (in != null)
@@ -223,7 +245,9 @@ public class BluetoothConnect implements IConnect {
                 e.printStackTrace();
             }
         }
-
+        if (mDevice != null)
+            mDevice=null;
     }
+
 
 }

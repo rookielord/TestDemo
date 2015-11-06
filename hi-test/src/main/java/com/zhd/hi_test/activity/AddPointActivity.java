@@ -65,7 +65,7 @@ public class AddPointActivity extends Activity {
         final String id = intent.getStringExtra("ID");
         if (id == null) {//添加
             //在添加栏目中获得目标高,无论有否，都将仪高赋给editview
-            mheight = Const.getMheight();
+            mheight = Const.getheight();
             et_height.setText(String.valueOf(mheight));
             //获得最后的插入id，然后拼接成点号
             final int lastID = curd.getLastID();
@@ -99,15 +99,15 @@ public class AddPointActivity extends Activity {
                     cv.put("time",tv_time.getText().toString());
                     values.add(cv);
                     //这里将mheight重新赋值给全局变量
-                    Const.setMheight(Double.parseDouble(et_height.getText().toString()));
+                    Const.setheight(Double.parseDouble(et_height.getText().toString()));
                     boolean res = curd.insertData(values);
                     if (res) {
-                        Toast.makeText(AddPointActivity.this, R.string.update_success, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.add_success, Toast.LENGTH_SHORT).show();
                         //添加成功后关闭该页面
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(AddPointActivity.this, R.string.update_failure, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -139,12 +139,12 @@ public class AddPointActivity extends Activity {
                     cv.put("height", et_height.getText().toString());
                     boolean res = curd.UpdateData(id, cv);
                     if (res) {
-                        Toast.makeText(AddPointActivity.this, R.string.add_success, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.update_success, Toast.LENGTH_SHORT).show();
                         //添加成功设置修改成功，并关闭当前页面
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(AddPointActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddPointActivity.this, R.string.update_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
             });

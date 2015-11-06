@@ -57,7 +57,7 @@ public class ProjectActivity extends Activity {
         setContentView(R.layout.activity_project);
         //首先查看是否当前项目已经打开
         //全局路径
-        mPath = Const.getmPath();
+        mPath = Const.getPath();
         mProject = Const.getmProject();
         //找控件：1.进行填充的listview
         lv = (ListView) findViewById(R.id.lv);
@@ -74,7 +74,12 @@ public class ProjectActivity extends Activity {
         //判断是否有项目内容
         if (mHasProject) {
             //获得当前的Project目录下所有的project对象
-            mProjects = getProjectInstance(mPath);
+            mProjects = FileUtil.getProjectInstance(mPath);
+            if (mProject != null) {//当没有上一次project的情况
+                int loc = FileUtil.getDefaultProLoc(mProjects);
+                mProjects.remove(loc);
+                mProjects.add(0, mProject);
+            }
             //将对象传给适配器，然后对item内容进行填充,只要点击了就会将当前项目的信息显示,当点击后就将当前项目显示到上面去
             mpa = new ProjectAdapter(mProjects, this);
             mpa.setmP(new OnProjectListener() {
@@ -109,44 +114,7 @@ public class ProjectActivity extends Activity {
         return contents.length > 0;
     }
 
-    /**
-     * 第二步根据路径来获取对应的配置文件来创建Project对象，并填充进集合
-     *
-     * @param path 配置文件的路径
-     * @return
-     */
-    private List<MyProject> getProjectInstance(String path) {
-        List<MyProject> myProjectList = new ArrayList<>();
-        //对应路径下的config.txt文件进行读取，并创建project对象
-        String[] proPaths = new File(path).list();//这个只会得到对应的文件夹名，没有路径
-        for (String proName : proPaths) {
-            //拼接config.txt路径
-            File config = new File(path + "/" + proName, "config.txt");
-            //读取存入的project对象
-            ObjectInputStream in = null;
-            try {
-                //设置文件读取流
-                in = new ObjectInputStream(new FileInputStream(config));
-                MyProject p = (MyProject) in.readObject();
-                myProjectList.add(p);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        return myProjectList;
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -235,7 +203,7 @@ public class ProjectActivity extends Activity {
                 if (Const.getmProject() != null) {
                     FileUtil.updateProject(Const.getmProject());
                 }
-                Const.setmProject(mProject);
+                Const.setProject(mProject);
                 Toast.makeText(this, R.string.project_open_success, Toast.LENGTH_SHORT).show();
                 refresh();
                 break;
@@ -281,7 +249,14 @@ public class ProjectActivity extends Activity {
 
     //重新刷新整个Activity来获取文件列表
     public void refresh() {
-        onCreate(null);
+//        onCreate(null);
+        mProjects = FileUtil.getProjectInstance(mPath);
+        int loc = FileUtil.getDefaultProLoc(mProjects);
+        mProjects.remove(loc);
+        mProjects.add(0, Const.getmProject());
+        mpa.setmMyProjects(mProjects);
+        showProjectInfo(Const.getmProject());
+        mProject = Const.getmProject();
     }
 
     /**

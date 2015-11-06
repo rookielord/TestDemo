@@ -74,6 +74,13 @@
             android:layout_marginTop="10dp"
             android:scaleType="fitCenter"
             android:src="@mipmap/ic_manual" />
+        <ImageView
+            android:id="@+id/image_auto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@mipmap/ic_auto_start"
+            android:layout_above="@id/image_add"
+            android:layout_alignParentRight="true"/>
     </RelativeLayout>
     <!-- 显示信息用的滑动效果-->
     <LinearLayout

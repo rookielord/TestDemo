@@ -22,6 +22,7 @@ public class MyProject implements Serializable {
     private String mTableName;
     private String mLastTime;
     private String mCoordinate;
+    private String mGuass;
 
     public String getmGuass() {
         return mGuass;
@@ -31,7 +32,7 @@ public class MyProject implements Serializable {
         this.mGuass = mGuass;
     }
 
-    private String mGuass;
+
 
     /**
      * 创建顺序,更改最后的时间不用获得，而是获得配置文件config的最后更改时间。其它的使用

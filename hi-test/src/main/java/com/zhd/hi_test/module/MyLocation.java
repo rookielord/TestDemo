@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * Created by 2015032501 on 2015/9/23.
- * <p>
+ * <p/>
  * 需要显示到屏幕上的数据，其中包括有位置信息和时间信息
  * 最好是全部的数据都存满，不要留下空隙
  * 注意内置GPS和IRTK的数据格式是不一样的
@@ -17,61 +17,67 @@ public class MyLocation {
 
     private String mB;
     private String mL;
-    private String mH;
+    private double mH;
     private String mTime;
     private String mDireB;
     private String mDireL;
-    private String mProgressB;
-    private String mProgressL;
+    private double mProgressB;
+    private double mProgressL;
+    private double mN;
+    private double mE;
+    private double mZ;
     private String mQuality;
-    private String mAge = "尚无差分龄期";
-    private String mUseSate = "0";
+    private float mAge = 0.0f;
+    private int mUseSate = 0;
 
-    public String getmUseSate() {
+    public double getUseSate() {
         return mUseSate;
     }
 
-    public String getmQuality() {
+    public String getQuality() {
         return mQuality;
     }
 
-    public String getmAge() {
+    public float getAge() {
         return mAge;
     }
 
-    public String getmDireB() {
+    public String getDireB() {
         return mDireB;
     }
 
-    public String getmDireL() {
+    public String getDireL() {
         return mDireL;
     }
 
-    public String getmProgressB() {
+    public double getProgressB() {
         return mProgressB;
     }
 
-    public String getmProgressL() {
+    public double getProgressL() {
         return mProgressL;
     }
 
 
     //RTK传过来的数据
     public MyLocation(String B, String L, String H, String DireB, String DireL, String time, int Quality, String Age, String useSate) {
-        this.mQuality = getQuality(Quality);
-        this.mAge = Age;
+        this.mQuality = showQuality(Quality);
+        this.mAge = Float.valueOf(Age);
         this.mB = Coordinate.getDmsString(Coordinate.getDegreeFromRTK(B));
         this.mL = Coordinate.getDmsString(Coordinate.getDegreeFromRTK(L));
-        this.mProgressB = String.valueOf(Coordinate.getDegreeFromRTK(B));
-        this.mProgressL = String.valueOf(Coordinate.getDegreeFromRTK(L));
-        this.mH = H;
+        this.mProgressB = Coordinate.getDegreeFromRTK(B);
+        this.mProgressL = Coordinate.getDegreeFromRTK(L);
+        this.mH = Double.valueOf(H);
         this.mDireB = DireB;
         this.mDireL = DireL;
         this.mTime = getLocalTime(time);
-        this.mUseSate = useSate;
+        this.mUseSate = Integer.valueOf(useSate);
+        this.mN = 1;
+        this.mE = 1;
+        this.mZ = Double.valueOf(H);
     }
 
-    private String getQuality(int quality) {
+    private String showQuality(int quality) {
         //默认无解
         String msg = "无解";
         switch (quality) {
@@ -96,17 +102,16 @@ public class MyLocation {
 
 
     //内置GPS传过来的数据
-    public MyLocation(String mB, String mL, String mH, long time,String UseSate) {
-        this.mProgressB = mB;
-        this.mProgressL = mL;
-        this.mB = Coordinate.getDmsString(Double.valueOf(mB));
-        this.mL = Coordinate.getDmsString(Double.valueOf(mL));
-        this.mH = mH;
-        this.mTime = getTime(time);
+    public MyLocation(double B, double L, double H, long time, int UseSate) {
+        this.mProgressB = B;
+        this.mProgressL = L;
+        this.mB = Coordinate.getDmsString(B);
+        this.mL = Coordinate.getDmsString(L);
+        this.mH = H;
+        this.mZ = H;
+        this.mTime = getCurTime(time);
         //根据正负来判断当前位于哪个半球，必须转化为double类型，转化成int类型显示为空指针
-        double B = Double.valueOf(mB);
-        double L = Double.valueOf(mL);
-        this.mUseSate=UseSate;
+        this.mUseSate = UseSate;
         this.mQuality = "内置GPS定位";
         if (B > 0)
             this.mDireB = "N";
@@ -118,23 +123,27 @@ public class MyLocation {
             this.mDireL = "W";
     }
 
-    public String getmB() {
+    public String getB() {
         return mB;
     }
 
-    public String getmL() {
+    public String getL() {
         return mL;
     }
 
-    public String getmH() {
+    public double getH() {
         return mH;
     }
 
-    public String getmTime() {
+    public String getTime() {
         return mTime;
     }
 
-    private String getTime(long mTime) {
+    public double getZ() {
+        return mZ;
+    }
+
+    private String getCurTime(long mTime) {
         Date date = new Date(mTime);//GPSneizhi
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
         return (format.format(date));

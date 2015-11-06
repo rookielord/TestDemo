@@ -65,7 +65,7 @@ public class ProgressInfo {
      * @param uncompleteInfo
      * @return
      */
-    public static byte[] MergeInfo(byte[] completeInfo, byte[] uncompleteInfo) {
+    public static byte[] mergeInfo(byte[] completeInfo, byte[] uncompleteInfo) {
         if (completeInfo == null)
             return null;
         if (uncompleteInfo == null)

@@ -11,12 +11,14 @@ public interface IConnect {
     //连接
     void startConnect();
 
-    //发送命令
-    void sendMessage();
-
-    //读取信息
-    void readMessage();
-
     //断开连接
     void breakConnect();
+
+    //老版本的发送命令
+    void sendMessage();
+
+    //老版本的读取信息
+
+    void readMessage();
+
 }
