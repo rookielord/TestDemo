@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="40dip"
+        android:orientation="horizontal">
+        <!--这个是点名-->
+        <TextView
+            style="@style/ManageTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="3"
+            android:text="@string/point_name" />
+        <!--这个是可以滑动的表头B,L,H等数据的<标题>-->
+        <com.zhd.hi_test.ui.MyScrollView
+            android:id="@+id/item_scroll_title"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/B" />
+
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/L" />
+
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/H" />
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/N" />
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/E" />
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="150dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/Z" />
+
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="80dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/height" />
+                <TextView
+                    style="@style/ManageInfo"
+                    android:layout_width="90dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="@string/des" />
+            </LinearLayout>
+        </com.zhd.hi_test.ui.MyScrollView>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/scroll_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="@android:color/transparent"
+        android:scrollbars="none"
+        ></ListView>
+
+</LinearLayout>

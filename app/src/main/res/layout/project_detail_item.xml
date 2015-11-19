@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!--<TextView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--style="@style/ProjectName"-->
+    <!--android:text="@string/project_name"/>-->
+    <LinearLayout
+        android:id="@+id/ll_proinfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        android:orientation="vertical">
+
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/project_name" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/coordinate" />
+
+            <TextView
+                android:id="@+id/tv_coordinate"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/guass" />
+
+            <TextView
+                android:id="@+id/tv_guass"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#ff000000" />
+
+        </LinearLayout>
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/project_back" />
+
+            <TextView
+                android:id="@+id/tv_back"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/lasttime" />
+
+            <TextView
+                android:id="@+id/tv_lasttime"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+        <LinearLayout
+            style="@style/ProjectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/project_create_time" />
+
+            <TextView
+                android:id="@+id/tv_create_time"
+                style="@style/ProjectInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#000" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
