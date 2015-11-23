@@ -48,6 +48,14 @@ public class Satellite {
     public static final int BD = 3;
     public static final int SBAS = 4;
 
+    /**
+     * 卫星的数据
+     * @param Prn 编号
+     * @param Elevation 仰角
+     * @param Azimuth 方位角
+     * @param Snr 信噪比
+     * @param Type 类型
+     */
     public Satellite(String Prn, String Elevation, String Azimuth, String Snr, int Type) {
         this.mElevation = Float.valueOf(Elevation);
         this.mAzimuth = Float.valueOf(Azimuth);

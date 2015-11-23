@@ -1,7 +1,6 @@
 package com.zhd.hi_test.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -36,7 +35,7 @@ import static android.view.View.*;
  * <p/>
  * 就在这里创建蓝牙连接，而不是在返回的时候，返回时候只更改数据和弹窗
  */
-public class BluetoothDeviceActivity extends Activity {
+public class BluetoothDeviceActivity extends Activity implements OnClickListener{
     //device上面的控件
     Button btn_search, btn_close;
     ListView lv_pairedlist, lv_newlist;
@@ -55,7 +54,6 @@ public class BluetoothDeviceActivity extends Activity {
     private static final int BLUETOOTH_REQUEST = 0x1;
     //设置判断是否开启过蓝牙搜索，只有开启过蓝牙搜索后搜索到为0才能添加没有数据
     private boolean isSearch = false;
-    private ProgressDialog dialog;
 
     //要获取适配器中的内容已经匹配的内容，必须一开始就打开蓝牙
     @Override
@@ -89,27 +87,9 @@ public class BluetoothDeviceActivity extends Activity {
         lv_newlist.setOnItemClickListener(mItemlistener);
         lv_pairedlist.setOnItemClickListener(mItemlistener);
         //开始搜索蓝牙设备
-        btn_search.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startDiscovery();
-                //搜索完毕后按钮消失
-                v.setVisibility(GONE);
-                mNewAdapter.clear();
-                mNewDevices.clear();
-                btn_close.setVisibility(VISIBLE);
-            }
-        });
+        btn_search.setOnClickListener(this);
         //停止搜索
-        btn_close.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mAdapter.isDiscovering())
-                    mAdapter.cancelDiscovery();
-                v.setVisibility(GONE);
-                btn_search.setVisibility(VISIBLE);
-            }
-        });
+        btn_close.setOnClickListener(this);
 
 
     }
@@ -213,7 +193,7 @@ public class BluetoothDeviceActivity extends Activity {
                     //找到一个新的蓝牙设备
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (device.getBondState() != BluetoothDevice.BOND_BONDED) {//如果已经绑定就不用添加进列表了
-                        mNewAdapter.add(device.getName() + "");
+                        mNewAdapter.add(device.getName() + "");//可能有null的情况，将null转化为字符类型
                         mNewDevices.add(device.getAddress());
                     }
                     break;
@@ -221,4 +201,23 @@ public class BluetoothDeviceActivity extends Activity {
         }
     };
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_search:
+                startDiscovery();
+                //搜索完毕后按钮消失
+                v.setVisibility(GONE);
+                mNewAdapter.clear();
+                mNewDevices.clear();
+                btn_close.setVisibility(VISIBLE);
+                break;
+            case R.id.btn_close:
+                if (mAdapter.isDiscovering())
+                    mAdapter.cancelDiscovery();
+                v.setVisibility(GONE);
+                btn_search.setVisibility(VISIBLE);
+                break;
+        }
+    }
 }

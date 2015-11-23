@@ -6,10 +6,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 
+
 import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.interfaces.Joinable;
-import com.zhd.hi_test.interfaces.OnBreakListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +35,11 @@ public class BluetoothConnect2 implements Joinable {
     /**
      * 为了在Connect上面显示toast需要传入Activity
      * 为了创建蓝牙连接对象，需要使用BluetoothAdapter对象，但是为了方便，会把在主Activity中的mAdapter传过来进行判断
-     *
      */
     public BluetoothConnect2(String address, BluetoothAdapter adapter, Activity activity) {
         this.mAddress = address;
         this.mAdapter = adapter;
-        this.mActivity=activity;
+        this.mActivity = activity;
         //这里的handler是新建的，所以不能获得
     }
 
@@ -60,15 +59,15 @@ public class BluetoothConnect2 implements Joinable {
             e.printStackTrace();
             Const.Info.SetInfo(Const.NoneConnect, false, mActivity.getString(R.string.unconnected));
             mDevice = null;
-//            这里调用Activity中的一个方法发送消息，然后取消连接，提示连接失败
-//            mHandler.sendEmptyMessage(Const.TYPE_UPDATE);
-            Intent intent=new Intent("");
-           mActivity.sendBroadcast(intent);
+        } finally {
+            //发送广播来通知ConnectActivity来更新界面
+            mActivity.sendBroadcast(new Intent("com.zhd.update"));
         }
     }
 
     /**
      * 发送命令
+     *
      * @throws IOException
      */
     @Override
@@ -80,6 +79,7 @@ public class BluetoothConnect2 implements Joinable {
 
     /**
      * 写入命令
+     *
      * @throws IOException
      */
     @Override
@@ -103,6 +103,7 @@ public class BluetoothConnect2 implements Joinable {
 
     /**
      * 断开连接
+     *
      * @throws IOException
      */
     @Override

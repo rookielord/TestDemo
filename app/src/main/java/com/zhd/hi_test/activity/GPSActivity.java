@@ -96,10 +96,23 @@ public class GPSActivity extends Activity implements OnClickListener, OnSeekBarC
                     Const.HasPDOP = true;
                     tv_PDOP.setText(msg.obj.toString());
                     break;
+                case Const.TYPE_CLEAR:
+                    clearMessage();
             }
             super.handleMessage(msg);
         }
     };
+
+    private void clearMessage() {
+        tv_locB.setText("");
+        tv_locL.setText("");
+        tv_locH.setText("");
+        my_view.invalidate();
+        tv_satellite.setText(R.string.default_none);
+        tv_connect.setText(getString(R.string.unconnected));
+        mAdapter.clear();
+        mAdapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

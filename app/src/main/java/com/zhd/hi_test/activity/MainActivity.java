@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.zhd.hi_test.Const;
 import com.zhd.hi_test.R;
 import com.zhd.hi_test.adapter.MyPagerAdapter;
+import com.zhd.hi_test.module.ConnectManager;
 import com.zhd.hi_test.module.InnerGPSConnect;
 import com.zhd.hi_test.module.MyLocation;
 import com.zhd.hi_test.module.MyProject;
@@ -77,18 +78,23 @@ public class MainActivity extends Activity {
                     tv_PDOP.setText(msg.obj.toString());
                     break;
                 case Const.TYPE_CLEAR:
-                    tv_result.setText(R.string.solution_none);
-                    tv_connect.setText(R.string.unconnected);
-                    image_solution.setImageResource(R.mipmap.ic_solution_none);
-                    tv_age_time.setText(R.string.default_none);
-                    tv_use_sate.setText(R.string.default_none);
-                    tv_sate.setText(R.string.default_none);
-                    tv_PDOP.setText(R.string.default_PDOP);
+                    clearMessage();
                     break;
             }
             return false;
         }
     });
+
+    private void clearMessage() {
+        Toast.makeText(this, R.string.device_disconnect, Toast.LENGTH_SHORT).show();
+        tv_result.setText(R.string.solution_none);
+        tv_connect.setText(R.string.unconnected);
+        image_solution.setImageResource(R.mipmap.ic_solution_none);
+        tv_age_time.setText(R.string.default_none);
+        tv_use_sate.setText(R.string.default_none);
+        tv_sate.setText(R.string.default_none);
+        tv_PDOP.setText(R.string.default_PDOP);
+    }
 
     private void setSolutionImage(String s) {
         switch (s) {
@@ -129,6 +135,8 @@ public class MainActivity extends Activity {
         context = MainActivity.this;
         manager = new LocalActivityManager(this, true);
         manager.dispatchCreate(savedInstanceState);
+        //创建ConnectManager
+        Const.setManager(new ConnectManager());
         initTextView();
         initPagerViewer();
         initInfo();
@@ -343,7 +351,7 @@ public class MainActivity extends Activity {
             Const.getManager().closeConnect();
             Const.setManager(null);
         }
-        if (Const.getConnect()!=null){
+        if (Const.getConnect() != null) {
             Const.getConnect().breakConnect();
             Const.setJoin(null);
         }

@@ -3,10 +3,11 @@ package com.zhd.hi_test.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -42,7 +43,7 @@ import com.zhd.hi_test.module.InnerGPSConnect;
  * 1.创建连接都是在这里进行。其它的地方都是调用ConnectManager中registerListener和removeListener
  * 2.所以ConnectManager必须作为全局变量。
  */
-public class ConnectActivity extends Activity {
+public class ConnectActivity extends Activity implements OnClickListener {
     //控件
     Button btn_connect;
     TextView tv_deviece_info;
@@ -55,67 +56,37 @@ public class ConnectActivity extends Activity {
     private ArrayAdapter<String> wayAdapter;
     //获取连接的方式
     private int mConnectWay;
-    //当前的连接对象
-    private static Connectable mConnect;
-
-    private static final int REQUEST_CODE = 1;
-    //启动返回得到地址
-    private static final int DEVICE_MESSAGE = 2;
-    //判断是否可以被其它设备搜索
-    private static final int DISCOVERED = 3;
-    //判断GPS是否开启
-    private static final int GPS_REQUEST = 4;
 
     private ProgressDialog mDialog;
     private String mAddress;
-    private Handler mHandler = new Handler() {
+
+    /**
+     * 通过广播来更新UI
+     */
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Const.TYPE_UPDATE:
-                    getDefaultInfo();
-                    if (Const.Info.isConnected())
-                        Toast.makeText(ConnectActivity.this, R.string.connect_success, Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(ConnectActivity.this, R.string.connect_failure, Toast.LENGTH_SHORT).show();
-                    mDiaThread.mExit = true;
-                    mDialog.dismiss();
-                    break;
-            }
+        public void onReceive(Context context, Intent intent) {
+            getDefaultInfo();
+            if (Const.Info.isConnected())
+                Toast.makeText(ConnectActivity.this, R.string.connect_success, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(ConnectActivity.this, R.string.connect_failure, Toast.LENGTH_SHORT).show();
+            mDialog.dismiss();
         }
     };
-    private Joinable mJoin;
-    private DialogThread mDiaThread;
-
+    /**
+     * 需要接收的更新广播
+     */
+    private IntentFilter mFilter = new IntentFilter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect);
-        //注意相当于每次打开都会新建一个
+        //注册广播
+        mFilter.addAction("com.zhd.update");
+        registerReceiver(mReceiver, mFilter);
         init();
-        btn_connect.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!Const.Info.isConnected())
-                    startConnect();
-                else {
-                    if (Const.getConnect() != null) {
-                        Const.getConnect().breakConnect();
-                        Const.setJoin(null);
-                    }
-                    if (Const.getManager() != null) {
-                        Const.getManager().closeConnect();
-                        Const.setManager(null);
-                    }
-                    btn_connect.setText(R.string.connect);
-                    Const.Info.SetInfo(Const.NoneConnect, false, getString(R.string.unconnected));
-                    tv_deviece_info.setText(R.string.unconnected);
-                    sp_way.setEnabled(true);
-                    sp_device.setEnabled(true);
-                }
-            }
-        });
     }
 
     private void init() {
@@ -124,6 +95,7 @@ public class ConnectActivity extends Activity {
         btn_connect = (Button) findViewById(R.id.btn_connect);
         tv_deviece_info = (TextView) findViewById(R.id.tv_device_info);
         image_title = (ImageView) findViewById(R.id.image_title);
+        btn_connect.setOnClickListener(this);
         //获取设备的内容
         String[] device_items = getResources().getStringArray(R.array.devices);
         //创建对应的内容适配器
@@ -177,6 +149,9 @@ public class ConnectActivity extends Activity {
         getDefaultInfo();
     }
 
+    /**
+     * 获得当前连接状态的信息，并对控件进行设置
+     */
     private void getDefaultInfo() {
         int ConnectType = Const.Info.getType();
         if (Const.Info.isConnected()) {
@@ -217,7 +192,7 @@ public class ConnectActivity extends Activity {
             else //打开蓝牙
                 openBluetooth();
         } else if (mConnectWay == Const.InnerGPSConnect) {
-            mConnect = new InnerGPSConnect(this);
+            Connectable mConnect = new InnerGPSConnect(this);
             mConnect.startConnect();
             mConnect.sendMessage();
             mConnect.readMessage();
@@ -229,14 +204,14 @@ public class ConnectActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE://打开蓝牙选项
+            case Const.REQUEST_CODE://打开蓝牙选项
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                    startActivityForResult(intent, DISCOVERED);
+                    startActivityForResult(intent, Const.DISCOVERED);
                 }
                 break;
-            case DEVICE_MESSAGE:
+            case Const.DEVICE_MESSAGE:
                 if (resultCode == RESULT_OK) {
                     //返回时获取地址
                     mAddress = data.getExtras().getString(BluetoothDeviceActivity.ADDRESS);
@@ -248,13 +223,12 @@ public class ConnectActivity extends Activity {
                     mDialog.show();
                     //开启连接线程
                     new ConnectThread().start();
-                    new DialogThread().start();
                 }
                 break;
-            case DISCOVERED://打开蓝牙设备连接窗口的
+            case Const.DISCOVERED://打开蓝牙设备连接窗口的
                 startDeviceList();
                 break;
-            case GPS_REQUEST:
+            case Const.GPS_REQUEST:
                 //通过选择GPS打开界面来确定是否打开GPS
                 if (resultCode == RESULT_OK) {
                     sp_way.setEnabled(false);
@@ -271,7 +245,7 @@ public class ConnectActivity extends Activity {
      */
     private void startDeviceList() {
         Intent intent = new Intent(this, BluetoothDeviceActivity.class);
-        startActivityForResult(intent, DEVICE_MESSAGE);
+        startActivityForResult(intent, Const.DEVICE_MESSAGE);
     }
 
     /**
@@ -281,40 +255,60 @@ public class ConnectActivity extends Activity {
         if (!mAdapter.isEnabled()) {
             //设置开启请求
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(intent, Const.REQUEST_CODE);
         } else {
             Toast.makeText(this, R.string.open_bluetooth, Toast.LENGTH_SHORT).show();
         }
     }
 
-    /**
-     * 连上后，发送消息，更新信息
-     */
-    private class DialogThread extends Thread {
-        public boolean mExit = false;
-
-        @Override
-        public void run() {
-            while (!mExit) {
-                if (Const.Info.isConnected())
-                    mExit = true;
-            }//这里发送成功
-            mHandler.sendEmptyMessage(Const.TYPE_UPDATE);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_connect:
+                if (!Const.Info.isConnected())
+                    startConnect();
+                else {
+                    if (Const.getConnect() != null) {
+                        Const.getConnect().breakConnect();
+                        Const.setJoin(null);
+                    }
+                    if (Const.getManager() != null) {
+                        Const.getManager().closeConnect();
+                        Const.setManager(null);
+                    }
+                    btn_connect.setText(R.string.connect);
+                    Const.Info.SetInfo(Const.NoneConnect, false, getString(R.string.unconnected));
+                    tv_deviece_info.setText(R.string.unconnected);
+                    sp_way.setEnabled(true);
+                    sp_device.setEnabled(true);
+                }
+                break;
         }
     }
 
+
+    /**
+     * 连接的线程
+     */
     private class ConnectThread extends Thread {
         @Override
         public void run() {
             //创建连接
-            mJoin = new BluetoothConnect2(mAddress, mAdapter, ConnectActivity.this);
-            //创建数据管理类
-            if (Const.getManager() == null)
-                Const.setManager(new ConnectManager());
+            Joinable mJoin = new BluetoothConnect2(mAddress, mAdapter, ConnectActivity.this);
+            //开始连接
+            mJoin.startConnect();
             //传入连接成功的数据源
             if (Const.Info.isConnected())
-            Const.getManager().setJoinable(mJoin);
+                Const.getManager().setJoinable(mJoin);
         }
     }
 
+    /**
+     * 关闭界面，注销广播
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+    }
 }

@@ -135,13 +135,33 @@ public class SurveyActivity extends Activity implements OnClickListener {
                         Toast.makeText(SurveyActivity.this, R.string.add_failure, Toast.LENGTH_SHORT).show();
                     }
                     mView.invalidate();
+                    mView.invalidate();
                     break;
                 case Const.TYPE_CLEAR:
-                    //
+                    clearMessage();
                     break;
             }
         }
     };
+
+    private void clearMessage() {
+        tv_B.setText("");
+        tv_L.setText("");
+        tv_H.setText("");
+        tv_time.setText("");
+        tv_age.setText("");
+        tv_solution.setText("");
+        tv_usesate.setText("");
+        tv_N.setText("");
+        tv_E.setText("");
+        tv_Z.setText("");
+        tv_date.setText("");
+        tv_PDOP.setText("");
+        tv_satellite.setText("");
+        refreshPoints();
+        mView.invalidate();
+        Toast.makeText(this,R.string.device_disconnect,Toast.LENGTH_SHORT).show();
+    }
 
     //指南针事件监听
     SensorEventListener mListener = new SensorEventListener() {
@@ -224,7 +244,6 @@ public class SurveyActivity extends Activity implements OnClickListener {
         res = mCurd.insertData(values);
         //直接发送消息进行Toast显示
     }
-
     private String setHeight(String height) {
         float h = Float.parseFloat(height.substring(0, height.length() - 1));
         return String.valueOf(h + Const.Height + "m");
@@ -362,6 +381,8 @@ public class SurveyActivity extends Activity implements OnClickListener {
         dots[mCurrentIndex].setBackgroundResource(R.mipmap.dian);
         mCurrentIndex = position;
     }
+
+
 
     private PagerAdapter mAdapter = new PagerAdapter() {
         @Override

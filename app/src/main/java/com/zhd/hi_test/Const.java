@@ -24,8 +24,15 @@ public class Const {
     public static final int TYPE_PDOP=4;
     public static final int TYPE_CLEAR=5;
     public static final int TYPE_ADD =6;
+
+    public static final int REQUEST_CODE = 1;
+    //启动返回得到地址
+    public static final int DEVICE_MESSAGE = 2;
+    //判断是否可以被其它设备搜索
+    public static final int DISCOVERED = 3;
+    //判断GPS是否开启
+    public static final int GPS_REQUEST = 4;
     //判断弹出ProgressDialog
-    public static final int TYPE_UPDATE = 5;
     public static final String PFNAME = "config";//SharePreference文件名
     public static final String ISUPDATA = "updata";//是否检查版本更新
     //当前打开的项目对象
